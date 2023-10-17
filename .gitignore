@@ -1,0 +1,6 @@
+# ignore data
+data/**
+*.nd2
+
+# Jupyter Notebook
+.ipynb_checkpoints
