@@ -4,3 +4,6 @@ data/**
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# logs
+logs/**
