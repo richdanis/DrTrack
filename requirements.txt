@@ -1,3 +1,10 @@
 numpy
+pandas
 matplotlib
 nd2reader
+scikit-image
+torch
+tqdm
+argparse
+torchvision
+info-nce-pytorch

@@ -7,3 +7,9 @@ data/**
 
 # logs
 logs/**
+
+# python cache in all directories
+**/__pycache__/**
+
+# .pth files
+*.pth
