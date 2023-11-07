@@ -1,0 +1,42 @@
+import torch
+import torchvision
+from tqdm import tqdm
+
+class EfficientNet(torch.nn.Module):
+
+    def __init__(self):
+
+        super().__init__()
+
+        # initialize with pretrained weights
+        # does not work on euler!
+        # download model yourself and transfer to euler
+        #self.layers = torchvision.models.efficientnet_b1(weights='DEFAULT')
+
+        # load from local state dict
+        self.layers = torchvision.models.efficientnet_b1()
+        self.layers.load_state_dict(torch.load('src/training/models/efficientnet_b1.pth'))
+
+        # change classifier to identity
+        self.layers.classifier = torch.nn.Identity()
+
+    def forward(self, x):
+        
+        assert len(x.shape)==4, "Inputs must be grayscale images of shape (N, 1, H, W)"
+        # repeat along first dimension
+        # this tutorial explains nicely why this is necessary:
+        # https://towardsdatascience.com/transfer-learning-on-greyscale-images-how-to-fine-tune-pretrained-models-on-black-and-white-9a5150755c7a
+        x = x.repeat(1, 3, 1, 1)
+
+        return self.layers(x)
+    
+def save_locally():
+
+    # download model
+    model = torchvision.models.efficientnet_b1(weights='DEFAULT')
+    # save model
+    torch.save(model.state_dict(), 'src/training/models/efficientnet_b1.pth')
+
+if __name__ == "__main__":
+
+    save_locally()
