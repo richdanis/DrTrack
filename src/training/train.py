@@ -46,7 +46,6 @@ def main():
 
         train_one_epoch(model, train_loader, optimizer, criterion, epoch, args)
 
-        break
 
 def train_one_epoch(
         model: torch.nn.Module,
@@ -56,11 +55,17 @@ def train_one_epoch(
         epoch: int,
         args: argparse.Namespace
     ):
-        # TODO: Logging, keeping track of loss, etc.
-        # TODO: Progressbar
+        # TODO: Logging, keeping track of loss, metrics, etc.
+
+        # progress bar
+        pbar = tqdm(train_dl, bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}")
+        pbar.set_description(f"Epoch {epoch + 1}/{args.epochs}")
 
         # log epoch
         logging.info(f"Epoch {epoch}")
+
+        # keep track of loss for each iteration
+        info_loss = []
 
         model.train()
 
@@ -77,9 +82,16 @@ def train_one_epoch(
             output.backward()
             optimizer.step()
 
-            print("got here :)")
+            # update progress bar with current loss
+            pbar.set_postfix(
+                loss=f"{output.item():.4f}",
+            )
+            pbar.update()
 
-            break
+            info_loss.append(output.item())
+
+        # log average loss for epoch
+        logging.info(f"Loss: {sum(info_loss) / len(info_loss)}")
 
 def evaluate(
         model: torch.nn.Module,

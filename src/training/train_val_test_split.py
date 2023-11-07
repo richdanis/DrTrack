@@ -86,6 +86,14 @@ def main():
 
     print("Shape: " + str(train.shape))
 
+    # fix seed for reproducibility
+    np.random.seed(0)
+
+    # shuffle the datasets
+    np.random.shuffle(train)
+    np.random.shuffle(validation)
+    np.random.shuffle(test)
+
     # save the datasets
     np.save(CELL_DATASET_PATH + "train.npy", train)
     np.save(CELL_DATASET_PATH + "validation.npy", validation)
