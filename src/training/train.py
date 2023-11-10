@@ -34,6 +34,9 @@ def main():
                                              batch_size=args.batch_size,
                                              shuffle=True)
 
+    # set wandb environment variables so that it workes on euler GPU
+    os.environ["WANDB__SERVICE_WAIT"] = "300"
+
     # initialize wandb
     if args.wandb:
         wandb.init(
@@ -143,8 +146,8 @@ def evaluate(
         output = criterion(embeddings_x, embeddings_y)
         info_loss.append(output.item())
 
-        embeddings_x = embeddings_x.detach().numpy()
-        embeddings_y = embeddings_y.detach().numpy()
+        embeddings_x = embeddings_x.detach().cpu().numpy()
+        embeddings_y = embeddings_y.detach().cpu().numpy()
 
         info_topk_accuracy.append(calculate_accuracy(embeddings_x, embeddings_y, args.topk_accuracy))
 
