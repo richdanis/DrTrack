@@ -1,25 +1,27 @@
 import os
-
 import wandb
 import torch
 import argparse
-import torchvision
 import logging
+import numpy as np
 from info_nce import InfoNCE
 from tqdm import tqdm
 from dataset import CellDataset
 from models.efficientnet import EfficientNet
-import numpy as np
+from utils.setup import setup_logging, get_args
+
 
 from metrics.auroc import calculate_auroc
 from metrics.accuracy import calculate_accuracy
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    args = get_args(parser)
+    
+    # get arguments
+    args = get_args()
 
-    logging.basicConfig(filename='logs/training.log', level=logging.DEBUG)
+    # initialize logging and wandb
+    setup_logging(args)
 
     # load datasets
     train_dataset = CellDataset(os.path.join(args.data_path, 'train.npy'))
@@ -33,16 +35,6 @@ def main():
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                              batch_size=args.batch_size,
                                              shuffle=True)
-
-    # set wandb environment variables so that it workes on euler GPU
-    os.environ["WANDB__SERVICE_WAIT"] = "300"
-
-    # initialize wandb
-    if args.wandb:
-        wandb.init(
-            project="dsl",
-            config=vars(args)
-        )
 
     # load model
     model = load_model()
@@ -169,23 +161,6 @@ def evaluate(
         logging.info(f"Val mean top {k} accuracy: {acc}")
 
     return log_dict
-
-
-def get_args(parser):
-    # TODO: add more arguments
-
-    parser.add_argument('--data_path', type=str, required=True, help='Path to data.')
-    parser.add_argument('--model', default=None, help='Which model to use. Default is None.')
-    parser.add_argument('--batch_size', type=int, default=32, help='Batch size. Default is 32.')
-    parser.add_argument('--epochs', type=int, default=100, help='Number of epochs. Default is 100.')
-    parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate. Default is 0.001.')
-    parser.add_argument('--device', type=str, default='cuda', help='Device to use. Default is cuda.')
-    parser.add_argument('--topk_accuracy', type=int, nargs='+', help='Whether to log validation topk accuracy.')
-    parser.add_argument('--auroc_mode', type=str, default='roll',
-                        help='Mode for calculating the negative class for AUROC')
-    parser.add_argument('--wandb', type=bool, default=False, help='Whether to log to wandb.')
-
-    return parser.parse_args()
 
 
 def load_model():
