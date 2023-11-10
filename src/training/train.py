@@ -1,5 +1,6 @@
 import os
 
+import wandb
 import torch
 import argparse
 import torchvision
@@ -15,8 +16,6 @@ from metrics.accuracy import calculate_accuracy
 
 
 def main():
-    # TODO: wandb integration
-
     parser = argparse.ArgumentParser()
     args = get_args(parser)
 
@@ -34,6 +33,13 @@ def main():
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                              batch_size=args.batch_size,
                                              shuffle=True)
+
+    # initialize wandb
+    if args.wandb:
+        wandb.init(
+            project="dsl",
+            config=vars(args)
+        )
 
     # load model
     model = load_model()
@@ -54,6 +60,11 @@ def main():
     for epoch in range(args.epochs):
         train_log_dict = train_one_epoch(model, train_loader, optimizer, criterion, epoch, args)
         val_log_dict = evaluate(model, val_loader, criterion, epoch, args)
+        if args.wandb:
+            wandb.log({**train_log_dict, **val_log_dict})
+
+    if args.wandb:
+        wandb.finish()
 
 
 def train_one_epoch(
@@ -97,7 +108,6 @@ def train_one_epoch(
         pbar.update()
 
         info_loss.append(output.item())
-        break
 
     # log average loss for epoch
     mean_loss = sum(info_loss) / len(info_loss)
@@ -170,6 +180,7 @@ def get_args(parser):
     parser.add_argument('--topk_accuracy', type=int, nargs='+', help='Whether to log validation topk accuracy.')
     parser.add_argument('--auroc_mode', type=str, default='roll',
                         help='Mode for calculating the negative class for AUROC')
+    parser.add_argument('--wandb', type=bool, default=False, help='Whether to log to wandb.')
 
     return parser.parse_args()
 

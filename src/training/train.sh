@@ -8,7 +8,7 @@
 #SBATCH --output=/cluster/home/%u/DrTrack/logs/%x.out                                                                         
 #SBATCH --error=/cluster/home/%u/DrTrack/logs/%x.err
 
-module load gcc/8.2.0 python_gpu/3.11.2
+module load gcc/8.2.0 python_gpu/3.11.2 eth_proxy
 
 # need to change to your environment here (mine is just called lab_env)
 $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
@@ -17,6 +17,8 @@ $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
     --batch_size 32 \
     --epochs 1 \
     --lr 1e-3 \
-    --device cuda
+    --device cuda \
+    --topk_accuracy 1 5 \
+    --wandb True
 
 

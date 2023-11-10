@@ -8,3 +8,4 @@ tqdm
 argparse
 torchvision
 info-nce-pytorch
+wandb
