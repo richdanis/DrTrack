@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 class EfficientNet(torch.nn.Module):
 
-    def __init__(self, path='src/training/models/efficientnet_b1.pth'):
+    def __init__(self, args, path='src/training/models/efficientnet_b1.pth'):
         super().__init__()
 
         # initialize with pretrained weights
@@ -19,6 +19,10 @@ class EfficientNet(torch.nn.Module):
 
         # change classifier to identity
         self.layers.classifier = torch.nn.Identity()
+
+        if args.embed_dim is not None:
+            # add embedding layer
+            self.layers.add_module('embedding', torch.nn.Linear(1280, args.embed_dim))
 
     def forward(self, x):
         assert len(x.shape) == 4, "Inputs must be grayscale images of shape (N, 1, H, W)"

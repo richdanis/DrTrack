@@ -23,6 +23,9 @@ def get_args():
     parser.add_argument('--wandb', action='store_true', help='Whether to use wandb for logging.')
     parser.add_argument('--checkpoint_path', default=None, type=str,
                         help='Where to store model checkpoints. If not provided, the model is not stored.')
+    parser.add_argument('--embed_dim', default=None, type=int, help='Dimension of the embedding layer.')
+    parser.add_argument('--samples_per_epoch', default=None, type=int, help='Number of samples per epoch.')
+    parser.add_argument('--validation_batch_size', default=32, type=int, help='Batch size for validation.')
 
     return parser.parse_args()
 

@@ -41,11 +41,11 @@ def main():
                                                batch_size=args.batch_size,
                                                shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_dataset,
-                                             batch_size=args.batch_size,
+                                             batch_size=args.validation_batch_size,
                                              shuffle=True)
 
     # load model
-    model = load_model()
+    model = load_model(args)
     model = model.to(args.device)
     logging.info(f"Model loaded.")
 
@@ -90,7 +90,6 @@ def train_one_epoch(
         epoch: int,
         args: argparse.Namespace
 ):
-    # TODO: Logging, keeping track of loss, metrics, etc.
 
     # progress bar
     pbar = tqdm(train_dl, bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}")
@@ -101,6 +100,9 @@ def train_one_epoch(
 
     # keep track of loss for each iteration
     info_loss = []
+
+    # count num samples for epoch
+    count = 0
 
     model.train()
     for x, y in train_dl:
@@ -122,6 +124,11 @@ def train_one_epoch(
         pbar.update()
 
         info_loss.append(output.item())
+
+        if args.samples_per_epoch is not None:
+            count += args.batch_size
+            if count > args.samples_per_epoch:
+                break
 
     # log average loss for epoch
     mean_loss = sum(info_loss) / len(info_loss)
@@ -153,6 +160,10 @@ def evaluate(
     info_loss = []
     info_topk_accuracy = []
     info_auroc = []
+
+    # set model to eval mode
+    model.eval()
+
     for x, y in val_dl:
         x, y = x.to(args.device), y.to(args.device)
 
@@ -187,11 +198,11 @@ def evaluate(
     return log_dict
 
 
-def load_model():
+def load_model(args):
     # TODO: needs to be changed if we want to be able to load different models.
     # Currently using EfficientNet, version b1, lightweight: 6.5 million parameters.
     # Output embedding has 1280 dimensions.
-    return EfficientNet()
+    return EfficientNet(args)
 
 
 if __name__ == "__main__":
