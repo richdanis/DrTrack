@@ -15,13 +15,13 @@ $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
     --data_path /cluster/scratch/$USER/data/ \
     --model efficientnet-b0 \
     --batch_size 32 \
-    --epochs 10 \
+    --epochs 60 \
     --lr 1e-3 \
     --device cuda \
     --topk_accuracy 1 5 \
     --wandb \
     --checkpoint_path /cluster/home/rdanis/DrTrack/data/ \
-    --embed_dim 32 \
+    --embed_dim 128 \
     --samples_per_epoch 500 \
     --validation_batch_size 128 \
 

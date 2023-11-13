@@ -158,42 +158,44 @@ def evaluate(
     topk = list(topk)
 
     info_loss = []
-    info_topk_accuracy = []
-    info_auroc = []
 
-    # set model to eval mode
+    # put model to eval mode
     model.eval()
+
+    # arrays for x and y embeddings
+    embeddings_x = np.empty((0, args.embed_dim))
+    embeddings_y = np.empty((0, args.embed_dim))
 
     for x, y in val_dl:
         x, y = x.to(args.device), y.to(args.device)
 
-        embeddings_x = model(x)
-        embeddings_y = model(y)
+        out_x = model(x)
+        out_y = model(y)
 
-        output = criterion(embeddings_x, embeddings_y)
+        output = criterion(out_x, out_y)
         info_loss.append(output.item())
 
-        embeddings_x = embeddings_x.detach().cpu().numpy()
-        embeddings_y = embeddings_y.detach().cpu().numpy()
+        out_x = out_x.detach().cpu().numpy()
+        out_y = out_y.detach().cpu().numpy()
 
-        info_topk_accuracy.append(calculate_accuracy(embeddings_x, embeddings_y, topk))
+        embeddings_x = np.concatenate((embeddings_x, out_x), axis=0)
+        embeddings_y = np.concatenate((embeddings_y, out_y), axis=0)
 
-        info_auroc.append(calculate_auroc(embeddings_x, embeddings_y, args.auroc_mode))
-
+    info_topk_accuracy = calculate_accuracy(embeddings_x, embeddings_y, topk)
+    info_auroc = calculate_auroc(embeddings_x, embeddings_y, args.auroc_mode)
+    
     mean_loss = sum(info_loss) / len(info_loss)
-    mean_auroc = sum(info_auroc) / len(info_auroc)
     logging.info(f"Val loss: {mean_loss}")
-    logging.info(f"Val auroc: {mean_auroc}")
+    logging.info(f"Val auroc: {info_auroc}")
 
     log_dict = {
         'val_mean_epoch_loss': mean_loss,
-        'val_mean_auroc': mean_auroc,
+        'val_auroc': info_auroc,
     }
 
-    mean_topk_accuracy = np.mean(info_topk_accuracy, axis=0)
-    for k, acc in zip(topk, mean_topk_accuracy):
-        log_dict[f'val_mean_top{k}_accuracy'] = acc
-        logging.info(f"Val mean top {k} accuracy: {acc}")
+    for k, acc in zip(topk, info_topk_accuracy):
+        log_dict[f'val_top{k}_accuracy'] = acc
+        logging.info(f"Val top {k} accuracy: {acc}")
 
     return log_dict
 

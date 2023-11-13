@@ -22,7 +22,7 @@ class EfficientNet(torch.nn.Module):
 
         if args.embed_dim is not None:
             # add embedding layer
-            self.layers.add_module('embedding', torch.nn.Linear(1280, args.embed_dim))
+            self.layers.classifier = torch.nn.Linear(1280, args.embed_dim)
 
     def forward(self, x):
         assert len(x.shape) == 4, "Inputs must be grayscale images of shape (N, 1, H, W)"
