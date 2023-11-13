@@ -21,11 +21,13 @@ def get_args():
     parser.add_argument('--auroc_mode', type=str, default='roll',
                         help='Mode for calculating the negative class for AUROC')
     parser.add_argument('--wandb', action='store_true', help='Whether to use wandb for logging.')
+    parser.add_argument('--checkpoint_path', default=None, type=str,
+                        help='Where to store model checkpoints. If not provided, the model is not stored.')
 
     return parser.parse_args()
 
-def setup_logging(args: argparse.Namespace):
 
+def setup_logging(args: argparse.Namespace):
     # TODO: create different directory for each run
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -46,5 +48,3 @@ def setup_logging(args: argparse.Namespace):
             config=vars(args),
             dir="logs"
         )
-
-

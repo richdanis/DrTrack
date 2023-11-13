@@ -1,4 +1,7 @@
+import datetime
 import os
+import time
+
 import wandb
 import torch
 import argparse
@@ -8,20 +11,25 @@ from info_nce import InfoNCE
 from tqdm import tqdm
 from dataset import CellDataset
 from models.efficientnet import EfficientNet
-from utils.setup import setup_logging, get_args
-
 
 from metrics.auroc import calculate_auroc
 from metrics.accuracy import calculate_accuracy
+from utils.setup import setup_logging, get_args
 
 
 def main():
-    
     # get arguments
     args = get_args()
 
     # initialize logging and wandb
     setup_logging(args)
+
+    # prepare for saving the model
+    if args.checkpoint_path is not None:
+        timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
+        model_path = os.path.join(args.checkpoint_path, f'{timestamp}_embeddings_model.pt')
+    else:
+        model_path = None
 
     # load datasets
     train_dataset = CellDataset(os.path.join(args.data_path, 'train.npy'))
@@ -52,11 +60,23 @@ def main():
     # this is just a first try, can maybe use different contrastive loss
     criterion = InfoNCE()
 
+    best_val_loss = -1 * float('inf')
     for epoch in range(args.epochs):
         train_log_dict = train_one_epoch(model, train_loader, optimizer, criterion, epoch, args)
         val_log_dict = evaluate(model, val_loader, criterion, epoch, args)
         if args.wandb:
             wandb.log({**train_log_dict, **val_log_dict})
+
+        if model_path is not None and best_val_loss < val_log_dict['val_mean_epoch_loss']:
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_log_dict['train_mean_epoch_loss'],
+            }, model_path)
+            logging.info(
+                f'Validation loss improved from {best_val_loss} to {val_log_dict["val_mean_epoch_loss"]}. Saved the model.')
+            best_val_loss = val_log_dict['val_mean_epoch_loss']
 
     if args.wandb:
         wandb.finish()
@@ -83,7 +103,6 @@ def train_one_epoch(
     info_loss = []
 
     model.train()
-
     for x, y in train_dl:
         x, y = x.to(args.device), y.to(args.device)
 
@@ -126,6 +145,11 @@ def evaluate(
     # log epoch info
     logging.info(f"Evaluating after epoch {epoch}")
 
+    # prepare topk accuracy params
+    topk = set() if args.topk_accuracy is None else set(args.topk_accuracy)
+    topk.add(1)  # we want to always list top1 accuracy
+    topk = list(topk)
+
     info_loss = []
     info_topk_accuracy = []
     info_auroc = []
@@ -141,7 +165,7 @@ def evaluate(
         embeddings_x = embeddings_x.detach().cpu().numpy()
         embeddings_y = embeddings_y.detach().cpu().numpy()
 
-        info_topk_accuracy.append(calculate_accuracy(embeddings_x, embeddings_y, args.topk_accuracy))
+        info_topk_accuracy.append(calculate_accuracy(embeddings_x, embeddings_y, topk))
 
         info_auroc.append(calculate_auroc(embeddings_x, embeddings_y, args.auroc_mode))
 
@@ -156,7 +180,7 @@ def evaluate(
     }
 
     mean_topk_accuracy = np.mean(info_topk_accuracy, axis=0)
-    for k, acc in zip(args.topk_accuracy, mean_topk_accuracy):
+    for k, acc in zip(topk, mean_topk_accuracy):
         log_dict[f'val_mean_top{k}_accuracy'] = acc
         logging.info(f"Val mean top {k} accuracy: {acc}")
 
