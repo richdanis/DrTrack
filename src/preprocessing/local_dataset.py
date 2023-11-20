@@ -6,7 +6,7 @@ import argparse
 import os
 
 DATA_PATH = '/cluster/scratch/rdanis/data/'
-SAVE_PATH = '/cluster/scratch/rdanis/data/'
+SAVE_PATH = '/cluster/scratch/rdanis/data/local_datasets/'
 
 
 def create_mapping_df(patches_df, tracking_df, distance=10):
@@ -85,6 +85,9 @@ def create_mapping_df(patches_df, tracking_df, distance=10):
 
     columns = columns[1:]
 
+    # reset indices
+    mapping = mapping.reset_index(drop=True)
+
     return mapping[columns]
 
 
@@ -99,9 +102,11 @@ def local_negatives(mapped_patches, num_frames):
     Returns:
     numpy array: A numpy array containing the indices of the negatives for each droplet in the dataset.
     """
+    # number of negatives
+    num = min(len(mapped_patches) - 1, 128)
+
     # create empty index list
-    indices = np.empty(
-        (len(mapped_patches) * (num_frames - 1), 128), dtype=np.int16)
+    indices = np.empty((len(mapped_patches) * (num_frames - 1), num), dtype=np.int16)
 
     # iterate over frames:
     for i in tqdm.tqdm(range(num_frames-1), desc="Creating local negatives..."):
@@ -122,7 +127,7 @@ def local_negatives(mapped_patches, num_frames):
                                 2 + (curr_y - next_y_temp)**2)
 
             # get 128 closest droplets
-            closest = np.argsort(distances)[:128]
+            closest = np.argsort(distances)[:num]
 
             # add length of list to closest
             closest = closest + len(mapped_patches) * (i + 1)
@@ -223,7 +228,7 @@ def resize_patch_columns(df, num_frames):
     """
     for i in tqdm.tqdm(range(num_frames), desc="Resizing patches..."):
         for j in range(len(df)):
-            patch = df["patch" + str(i)].iloc[j]
+            patch = df.at[j, "patch" + str(i)]
             patch = resize(patch, (2, 40, 40))
             # updated dataframe
             df.at[j, "patch" + str(i)] = patch
@@ -282,16 +287,13 @@ def main():
     print("Shape of labels: " + str(label.shape))
     print("Shape of negative indices: " + str(neg_indices.shape))
 
-    # modify save path
-    SAVE_PATH = SAVE_PATH + 'local_datasets/' + fname + '/'
-
     # make directories
-    os.makedirs(SAVE_PATH, exist_ok=True)
+    os.makedirs(SAVE_PATH + fname + "/", exist_ok=True)
 
     print("Saving files...")
-    np.save(SAVE_PATH + 'patches', dataset)
-    np.save(SAVE_PATH + 'labels', label)
-    np.save(SAVE_PATH + 'negatives', neg_indices)
+    np.save(SAVE_PATH + fname + "/" + 'patches', dataset)
+    np.save(SAVE_PATH + fname + "/" + 'labels', label)
+    np.save(SAVE_PATH + fname + "/" + 'negatives', neg_indices)
 
 
 if __name__ == '__main__':
