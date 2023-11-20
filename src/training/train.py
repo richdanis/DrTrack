@@ -60,14 +60,14 @@ def main():
     # this is just a first try, can maybe use different contrastive loss
     criterion = InfoNCE()
 
-    best_val_loss = -1 * float('inf')
+    best_val_loss = float('inf')
     for epoch in range(args.epochs):
         train_log_dict = train_one_epoch(model, train_loader, optimizer, criterion, epoch, args)
         val_log_dict = evaluate(model, val_loader, criterion, epoch, args)
         if args.wandb:
             wandb.log({**train_log_dict, **val_log_dict})
 
-        if model_path is not None and best_val_loss < val_log_dict['val_mean_epoch_loss']:
+        if model_path is not None and best_val_loss > val_log_dict['val_mean_epoch_loss']:
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),

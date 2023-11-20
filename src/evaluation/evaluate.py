@@ -28,15 +28,16 @@ def get_args():
                         help='Where model checkpoint is stored.')
     parser.add_argument('--validation_batch_size', type=int, default=32, help='Batch size. Default is 32.')
     parser.add_argument('--device', type=str, default='cpu', help='Device to use. Default is cpu.')
+    parser.add_argument('--embed_dim', default=None, type=int, help='Dimension of the embedding layer.')
 
     return parser.parse_args()
 
 
-def load_model():
+def load_model(args: argparse.Namespace):
     # TODO: needs to be changed if we want to be able to load different models.
     # Currently using EfficientNet, version b1, lightweight: 6.5 million parameters.
     # Output embedding has 1280 dimensions.
-    return EfficientNet()
+    return EfficientNet(args)
 
 
 def setup_logging():
@@ -53,7 +54,7 @@ def main():
     args = get_args()
     setup_logging()
 
-    model = load_model()
+    model = load_model(args)
     checkpoint = torch.load(args.checkpoint_path, map_location=torch.device(args.device))
     model.load_state_dict(checkpoint['model_state_dict'])
     logging.info(f"Model loaded.")
