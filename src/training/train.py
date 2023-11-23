@@ -1,6 +1,4 @@
-import datetime
 import os
-import time
 
 import wandb
 import torch
@@ -12,8 +10,6 @@ from tqdm import tqdm
 from dataset import LocalDataset
 from models.efficientnet import EfficientNet
 
-from metrics.auroc import calculate_auroc
-from metrics.accuracy import calculate_accuracy
 from utils.setup import setup_logging, get_args
 from trainer import Trainer
 
@@ -27,31 +23,34 @@ def main():
     # initialize logging and wandb
     setup_logging(args)
 
-    # prepare for saving the model
-    if args.checkpoint_path is not None:
-        timestamp = datetime.datetime.fromtimestamp(
-            time.time()).strftime("%Y-%m-%d_%H-%M-%S")
-        model_path = os.path.join(
-            args.checkpoint_path, f'{timestamp}_embeddings_model.pt')
-    else:
-        model_path = None
-
     # load datasets
     train_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
                                  config='train')
+    train_eval_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
+                                      config='val')
     val_dataset = LocalDataset(os.path.join(args.data_path, 'validation'),
                                config='val')
     
-    val_labels, val_neg_ind = val_dataset.labels, val_dataset.negatives
     logging.info(f"Datasets loaded.")
 
     # data loader
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=args.batch_size,
                                                shuffle=True)
+    train_eval_loader = torch.utils.data.DataLoader(train_eval_dataset,
+                                                    batch_size=args.validation_batch_size,
+                                                    shuffle=False)
+    train_indices = {
+        'labels': train_eval_dataset.labels,
+        'neg_ind': train_eval_dataset.negatives
+    }
     val_loader = torch.utils.data.DataLoader(val_dataset,
                                              batch_size=args.validation_batch_size,
                                              shuffle=False)
+    val_indices = {
+        'labels': val_dataset.labels,
+        'neg_ind': val_dataset.negatives
+    }
 
     # load model
     model = load_model(args)
@@ -68,17 +67,17 @@ def main():
     # loss criterion
     # https://github.com/RElbers/info-nce-pytorch
     # this is just a first try, can maybe use different contrastive loss
-    criterion = InfoNCE(negative_mode='paired')
+    criterion = InfoNCE()
 
     trainer = Trainer(model=model,
                       optimizer=optimizer,
                       loss_fn=criterion,
                       train_loader=train_loader,
+                      train_eval_loader=train_eval_loader,
                       val_loader=val_loader,
                       device=DEVICE,
-                      val_labels=val_labels,
-                      val_neg_ind=val_neg_ind,
-                      save_path=model_path,
+                      train_indices=train_indices,
+                      val_indices=val_indices,
                       args=args)
 
     trainer.train()

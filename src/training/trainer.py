@@ -4,60 +4,76 @@ import numpy as np
 import wandb
 import torch
 from info_nce import InfoNCE
+import time
+import datetime
+import os
+
 
 class Trainer():
 
-    def __init__(self, 
-                 model, 
-                 optimizer, 
-                 loss_fn, 
-                 train_loader, 
-                 val_loader,  
+    def __init__(self,
+                 model,
+                 optimizer,
+                 loss_fn,
+                 train_loader,
+                 train_eval_loader,
+                 val_loader,
                  device,
-                 val_labels,
-                 val_neg_ind,
-                 save_path, 
+                 train_indices,
+                 val_indices,
                  args):
-        
+
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.train_loader = train_loader
+        self.train_eval_loader = train_eval_loader
         self.val_loader = val_loader
         self.device = device
-        self.val_labels = val_labels
-        self.val_neg_ind = val_neg_ind
-        self.save_path = save_path
+        self.train_indices = train_indices
+        self.val_indices = val_indices
         self.args = args
 
-        self.val_losses = []
-        self.val_acc_top1 = []
-        self.val_acc_top5 = []
-
         self.best_top5_acc = 0
+
+        self.val_loss = InfoNCE(negative_mode='paired')
+
+        # prepare for saving the model
+        self.model_path = None
+        if args.checkpoint_path is not None:
+            timestamp = datetime.datetime.fromtimestamp(
+                time.time()).strftime("%Y-%m-%d_%H-%M-%S")
+            self.model_path = os.path.join(
+                args.checkpoint_path, f'{timestamp}_embeddings_model.pt')
 
     def train(self):
         for epoch in range(self.args.epochs):
             logging.info(f"Epoch {epoch+1} of {self.args.epochs}")
             self.train_epoch(epoch)
-            self.val_epoch(epoch)
-            self.log()
+            train_eval_dict = self.val_epoch(
+                loader=self.train_eval_loader, epoch=epoch, **self.train_indices)
+            val_dict = self.val_epoch(
+                loader=self.val_loader, epoch=epoch, **self.val_indices)
+            self.log(train_eval_dict, val_dict)
 
-            self.save_model(epoch)
+            self.save_model(epoch, val_dict)
 
         if self.args.wandb:
             wandb.finish()
 
-    def log(self):
+    def log(self, train_eval_dict, val_dict):
 
-        logging.info(f"Val Loss: {self.val_losses[-1]:.4f}")
-        logging.info(f"Val Acc Top 1: {self.val_acc_top1[-1]:.4f}")
-        logging.info(f"Val Acc Top 5: {self.val_acc_top5[-1]:.4f}")
+        # log dicts with keys capitalized
+        logging.info(f"Train: {train_eval_dict}")
+        logging.info(f"Val: {val_dict}")
+
+        # append train/val to keys
+        train_eval_dict = {f"train_{k}": v for k, v in train_eval_dict.items()}
+        val_dict = {f"val_{k}": v for k, v in val_dict.items()}
         if self.args.wandb:
             wandb.log({
-                'val_loss': self.val_losses[-1],
-                'val_acc_top1': self.val_acc_top1[-1],
-                'val_acc_top5': self.val_acc_top5[-1]
+                **train_eval_dict,
+                **val_dict
             })
 
     def train_epoch(self, epoch):
@@ -67,7 +83,6 @@ class Trainer():
 
         self.model.train()
 
-        criterion = InfoNCE()
         for x, y in tqdm(self.train_loader, desc=f"Epoch {epoch + 1}/{self.args.epochs}"):
             x, y = x.to(self.device), y.to(self.device)
 
@@ -76,7 +91,7 @@ class Trainer():
             embeddings_y = self.model(y)
 
             # output = self.loss_fn(embeddings_x, embeddings_y, embeddings_z)
-            output = criterion(embeddings_x, embeddings_y)
+            output = self.loss_fn(embeddings_x, embeddings_y)
 
             self.optimizer.zero_grad()
             output.backward()
@@ -87,16 +102,16 @@ class Trainer():
                 if count > self.args.samples_per_epoch:
                     break
 
-    def val_epoch(self, epoch):
+    def val_epoch(self, loader, epoch, labels, neg_ind):
 
         self.model.eval()
 
         embeddings_x = torch.empty((0, self.args.embed_dim))
 
-        for x in tqdm(self.val_loader, desc=f"Val epoch {epoch + 1}/{self.args.epochs}"):
-            
+        for x in tqdm(loader, desc=f"Val epoch {epoch + 1}/{self.args.epochs}"):
+
             with torch.no_grad():
-                
+
                 x = x.to(self.device)
 
                 out_x = self.model(x).cpu()
@@ -109,9 +124,9 @@ class Trainer():
         losses = []
 
         # TODO: could batch this to make it faster
-        for i in range(self.val_labels.shape[0]):
-            positive = embeddings_x[self.val_labels[i]]
-            negatives = embeddings_x[self.val_neg_ind[i]]
+        for i in range(labels.shape[0]):
+            positive = embeddings_x[labels[i]]
+            negatives = embeddings_x[neg_ind[i]]
 
             # compute distances
             distances = np.linalg.norm(embeddings_x[i] - negatives, axis=1)
@@ -130,23 +145,25 @@ class Trainer():
 
             # compute the loss
             with torch.no_grad():
-                losses.append(self.loss_fn(embeddings_x[i].unsqueeze(0), 
-                                           positive.unsqueeze(0), 
-                                           negatives.unsqueeze(0)).item())
-        
-        self.val_losses.append(np.mean(losses))
-        self.val_acc_top1.append(np.sum(top1_accuracy) / len(top1_accuracy))
-        self.val_acc_top5.append(np.sum(top5_accuracy) / len(top5_accuracy))
+                losses.append(self.val_loss(embeddings_x[i].unsqueeze(0),
+                                            positive.unsqueeze(0),
+                                            negatives.unsqueeze(0)).item())
 
-    def save_model(self, epoch):
+        return {
+            "loss": np.mean(losses),
+            "acc_top1": np.sum(top1_accuracy) / len(top1_accuracy),
+            "acc_top5": np.sum(top5_accuracy) / len(top5_accuracy)
+        }
 
-        if self.save_path is not None and self.best_top5_acc < self.val_acc_top5[-1]:
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': self.model.state_dict(),
-                    'optimizer_state_dict': self.optimizer.state_dict(),
-                    'loss': self.val_losses[-1],
-                }, self.args.model_path)
-                logging.info(
-                    f'Validation top5 accuracy improved from {self.best_top5_acc} to {self.val_acc_top5[-1]}. Saved the model.')
-                self.best_top5_acc = self.val_acc_top5[-1]
+    def save_model(self, epoch, val_dict):
+
+        if self.model_path is not None and self.best_top5_acc < val_dict['acc_top5']:
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': self.model.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'loss': val_dict['loss'],
+            }, self.model_path)
+            logging.info(
+                f'Validation top5 accuracy improved from {self.best_top5_acc} to {val_dict["acc_top5"]}. Saved the model.')
+            self.best_top5_acc = val_dict['acc_top5']

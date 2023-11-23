@@ -15,9 +15,11 @@ $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
     --data_path /cluster/scratch/$USER/data/local_datasets/ \
     --model efficientnet-b0 \
     --batch_size 32 \
-    --epochs 10 \
+    --epochs 20 \
     --lr 1e-3 \
-    --embed_dim 4 \
+    --wandb \
+    --checkpoint_path /cluster/scratch/$USER/checkpoints/ \
+    --embed_dim 5 \
     --validation_batch_size 32 \
 
 
