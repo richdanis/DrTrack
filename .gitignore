@@ -7,4 +7,5 @@ data/**
 
 # Ignore temporary files
 ground_truth_generation
+dslab
 
