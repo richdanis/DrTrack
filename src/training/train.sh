@@ -12,17 +12,14 @@ module load gcc/8.2.0 python_gpu/3.11.2 eth_proxy
 
 # need to change to your environment here (mine is just called lab_env)
 $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
-    --data_path /cluster/scratch/$USER/data/ \
+    --data_path /cluster/scratch/$USER/data/local_datasets/ \
     --model efficientnet-b0 \
     --batch_size 32 \
-    --epochs 60 \
+    --epochs 20 \
     --lr 1e-3 \
-    --device cuda \
-    --topk_accuracy 1 5 \
     --wandb \
-    --checkpoint_path /cluster/home/rdanis/DrTrack/data/ \
-    --embed_dim 128 \
-    --samples_per_epoch 500 \
-    --validation_batch_size 128 \
+    --checkpoint_path /cluster/scratch/$USER/checkpoints/ \
+    --embed_dim 5 \
+    --validation_batch_size 32 \
 
 

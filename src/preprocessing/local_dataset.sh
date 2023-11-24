@@ -2,7 +2,7 @@
 
 #SBATCH --time=00:10:00
 #SBATCH --mem-per-cpu=10G
-#SBATCH --job-name=cell_dataset
+#SBATCH --job-name=local_dataset
 #SBATCH --output=/cluster/home/%u/DrTrack/logs/%x.out                                                                         
 #SBATCH --error=/cluster/home/%u/DrTrack/logs/%x.err
 
