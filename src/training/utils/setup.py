@@ -7,21 +7,22 @@ import time
 
 
 def get_args():
-    # TODO: add more arguments
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--data_path', type=str, required=True, help='Path to data.')
-    parser.add_argument('--model', default=None, help='Which model to use. Default is None.')
+    parser.add_argument('--model', default="efficientnet-b0", help='Which model to use. Default is None.')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size. Default is 32.')
-    parser.add_argument('--epochs', type=int, default=100, help='Number of epochs. Default is 100.')
+    parser.add_argument('--epochs', type=int, default=20, help='Number of epochs. Default is 100.')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate. Default is 0.001.')
+    parser.add_argument('--weight_decay', type=float, default=0, help='Weight decay. Default is 0.')
+    parser.add_argument('--temperature', type=float, default=0.1, help='Temperature for InfoNCE loss. Default is 0.1.')
     parser.add_argument('--auroc_mode', type=str, default='roll',
                         help='Mode for calculating the negative class for AUROC')
     parser.add_argument('--wandb', action='store_true', help='Whether to use wandb for logging.')
-    parser.add_argument('--checkpoint_path', default=None, type=str,
+    parser.add_argument('--checkpoint_path', default="/cluster/scratch/rdanis/checkpoints/", type=str,
                         help='Where to store model checkpoints. If not provided, the model is not stored.')
-    parser.add_argument('--embed_dim', default=None, type=int, help='Dimension of the embedding layer.')
+    parser.add_argument('--embed_dim', default=32, type=int, help='Dimension of the embedding layer.')
     parser.add_argument('--samples_per_epoch', default=None, type=int, help='Number of samples per epoch.')
     parser.add_argument('--validation_batch_size', default=32, type=int, help='Batch size for validation.')
 
@@ -29,7 +30,7 @@ def get_args():
 
 
 def setup_logging(args: argparse.Namespace):
-    # TODO: create different directory for each run
+    
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
 
     logging.basicConfig(

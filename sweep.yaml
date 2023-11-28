@@ -1,0 +1,37 @@
+command:
+  - ../lab_env/bin/python3.11
+  - ${program}
+  - ${args}
+  - --wandb
+  - --data_path 
+  - /cluster/scratch/${envvar:USER}/data/local_datasets/
+  - --checkpoint_path 
+  - /cluster/scratch/${envvar:USER}/checkpoints/
+method: grid
+metric:
+  goal: maximize
+  name: val_acc_top5
+parameters:
+  batch_size:
+    distribution: categorical
+    values:
+      - 64
+      - 128
+      - 256
+  embed_dim:
+    distribution: categorical
+    values:
+      - 20
+      - 30
+  lr:
+    distribution: categorical
+    values:
+      - 0.0001
+      - 0.001
+  weight_decay:
+    distribution: categorical
+    values:
+      - 0
+      - 0.0001
+      - 0.001
+program: src/training/train.py

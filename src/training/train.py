@@ -62,12 +62,12 @@ def main():
         f"Number of parameters: {sum(p.numel() for p in model.parameters())}")
 
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     # loss criterion
     # https://github.com/RElbers/info-nce-pytorch
     # this is just a first try, can maybe use different contrastive loss
-    criterion = InfoNCE()
+    criterion = InfoNCE(temperature=args.temperature)
 
     trainer = Trainer(model=model,
                       optimizer=optimizer,
