@@ -7,13 +7,16 @@ from preprocess.for_detection import raw_to_preprocessed_for_detection
 from preprocess.for_embeddings import raw_to_preprocessed_for_embeddings
 from utils.globals import *
 
+# import hydra
+# from omegaconf import DictConfig, OmegaConf
+
 
 def preprocess(raw_image_path: Path, image_name: str, pixel=-1):
     """Preprocess the .nd2 images and save as .npy arrays."""
     raw_to_preprocessed_for_detection(raw_image_path, image_name, PREPROCESSED_PATH, pixel=pixel)
     raw_to_preprocessed_for_embeddings(raw_image_path, image_name, PREPROCESSED_PATH, pixel=pixel)
 
-
+#@hydra.main(config_path="conf", config_name="config", version_base=None)
 def main():
     start_time = time.time()
 
