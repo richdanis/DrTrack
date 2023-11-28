@@ -10,7 +10,7 @@ from skimage.util import img_as_ubyte
 from .raw_image_reader import get_image_as_ndarray
 
 
-def preprocess_for_detection(image_path: str, pixel: int = -1) -> np.ndarray:
+def preprocess_for_detection(cfg, image_path: str, pixel: int = -1) -> np.ndarray:
     """
     Preprocess the BF channel of a image
     ----------
@@ -54,10 +54,10 @@ def preprocess_for_detection(image_path: str, pixel: int = -1) -> np.ndarray:
     return image
 
 
-def raw_to_preprocessed_for_detection(raw_image_path: Path, image_name: str, PREPROCESSED_PATH: Path,
+def raw_to_preprocessed_for_detection(cfg, raw_image_path: Path, image_name: str, PREPROCESSED_PATH: Path,
                                       pixel: int = -1) -> np.ndarray:
     """Preprocesses the raw .nd2 image for detection and saves it as .npy file."""
-    preprocessed_image = preprocess_for_detection(raw_image_path, pixel=pixel)
+    preprocessed_image = preprocess_for_detection(cfg, raw_image_path, pixel=pixel)
     path = Path(PREPROCESSED_PATH / f"preprocessed_drpdtc_{image_name}.npy")
     np.save(path, preprocessed_image)
     return preprocessed_image

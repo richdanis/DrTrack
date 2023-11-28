@@ -10,7 +10,7 @@ from skimage.util import img_as_ubyte
 from .raw_image_reader import get_image_as_ndarray
 
 
-def preprocess_for_embeddings(image_path: str, pixel: int = -1) -> np.ndarray:
+def preprocess_for_embeddings(cfg, image_path: str, pixel: int = -1) -> np.ndarray:
     """
     Preprocess the BF channel of an image
     ----------
@@ -63,10 +63,10 @@ def preprocess_for_embeddings(image_path: str, pixel: int = -1) -> np.ndarray:
     return image
 
 
-def raw_to_preprocessed_for_embeddings(raw_image_path: Path, image_name: str, PREPROCESSED_PATH: Path,
+def raw_to_preprocessed_for_embeddings(cfg, raw_image_path: Path, image_name: str, PREPROCESSED_PATH: Path,
                                        pixel: int = -1) -> np.ndarray:
     """Preprocesses the raw .nd2 image for embedding creation and saves it as .npy file."""
-    preprocessed_image = preprocess_for_embeddings(raw_image_path, pixel)
+    preprocessed_image = preprocess_for_embeddings(cfg, raw_image_path, pixel)
     path = Path(PREPROCESSED_PATH / f"preprocessed_featextr_bf_{image_name}.npy")
     np.save(path, preprocessed_image[:, 0, :, :])
     path = Path(PREPROCESSED_PATH / f"preprocessed_featextr_dapi_{image_name}.npy")

@@ -1,0 +1,8 @@
+# Data to preprocess
+raw_image: "Small mvt 1.nd2"
+
+# Cut out a small region of the image
+pixel: 100
+
+# Whether to skip the preprocessing step
+skip: false
