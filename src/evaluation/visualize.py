@@ -11,12 +11,9 @@ import time
 import torch
 from info_nce import InfoNCE
 import numpy as np
+from tqdm import tqdm
 
-sys.path.append('src/')
-sys.path.append('src/training/')
-from training.models.efficientnet import EfficientNet
-from training.dataset import CellDataset
-from training.train import evaluate
+from dataset import VisualizationDataset
 from setup import get_args, load_model
 
 
@@ -35,7 +32,7 @@ def main():
     logging.info(f"Model path: {args.checkpoint_path}")
     logging.info(f"Model loaded.")
 
-    eval_dataset = CellDataset(args.test_data_path)
+    eval_dataset = VisualizationDataset(args.test_data_path, args.test_metadata_path)
 
     eval_loader = torch.utils.data.DataLoader(eval_dataset,
                                               batch_size=args.validation_batch_size,
@@ -43,30 +40,40 @@ def main():
     logging.info(f"Data path: {args.test_data_path}")
     logging.info(f"Loaded dataset of {len(eval_dataset)} samples. Evaluating...")
 
+    num_cells = []
     droplet_ids = []
     embeddings = []
     images = []
+    segments = []
+    center_rows = []
+    center_cols = []
 
-    i = 0
-    for x, y in eval_loader:
-        x, y = x.to(args.device), y.to(args.device)
+    for x, y in tqdm(eval_loader):
+        patch_batch, metadata_batch = x.to(args.device), y
+        patch_batch = patch_batch.type(torch.FloatTensor)
+        with torch.no_grad():
 
-        out_x = model(x)
-        out_y = model(y)
+            embedding_batch = model(patch_batch)
 
-        out_x = out_x.detach().cpu().numpy()
-        out_y = out_y.detach().cpu().numpy()
+            embedding_batch = embedding_batch.detach().cpu().numpy()
 
-        for j in range(out_x.shape[0]):
-            droplet_ids += [i, i]
-            embeddings += [out_x[j], out_y[j]]
-            images += [wandb.Image(x[j]), wandb.Image(y[j])]
-            i += 1
+        for j in range(embedding_batch.shape[0]):
+            droplet_ids.append(metadata_batch['droplet_id'][j])
+            num_cells.append(metadata_batch['num_cells'][j])
+            segments.append(metadata_batch['segment'][j])
+            center_rows.append(metadata_batch['center_row'][j])
+            center_cols.append(metadata_batch['center_col'][j])
+            embeddings.append(embedding_batch[j])
+            images.append(wandb.Image(patch_batch[j]))
 
     df = pd.DataFrame({
-        'target': droplet_ids,
+        'droplet_id': droplet_ids,
+        'nr_cells': num_cells,
         'image': images,
-        'embeddings': embeddings
+        'embeddings': embeddings,
+        'segments': segments,
+        'center_rows': center_rows,
+        'center_cols': center_cols
     })
 
     wandb.log({"example_small_embeddings": df})

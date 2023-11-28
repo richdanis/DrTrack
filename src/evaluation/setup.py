@@ -17,6 +17,7 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--test_data_path', type=str, default=None, help='Full path to .npy file with data.')
+    parser.add_argument('--test_metadata_path', type=str, default=None, help='Full path to .npy file with data.')
     parser.add_argument('--model', default=None, help='Which model to use. Default is None.')
     parser.add_argument('--topk_accuracy', type=int, nargs='+', help='Whether to log validation topk accuracy.')
     parser.add_argument('--auroc_mode', type=str, default='roll',
