@@ -38,7 +38,7 @@ def main(cfg: DictConfig):
           cut_names = preprocess_all_cuts_and_store(cfg, RAW_PATH, image_preprocessed_path, image_name)
 
 
-     ### DROPLET EXTRACTION ###
+     ### DROPLET DETECTION ###
      # Check conf/extract_droplets.yaml for settings
      image_droplets_path = Path(DROPLET_PATH / image_name)
 
