@@ -37,6 +37,7 @@ def main(cfg: DictConfig):
           create_dir(image_preprocessed_path)
           cut_names = preprocess_all_cuts_and_store(cfg, RAW_PATH, image_preprocessed_path, image_name)
 
+
      ### DROPLET EXTRACTION ###
      # Check conf/extract_droplets.yaml for settings
      image_droplets_path = Path(DROPLET_PATH / image_name)
@@ -52,11 +53,11 @@ def main(cfg: DictConfig):
                     print(f)
 
 
-     ### FEATURE EXTRACTION ###
+     ### VISUAL EMBEDDING EXTRACTION ###
      # Check conf/extract_features.yaml for settings
      image_embeddings_path = Path(FEATURE_PATH / image_name)
 
-     if not cfg.skip_feature_extraction:
+     if not cfg.skip_visual_embedding_extraction:
           # Create paths if they do not exist
           create_dir(image_embeddings_path)
 
