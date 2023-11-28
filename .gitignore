@@ -9,3 +9,8 @@ data/**
 ground_truth_generation
 dslab
 
+# Git stuff
+**/__pycache__/
+
+# Ignore experiments - models
+experiments
