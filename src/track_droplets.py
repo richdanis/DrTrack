@@ -8,7 +8,7 @@ from preprocess.for_detection import raw_to_preprocessed_for_detection
 from preprocess.for_embeddings import raw_to_preprocessed_for_embeddings
 from preprocess.for_detection import raw_cut_to_preprocessed_for_detection
 from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
-from preprocess.for_all import preprocess_all_cuts_and_store
+from preprocess.for_all import preprocess_cuts_and_store_all
 from detect_droplets.detect_and_store import detect_and_store_all
 
 from utils.globals import *
@@ -35,7 +35,7 @@ def main(cfg: DictConfig):
      if not cfg.skip_preprocessing:
           # Create paths if they do not exist
           create_dir(image_preprocessed_path)
-          cut_names = preprocess_all_cuts_and_store(cfg, RAW_PATH, image_preprocessed_path, image_name)
+          preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path, image_name)
 
 
      ### DROPLET DETECTION ###
@@ -55,7 +55,6 @@ def main(cfg: DictConfig):
      if not cfg.skip_visual_embedding_extraction:
           # Create paths if they do not exist
           create_dir(image_embeddings_path)
-
 
 
      ### TRACKING ###

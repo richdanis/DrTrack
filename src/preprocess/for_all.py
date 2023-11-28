@@ -13,7 +13,7 @@ def preprocess_cut_and_store(cfg, raw_image_path: Path, upper_left_corner: tuple
     raw_cut_to_preprocessed_for_detection(cfg, raw_image_path, upper_left_corner, pixel_dimensions, image_name, PREPROCESSED_PATH, pixel=pixel)
     raw_cut_to_preprocessed_for_embeddings(cfg, raw_image_path, upper_left_corner, pixel_dimensions, image_name, PREPROCESSED_PATH, pixel=pixel)
 
-def preprocess_all_cuts_and_store(cfg, RAW_PATH:str, preprocessed_path: str, image_name: str):
+def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, image_name: str):
     """
     Preprocess the .nd2 images seperated into cuts and save as .npy arrays.
     """
@@ -57,5 +57,3 @@ def preprocess_all_cuts_and_store(cfg, RAW_PATH:str, preprocessed_path: str, ima
 
             # Save image names in list
             cut_image_names.append(image_name_curr)
-
-    return cut_image_names
