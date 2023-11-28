@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm.auto import tqdm
-from data_creation import manual_circle_hough, cell_detector, droplet_retriever
+from . import manual_circle_hough, cell_detector, droplet_retriever
 from pathlib import Path
 
 
@@ -152,13 +152,17 @@ def get_droplet_output(bf_image, refine, radius_min = 12, radius_max = 25):
 
 # The input image should be an ndarray with shape (f,c,h,w) where f = frames, c = channels, h = height and w = width of the image.
 # IMPORTANT: Datatype should be uint16 just as with the raw images and BF and DAPI must be channels Nr 0 and 1 respectively
-def generate_output_from_ndarray(input_image, output_string_droplets, output_string_cells, refine, optional_output_directory, optional_output, radius_min = 12, radius_max = 25):
+def generate_output_from_ndarray(cfg, input_image, output_string_droplets, output_string_cells, refine, optional_output_directory, optional_output, radius_min = 12, radius_max = 25):
     nr_frames = input_image.shape[0]
     nr_channels = input_image.shape[1]
 
+    disable_tqdm = True
+    if cfg.verbose == True:
+            disable_tqdm = False
+
     droplets = []
     cells_dict = []
-    for frame_nr in tqdm(range(nr_frames)):
+    for frame_nr in tqdm(range(nr_frames), disable=disable_tqdm):
 
         dapi_channel = input_image[frame_nr, 1, :, :]
         bf_channel = input_image[frame_nr, 0, :, :]
@@ -166,7 +170,7 @@ def generate_output_from_ndarray(input_image, output_string_droplets, output_str
 
         circles_in_frame = manual_circle_hough.manual_circle_hough(bf_channel, refine, bf_is_inverted = True, radius_min = radius_min, radius_max = radius_max)
 
-        cells_mask, cells_intensities, cells_persistencies = cell_detector.cell_detector(dapi_channel, bf_channel, circles_in_frame)
+        cells_mask, cells_intensities, cells_persistencies = cell_detector.cell_detector(cfg, dapi_channel, bf_channel, circles_in_frame)
 
         intensities_vector = cells_intensities[cells_mask == 1.0]
         persistence_vector = cells_persistencies[cells_mask == 1.0]
@@ -178,7 +182,12 @@ def generate_output_from_ndarray(input_image, output_string_droplets, output_str
         visualization_channel = cv.morphologyEx(cells_mask, cv.MORPH_DILATE, np.ones((3,3)))
 
         cell_id_counter = 0
-        for id, circ in tqdm(enumerate(circles_in_frame)):
+
+        disable = True
+        if cfg.verbose == True:
+            disable = False
+
+        for id, circ in tqdm(enumerate(circles_in_frame), disable=disable_tqdm):
             center = np.asarray([circ[0], circ[1]])
             radius = circ[2]
             patch_x = (max(int(center[0]) - radius - 2, 0), min(int(center[0]) + radius + 2, cells_mask.shape[0] - 1))
@@ -215,8 +224,8 @@ def generate_output_from_ndarray(input_image, output_string_droplets, output_str
     droplet_df = pd.DataFrame(droplets)
     droplet_df.to_csv(output_string_droplets, index = False)
 
-    cell_df = pd.DataFrame(cells_dict)
-    cell_df.to_csv(output_string_cells, index = False)
+    # cell_df = pd.DataFrame(cells_dict)
+    # cell_df.to_csv(output_string_cells, index = False)
 
 
 def main():

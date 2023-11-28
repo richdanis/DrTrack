@@ -1,0 +1,3 @@
+# This file contains the parameters for the RANSAC algorithm used to detect droplets.
+radius_min: 12
+radius_max: 25

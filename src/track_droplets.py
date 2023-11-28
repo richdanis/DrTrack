@@ -9,7 +9,7 @@ from preprocess.for_embeddings import raw_to_preprocessed_for_embeddings
 from preprocess.for_detection import raw_cut_to_preprocessed_for_detection
 from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
 from preprocess.for_all import preprocess_all_cuts_and_store
-
+from detect_droplets.detect_and_store import detect_and_store_cut
 
 from utils.globals import *
 
@@ -40,17 +40,19 @@ def main(cfg: DictConfig):
 
      ### DROPLET DETECTION ###
      # Check conf/extract_droplets.yaml for settings
-     image_droplets_path = Path(DROPLET_PATH / image_name)
+     image_feature_path = Path(FEATURE_PATH / image_name)
 
      if not cfg.skip_droplet_extraction:
           # Create paths if they do not exist
-          create_dir(image_droplets_path) 
+          create_dir(image_feature_path) 
 
-          for filename in os.listdir(image_droplets_path):
-               f = os.path.join(image_droplets_path, filename)
+          for filename in os.listdir(image_preprocessed_path):
+               f = os.path.join(image_preprocessed_path, filename)
                # checking if it is a file
-               if os.path.isfile(f):
-                    print(f)
+               if os.path.isfile(f) and filename.startswith("preprocessed_drpdtc_"):
+                    cut_file_name = filename
+
+          detect_and_store_cut(cfg, cut_file_name, image_name, image_feature_path, image_preprocessed_path)
 
 
      ### VISUAL EMBEDDING EXTRACTION ###
