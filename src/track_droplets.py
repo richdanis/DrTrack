@@ -10,6 +10,7 @@ from preprocess.for_detection import raw_cut_to_preprocessed_for_detection
 from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
 from preprocess.for_all import preprocess_all_cuts_and_store
 from detect_droplets.detect_and_store import detect_and_store_all
+from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
 
 from utils.globals import *
 
@@ -49,6 +50,15 @@ def main(cfg: DictConfig):
           # Create paths if they do not exist
           create_dir(image_feature_path)
           detect_and_store_all(cfg, image_preprocessed_path, image_feature_path)
+
+     ### DROPLET PATCHES EXTRACTION ###
+     # Check conf/extract_droplets.yaml for settings
+
+
+     if not cfg.skip_droplet_patch_extraction:
+          # Create paths if they do not exist
+          create_dir(image_feature_path)
+          create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_path)
 
      ### VISUAL EMBEDDING EXTRACTION ###
      # Check conf/extract_features.yaml for settings

@@ -244,9 +244,9 @@ def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_
             preprocessed_cut_path = Path(image_preprocessed_path / cut_file_name)
             preprocessed_cut = np.load(preprocessed_cut_path)
 
-            droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "droplet_")
+            droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "droplets_") + '.csv'
             droplet_feature_table = pd.read_csv(image_feature_path / droplet_feature_file_name, index_col=False)
 
             droplet_patches_df = create_droplet_patches(preprocessed_cut, droplet_feature_table)
-            droplet_patch_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "patches_")
+            droplet_patch_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "patches_") + '.npy'
             np.save(droplet_patch_file_name, droplet_patches_df)

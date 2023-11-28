@@ -79,3 +79,4 @@ wcwidth
 Werkzeug
 zipp
 hydra-core
+toml
