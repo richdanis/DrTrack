@@ -26,12 +26,12 @@ def main(cfg: DictConfig):
      image_name = cfg.preprocess.raw_image[:-4].lower().replace(' ', '_')
      preprocessed_path_img = Path(PREPROCESSED_PATH / image_name)
 
-     # Create paths if they do not exist
-     if not os.path.exists(preprocessed_path_img): 
-          os.makedirs(preprocessed_path_img) 
-
      if not cfg.preprocess.skip:
-         cut_names = preprocess_all_cuts_and_store(cfg, RAW_PATH, preprocessed_path_img, image_name)
+         # Create paths if they do not exist
+          if not os.path.exists(preprocessed_path_img): 
+               os.makedirs(preprocessed_path_img) 
+
+          cut_names = preprocess_all_cuts_and_store(cfg, RAW_PATH, preprocessed_path_img, image_name)
    
 if __name__ == '__main__':
     main()
