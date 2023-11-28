@@ -6,3 +6,7 @@ pixel: 100
 
 # Whether to skip the preprocessing step
 skip: false
+
+# Number of cuts for each image (only relevant if pixel = -1)
+cuts_x: 3
+cuts_y: 2

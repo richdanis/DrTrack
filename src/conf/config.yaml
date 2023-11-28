@@ -2,6 +2,7 @@ defaults:
   - _self_
   - preprocess: small_mvt
 
+verbose: true
 # OLD ARGS
 #     parser = argparse.ArgumentParser(description='Generate a tracking of droplets from an image.')
 
