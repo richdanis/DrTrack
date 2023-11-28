@@ -1,11 +1,8 @@
 # Data to preprocess
-raw_image: "Small mvt 1.nd2"
+raw_image: "Small mvt 2.nd2"
 
 # Cut out a small region of the image
 pixel: 100
-
-# Whether to skip the preprocessing step
-skip: false
 
 # Number of cuts for each image (only relevant if pixel = -1)
 cuts_x: 3
