@@ -44,7 +44,7 @@ class Trainer():
             timestamp = datetime.datetime.fromtimestamp(
                 time.time()).strftime("%Y-%m-%d_%H-%M-%S")
             self.model_path = os.path.join(
-                args.checkpoint_path, f'{timestamp}_embeddings_model.pt')
+                args.checkpoint_path, f'{timestamp}_dim_{args.embed_dim}.pth')
 
     def train(self):
         for epoch in range(self.args.epochs):
