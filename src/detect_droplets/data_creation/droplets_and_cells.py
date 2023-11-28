@@ -152,7 +152,7 @@ def get_droplet_output(bf_image, refine, radius_min = 12, radius_max = 25):
 
 # The input image should be an ndarray with shape (f,c,h,w) where f = frames, c = channels, h = height and w = width of the image.
 # IMPORTANT: Datatype should be uint16 just as with the raw images and BF and DAPI must be channels Nr 0 and 1 respectively
-def generate_output_from_ndarray(cfg, input_image, output_string_droplets, output_string_cells, refine, optional_output_directory, optional_output, radius_min = 12, radius_max = 25):
+def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refine, optional_output_directory, optional_output, radius_min = 12, radius_max = 25):
     nr_frames = input_image.shape[0]
     nr_channels = input_image.shape[1]
 

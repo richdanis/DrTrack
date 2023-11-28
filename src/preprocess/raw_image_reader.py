@@ -148,7 +148,8 @@ def get_image_cut_as_ndarray(cfg,
     if pixel == -1:
         output = (fullimage[frames, :, y_upper_left:y_end, x_upper_left:x_end])[:, channel_idx_precompute, :, :]
     else:
-        output = (fullimage[frames, :, :pixel, :pixel])[:, channel_idx_precompute, :, :]
+        output = (fullimage[frames, :, y_upper_left:min(y_upper_left+pixel,y_end), x_upper_left:min(x_upper_left+pixel,x_end)])[:, channel_idx_precompute, :, :]
+        #output = (fullimage[frames, :, :pixel, :pixel])[:, channel_idx_precompute, :, :]
     
     f.close()
     
