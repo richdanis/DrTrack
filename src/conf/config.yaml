@@ -1,12 +1,12 @@
 defaults:
   - _self_
   - preprocess: small_mvt_1
-  - extract_droplets: ransac3
+  - detect_droplets: ransac3
   - extract_visual_embeddings: cl_elastic_net
   - track: unb_reg_sinkhorn
 
-verbose: true
-skip_preprocessing: true
+verbose: false
+skip_preprocessing: false
 skip_droplet_extraction: false
 skip_visual_embedding_extraction: false
 skip_tracking: false
