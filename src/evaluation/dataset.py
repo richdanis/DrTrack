@@ -13,20 +13,25 @@ class VisualizationDataset(Dataset):
         "Incompatible shape of metadata and patches."
         self.dataset = []
 
-        min_row = min(metadata['center_row0'])
-        max_row = max(metadata['center_row0'])
-        min_col = min(metadata['center_col0'])
-        max_col = max(metadata['center_col0'])
+        all_row_locations = []
+        all_col_locations = []
+        for i in range(patches.shape[1]):
+            all_row_locations += metadata[f'center_row{i}'].tolist()
+            all_col_locations += metadata[f'center_col{i}'].tolist()
+        min_row = min(all_row_locations)
+        max_row = max(all_row_locations)
+        min_col = min(all_col_locations)
+        max_col = max(all_col_locations)
 
-        segment_num = 10
-        segment_width = (max_col - min_col) // segment_num
-        segment_height = (max_row - min_row) // segment_num
+        segment_num = 3
+        col_width = (max_col - min_col) // segment_num
+        row_width = (max_row - min_row) // segment_num
         segment_dict = {}
 
         for i in range(segment_num):
             for j in range(segment_num):
-                segment_dict[(i * segment_width, (i + 1) * segment_width, i * segment_height,
-                              (i + 1) * segment_height)] = segment_num * i + j
+                segment_dict[(min_col + i * col_width, min_col + (i + 1) * col_width, min_row + j * row_width,
+                              min_row + (j + 1) * row_width)] = segment_num * i + j
 
         for i in range(patches.shape[0]):
             for frame in range(patches.shape[1]):
