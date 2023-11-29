@@ -39,21 +39,21 @@ class OptimalTransport:
     """Class for computing optimal transport between two point clouds."""
     def __init__(self, cfg):
         # Get OT config parameters
-        self.args = cfg.track.unb_reg_sinkhorn
+        self.args = cfg.track
         self.verbose = cfg.verbose
 
         # Instantiate cost function
         self.cost_fn = SpatioVisualCost(alpha=self.args.alpha, beta=self.args.beta)
 
         # Instantiate solver for fused_gw version for better performance
-        if self.args.ot_type == "fused_gw":
-            self.solver = jax.jit(
-                sinkhorn.Sinkhorn(
-                    max_iterations=self.args.max_iterations
-                )
-            )  
+        self.solver = jax.jit(
+            sinkhorn.Sinkhorn(
+                max_iterations=self.args.max_iterations
+            )
+        )
+            
 
-    def get_ot_matrix(self, x, y):
+    def compute_ot_matrix(self, x, y):
         """Compute optimal transport between two point clouds."""
         # Create geometry and problem
         geom = pointcloud.PointCloud(x, y, epsilon=self.args.epsilon)
@@ -70,29 +70,18 @@ class OptimalTransport:
             
         return ot.matrix
         
-    def get_ot_matrices_all_frames(self, cfg, cut_feature_path):
+    def compute_and_store_ot_matrices_cut(self, features, cut_ot_path):
         # Iterate through all pairs of frames 
-        ot_matrices = np.array()
+        num_frames = features.shape[0]
 
-        # Get features
-        features = np.load(cut_feature_path)
-
-        for i in tqdm(range(len(cfg.track.frame_range)-1), disable=not cfg.verbose):
+        for i in range(num_frames-1):
             # Get frame numbers
             frame_curr = features[i,:,:]
             frame_next = features[i+1,:,:]
 
-            # # Get point clouds
-            # x = np.load(feature_path / f'frame_{frame1}_features.npy')
-            # y = np.load(feature_path / f'frame_{frame2}_features.npy')
-
             # Compute optimal transport matrix
-            ot_matrix = self.get_ot_matrix(frame_curr, frame_next)
+            ot_matrix = self.compute_ot_matrix(frame_curr, frame_next)
 
             # Save matrix
-            ot_matrices.append(ot_matrix)
-            
-
-
+            np.save(cut_ot_path / f'{i}-{i+1}.npy', ot_matrix)
         
-        return 
