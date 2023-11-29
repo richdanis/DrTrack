@@ -21,7 +21,7 @@ from extract_visual_embeddings.create_visual_embeddings import create_and_save_d
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
 
-from utils.globals import *
+#from utils.globals import *
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -31,27 +31,45 @@ def create_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
+def setup_directories(cfg):
+    # Create directories if they do not exist
+    create_dir(Path(cfg.data_path))
+    create_dir(Path(cfg.models_path))
+    create_dir(Path(cfg.data_path) / Path(cfg.raw_dir))
+    create_dir(Path(cfg.data_path) / Path(cfg.preprocessed_dir))
+    create_dir(Path(cfg.data_path) / Path(cfg.feature_dir))
+    create_dir(Path(cfg.data_path) / Path(cfg.ot_dir))
+    create_dir(Path(cfg.data_path) / Path(cfg.results_dir))
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
+    # Setup directories
+    RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
+    PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
+    FEATURE_PATH = Path(cfg.data_path) / Path(cfg.feature_dir)
+    OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
+    RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
+    setup_directories(cfg)
+
     # Start timer
     start_time = time.time()
 
-    # Get name of image to be processed
+    # Get name of image configuration to be processed
+    experiment_name = cfg.experiment_name
     image_name = cfg.preprocess.raw_image[:-4].lower().replace(' ', '_')
 
     ### PREPROCESSING ###
     # Check conf/preprocess.yaml for settings
-    image_preprocessed_path = Path(PREPROCESSED_PATH / image_name)
+    image_preprocessed_path = Path(PREPROCESSED_PATH / experiment_name)
 
     if not cfg.skip_preprocessing:
         # Create paths if they do not exist
         create_dir(image_preprocessed_path)
-        preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path, image_name)
+        preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path, experiment_name)
 
     ### DROPLET DETECTION ###
     # Check conf/extract_droplets.yaml for settings
-    image_feature_path = Path(FEATURE_PATH / image_name)
+    image_feature_path = Path(FEATURE_PATH / experiment_name)
 
     if not cfg.skip_droplet_extraction:
         # Create paths if they do not exist
@@ -76,18 +94,18 @@ def main(cfg: DictConfig):
         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
     ### TRACKING ###
-    image_ot_path = Path(OT_PATH / image_name)
+    image_ot_path = Path(OT_PATH / experiment_name)
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_ot_path)
 
         test_features = np.random.rand(3, 2, 3)
         ot = OptimalTransport(cfg)
-        ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path, test_features)
+        ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
 
 
     ### GENERATING RESULTS ###
-    image_results_path = Path(RESULT_PATH / image_name)
+    image_results_path = Path(RESULTS_PATH / experiment_name)
 
     if not cfg.skip_results_generation:
         # Create paths if they do not exist

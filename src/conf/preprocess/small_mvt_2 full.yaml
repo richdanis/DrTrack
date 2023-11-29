@@ -2,8 +2,8 @@
 raw_image: "Small mvt 1.nd2"
 
 # Cut out a small region of the image
-pixel: 1000
+pixel: -1
 
 # Number of cuts for each image (only relevant if pixel = -1)
-cuts_x: 2
-cuts_y: 2
+cuts_x: 1
+cuts_y: 1

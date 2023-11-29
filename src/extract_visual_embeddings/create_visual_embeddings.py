@@ -43,8 +43,8 @@ def create_droplet_embeddings(cfg, dataset: DropletDataset, model):
         for j in range(embedding_batch.shape[0]):
             embeddings['embeddings'].append(embedding_batch[j])
 
-        embeddings['droplet_id'] += droplet_ids
-        embeddings['frame'] += frames
+        embeddings['droplet_id'] += droplet_ids.numpy().tolist()
+        embeddings['frame'] += frames.numpy().tolist()
 
 
     return embeddings
@@ -85,4 +85,4 @@ def create_and_save_droplet_embeddings(cfg: DictConfig, image_feature_path):
 
             droplet_base_file_name = cut_patch_file_name.replace("patches_", "")
 
-            np.save(image_feature_path / f'embeddings_{droplet_base_file_name}.npy', droplet_embeddings_df)
+            np.save(image_feature_path / f'embeddings_{droplet_base_file_name}', droplet_embeddings_df)

@@ -6,7 +6,6 @@ from tqdm.auto import tqdm
 from . import manual_circle_hough, cell_detector, droplet_retriever
 from pathlib import Path
 
-
 class Droplet():
     def __init__(self, droplet_id, frame, center_y, center_x, radius, nr_cells, image_name,DROPLET_PATH) -> None:
         self.id = int(droplet_id)
