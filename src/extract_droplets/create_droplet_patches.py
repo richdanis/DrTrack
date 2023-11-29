@@ -5,6 +5,7 @@ import os
 import numpy as np
 import cv2 as cv
 import pandas as pd
+from omegaconf import DictConfig
 
 sys.path.append('./src/')
 from preprocess.raw_image_reader import get_image_cut_as_ndarray
@@ -193,9 +194,9 @@ def resize_patch(patch, diameter):
 
 
 def create_droplet_patches(image, droplet_feature_table, buffer=3, suppress_rest=True, suppression_slack=1,
-                           discard_boundaries=False, get_patches=True):
+                           discard_boundaries=False):
     """
-    Create a dataset that combines droplet and cell information from input images and tables.
+    Create a dataframe with droplet patches.
     ----------
     Parameters:
     image: np.ndarray:
@@ -210,37 +211,32 @@ def create_droplet_patches(image, droplet_feature_table, buffer=3, suppress_rest
         Distance in pixels outside of the detected radius that is still considered part of the droplet.
     discard_boundaries: bool
         Whether to exclude patches that are partially outside of the image boundaries.
-    get_patches: bool
-        If True, omit creating patches; return data without patches.
     ----------
     Returns:
-    ans: list[list[pd.Series]]
-        A list with one element for each frame. Each element is a list of dictionaries (or dataframes) containing data about droplets and their associated patches
-        (if not omitted). The 'cell_signals' field in each dictionary contains data about cell signals in the droplet.
+    droplet_patches_df: pd.DataFrame
+        A dataframe with droplet_id, frame and patch for each droplet.
     """
 
     droplet_patches = []
 
-    if get_patches:
+    for _, droplet in droplet_feature_table.iterrows():
+        patch = get_patch(image[droplet['frame']], droplet['center_x'], droplet['center_y'],
+                          droplet['radius'], buffer, suppress_rest, suppression_slack,
+                          discard_boundaries)
 
-        for _, droplet in droplet_feature_table.iterrows():
-            patch = get_patch(image[droplet['frame']], droplet['center_x'], droplet['center_y'],
-                              droplet['radius'], buffer, suppress_rest, suppression_slack,
-                              discard_boundaries)
-
-            droplet_patches.append((droplet['droplet_id'], droplet['frame'], patch))
+        droplet_patches.append((droplet['droplet_id'], droplet['frame'], patch))
 
     droplet_patches_df = pd.DataFrame(droplet_patches, columns=['droplet_id', 'frame', 'patch'])
     return droplet_patches_df
 
 
-def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_path):
+def create_and_save_droplet_patches(cfg: DictConfig, image_preprocessed_path, image_feature_path):
     """
     Creates droplet patches of the preprocessed cuts and stores them in a npy file.
     ----------
     Parameters:
-    cfg:
-        The whole application params.
+    cfg: DictConfig
+        Global config.
     image_preprocessed_path: Path:
         Directory where preprocessed cuts are stored.
     image_feature_path: Path:
@@ -270,4 +266,4 @@ def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_
                                                 index_col=False)
 
             droplet_patches_df = create_droplet_patches(preprocessed_cut, droplet_feature_table)
-            np.save(image_feature_path / f'patches_{droplet_feature_file_name}.npy', droplet_patches_df)
+            np.save(image_feature_path / f'patches_{droplet_feature_file_name}.npy', droplet_patches_df.to_dict(orient='list'))

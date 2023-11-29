@@ -1,0 +1,9 @@
+# Data to preprocess
+raw_image: "matched_data.nd2"
+
+# Cut out a small region of the image
+pixel: 1000
+
+# Number of cuts for each image (only relevant if pixel = -1)
+cuts_x: 2
+cuts_y: 2

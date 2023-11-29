@@ -1,11 +1,12 @@
 defaults:
   - _self_
-  - preprocess: small_mvt_2
+  - preprocess: small_mvt_3
   - detect_droplets: ransac3
-  - extract_visual_embeddings: cl_elastic_net
+  - extract_visual_embeddings: cl_efficientnet
   - track: unb_reg_sinkhorn
 
 verbose: true
+device: cpu
 tqdm_disable: false
 skip_preprocessing: false
 skip_droplet_extraction: false
