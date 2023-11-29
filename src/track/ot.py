@@ -102,6 +102,11 @@ class OptimalTransport:
             if self.verbose:
                 print(file_name)
 
+
+            embeddings = np.load(image_feature_path /'embeddings_matched_data_y0_x0.npy.npy', allow_pickle=True).item()
+            embeddings_df = pd.DataFrame(embeddings)
+            print(embeddings_df.head())
+
             # TODO
             if not file_name.startswith("droplets_"):
                 continue
