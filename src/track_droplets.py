@@ -12,7 +12,6 @@ from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
 from preprocess.for_all import preprocess_cuts_and_store_all
 from detect_droplets.detect_and_store import detect_and_store_all
 from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
-from track.ot import get_ot
 
 from utils.globals import *
 
@@ -75,11 +74,11 @@ def main(cfg: DictConfig):
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_results_path)
-        arr = np.load("patches_small_mvt_1_y0_x0.npy", allow_pickle=True)
-        arr_df = pd.DataFrame(arr)
+        # arr = np.load("patches_small_mvt_1_y0_x0.npy", allow_pickle=True)
+        # arr_df = pd.DataFrame(arr)
         #ot = get_ot(cfg, image_feature_path, image_results_path)
-        print(arr.shape)
-        print(arr_df)
+        # print(arr.shape)
+        # print(arr_df)
 
 
 if __name__ == '__main__':

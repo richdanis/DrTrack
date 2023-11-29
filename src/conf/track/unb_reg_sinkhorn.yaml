@@ -1,13 +1,13 @@
 # Cost params
-alpha = 0.5
-beta = 0.5
+alpha: 0.5
+beta: 0.5
 
 # Solver params
-max_iterations = 100000
+max_iterations: 100000
 
 # Geometry params
-epsilon = 0.01
+epsilon: 0.01
 
 # Problem params
-tau_a = 0.999
-tau_b = 0.999
+tau_a: 0.999
+tau_b: 0.999
