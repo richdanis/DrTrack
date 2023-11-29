@@ -16,7 +16,7 @@ tqdm_disable: false
 device: cpu
 
 # Pipeline Settings
-skip_preprocessing: false
+skip_preprocessing: true
 skip_droplet_extraction: false
 skip_droplet_patch_extraction: false
 skip_visual_embedding_extraction: false
