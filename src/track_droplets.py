@@ -61,7 +61,6 @@ def main(cfg: DictConfig):
     ### DROPLET PATCHES EXTRACTION ###
     # Check conf/extract_droplets.yaml for settings
 
-
     if not cfg.skip_droplet_patch_extraction:
         # Create paths if they do not exist
         create_dir(image_feature_path)
@@ -89,7 +88,7 @@ def main(cfg: DictConfig):
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path, test_features)
 
 
-    ### RESULTS ###
+    ### GENERATING RESULTS ###
     image_results_path = Path(RESULT_PATH / image_name)
 
     if not cfg.skip_results_generation:
