@@ -11,6 +11,7 @@ from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
 from preprocess.for_all import preprocess_cuts_and_store_all
 from detect_droplets.detect_and_store import detect_and_store_all
 from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
+from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 
 from utils.globals import *
 
@@ -62,11 +63,11 @@ def main(cfg: DictConfig):
 
      ### VISUAL EMBEDDING EXTRACTION ###
      # Check conf/extract_features.yaml for settings
-     image_embeddings_path = Path(FEATURE_PATH / image_name)
 
      if not cfg.skip_visual_embedding_extraction:
          # Create paths if they do not exist
-         create_dir(image_embeddings_path)
+         create_dir(image_feature_path)
+         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
      ### TRACKING ###
      image_results_path = Path(RESULT_PATH / image_name)
