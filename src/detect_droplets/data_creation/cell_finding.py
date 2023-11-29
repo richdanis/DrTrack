@@ -52,7 +52,7 @@ def cell_finding(cfg, droplet_circles: list, raw_dapi: np.ndarray, raw_bf: np.nd
 
 
     # We iterate over every droplet and aim to find the cells in that droplet
-    for i in tqdm(droplet_circles, desc='Finding cells', disable=disable_tqdm):
+    for i in droplet_circles:
 
         # Get the center and radius of the droplet
         center = np.asarray((i[0], i[1]), dtype = np.int32)

@@ -40,7 +40,8 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, ima
 
     if cfg.verbose:
         print("===================================================================")
-        print("Preprocess the Dataset for Detection and Embedding Creation\n")
+        print("Preprocess the Dataset for Detection and Embedding Creation")
+        print("===================================================================\n")
         print(f'Nr frames: {f.sizes["T"]}')
         print(f'Nr channels: {f.sizes["C"]}')
         print(f'Image dimensions: {cuts_y}x{cuts_x}')

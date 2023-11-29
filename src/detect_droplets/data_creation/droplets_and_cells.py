@@ -156,13 +156,9 @@ def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refin
     nr_frames = input_image.shape[0]
     nr_channels = input_image.shape[1]
 
-    disable_tqdm = True
-    if cfg.verbose == True:
-            disable_tqdm = False
-
     droplets = []
     cells_dict = []
-    for frame_nr in tqdm(range(nr_frames), disable=disable_tqdm):
+    for frame_nr in range(nr_frames):
 
         dapi_channel = input_image[frame_nr, 1, :, :]
         bf_channel = input_image[frame_nr, 0, :, :]
@@ -183,11 +179,7 @@ def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refin
 
         cell_id_counter = 0
 
-        disable = True
-        if cfg.verbose == True:
-            disable = False
-
-        for id, circ in tqdm(enumerate(circles_in_frame), disable=disable_tqdm):
+        for id, circ in enumerate(circles_in_frame):
             center = np.asarray([circ[0], circ[1]])
             radius = circ[2]
             patch_x = (max(int(center[0]) - radius - 2, 0), min(int(center[0]) + radius + 2, cells_mask.shape[0] - 1))

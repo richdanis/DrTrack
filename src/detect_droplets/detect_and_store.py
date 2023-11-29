@@ -33,6 +33,11 @@ def detect_and_store_all(cfg, image_preprocessed_path, image_feature_path):
     """ 
     Detect droplets and cells in all preprocessed cuts of an image and store them in a csv file
     """
+    if cfg.verbose:
+        print("\n===================================================================")
+        print("Detect Droplet Locations and Estimate Numbers of Cells")
+        print("===================================================================\n")
+      
     if cfg.verbose == True:
         print("Currently Processing:")
     for filename in os.listdir(image_preprocessed_path):
@@ -40,7 +45,8 @@ def detect_and_store_all(cfg, image_preprocessed_path, image_feature_path):
         # checking if it is a file
         if os.path.isfile(f) and filename.startswith("preprocessed_drpdtc_"):
             cut_file_name = filename
-            detect_and_store_cut(cfg, cut_file_name, image_feature_path, image_preprocessed_path)
 
             if cfg.verbose == True:
                 print(cut_file_name)
+                
+            detect_and_store_cut(cfg, cut_file_name, image_feature_path, image_preprocessed_path)
