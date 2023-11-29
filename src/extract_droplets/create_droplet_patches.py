@@ -234,6 +234,17 @@ def create_droplet_patches(image, droplet_feature_table, buffer=3, suppress_rest
     return droplet_patches_df
 
 def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_path):
+    """
+    Creates droplet patches of the preprocessed cuts and stores them in a npy file.
+    ----------
+    Parameters:
+    cfg:
+        The whole application params.
+    image_preprocessed_path: Path:
+        Directory where preprocessed cuts are stored.
+    image_feature_path: Path:
+        Directory where .csv files with droplet features are stored.
+    """
     # Read droplet and cell tables from CSV files
     for filename in os.listdir(image_preprocessed_path):
         f = os.path.join(image_preprocessed_path, filename)
@@ -244,9 +255,8 @@ def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_
             preprocessed_cut_path = Path(image_preprocessed_path / cut_file_name)
             preprocessed_cut = np.load(preprocessed_cut_path)
 
-            droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "droplets_") + '.csv'
-            droplet_feature_table = pd.read_csv(image_feature_path / droplet_feature_file_name, index_col=False)
+            droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "")
+            droplet_feature_table = pd.read_csv(Path(image_feature_path / f'droplets_{droplet_feature_file_name}.csv'), index_col=False)
 
             droplet_patches_df = create_droplet_patches(preprocessed_cut, droplet_feature_table)
-            droplet_patch_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "patches_") + '.npy'
-            np.save(droplet_patch_file_name, droplet_patches_df)
+            np.save(image_feature_path / f'patches_{droplet_feature_file_name}.npy', droplet_patches_df)
