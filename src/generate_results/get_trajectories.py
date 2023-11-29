@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import torch 
 
 import matplotlib.pyplot as plt
 from IPython import display
@@ -58,9 +59,9 @@ def create_trajectory_with_prob(cfg, ot_matrices):
 
         this_frame_ids, next_frame_ids = np.where(ids)
 
-        if cfg.verbose:
-            print(f"Frame {i} with {prob.shape[0]} droplets to frame {i+1} with {prob.shape[1]} droplets \n"
-                  f"matched droplets {len(this_frame_ids)} ({len(this_frame_ids)/np.min(prob.shape)*100:.2f}%)\n")
+        # if cfg.verbose:
+        #     print(f"Frame {i} with {prob.shape[0]} droplets to frame {i+1} with {prob.shape[1]} droplets \n"
+        #           f"matched droplets {len(this_frame_ids)} ({len(this_frame_ids)/np.min(prob.shape)*100:.2f}%)\n")
         
         # create a dataframe with the indices and the probabilities
         tmp = pd.DataFrame({f'frame': i,
@@ -137,17 +138,48 @@ def part_trajectory_prob(cfg, df):
     # Display the result DataFrame
     return result_df
 
-def compute_and_store_results_cut(cfg, cut_ot_path, cut_results_path, cut_droplet_path):
+def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path, cut_feature_droplets_df):
     # load the ot matrices
     ot_matrices = []
-    for file in os.listdir(cut_ot_path):
-        if file.endswith(".npy"):
-            ot_matrices.append(np.load(cut_ot_path / file))
-
+    for file_name in os.listdir(cut_ot_path):
+        if file_name.endswith(".npy"):
+            ot_matrices.append(torch.load(cut_ot_path / file_name))
+    
     trajectory_df = create_trajectory_with_prob(cfg, ot_matrices)
-    results_df = process_and_merge_results(cfg, cut_droplet_path, trajectory_df)
+    results_df = process_and_merge_results(cfg, cut_feature_droplets_df, trajectory_df)
+    part_probs = part_trajectory_prob(cfg, results_df)
 
-    part_probs = part_trajectory_prob(fin)
     # concat the two dataframes
-    fin = pd.concat([fin, part_probs], axis=1)
+    final_results_df = pd.concat([results_df, part_probs], axis=1)
 
+    # save the results
+    final_results_df.to_csv(image_results_path / f'results_{cut_name}.csv', index=False)
+
+def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):
+    # Progress
+    if cfg.verbose:
+        print("\n=========================================")
+        print("Generating Results For all Cuts")
+        print("=========================================\n")
+
+        print(f'Currently generating results for cut:')
+    
+    # Iterate through all cuts
+    for file_name in os.listdir(image_ot_path):
+        if not file_name.startswith("ot_matrix_"):
+            continue
+
+        # Get cut name
+        cut_name = file_name.replace("ot_matrix_", "")[:-4]
+
+        # Progress
+        if cfg.verbose:
+            print(cut_name)
+
+        # Get features of current cut
+        cut_ot_path = Path(image_ot_path / file_name)
+        cut_feature_droplets_file_path = Path(image_feature_path / f'droplets_{cut_name}.csv')
+        cut_feature_droplets_df = pd.read_csv(cut_feature_droplets_file_path)
+
+        # Compute and store ot matrices for current cut
+        compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path, cut_feature_droplets_df)

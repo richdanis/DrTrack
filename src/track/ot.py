@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import torch 
 
 import matplotlib.pyplot as plt
 from IPython import display
@@ -41,6 +42,7 @@ class OptimalTransport:
         # Get OT config parameters
         self.args = cfg.track
         self.verbose = cfg.verbose
+        self.tqdm_disable = cfg.tqdm_disable
 
         # Instantiate cost function
         self.cost_fn = SpatioVisualCost(alpha=self.args.alpha, beta=self.args.beta)
@@ -64,9 +66,9 @@ class OptimalTransport:
         # Solve problem using given solver
         ot = jax.jit(self.solver)(ot_prob)
 
-        if self.verbose:
-            print(f'Sinkhorn has converged: {ot.converged}, in {jnp.sum(ot.errors > -1)} iterations\n'
-                f'Error upon last iteration: {ot.errors[(ot.errors > -1)][-1]:.4e}')
+        # if self.verbose:
+        #     print(f'Sinkhorn has converged: {ot.converged}, in {jnp.sum(ot.errors > -1)} iterations\n'
+        #         f'Error upon last iteration: {ot.errors[(ot.errors > -1)][-1]:.4e}')
             
         return ot.matrix
         
@@ -74,7 +76,7 @@ class OptimalTransport:
         # Iterate through all pairs of frames 
         num_frames = features.shape[0]
 
-        for i in range(num_frames-1):
+        for i in tqdm(range(num_frames-1), self.tqdm_disable):
             # Get frame numbers
             frame_curr = features[i,:,:]
             frame_next = features[i+1,:,:]
@@ -83,5 +85,37 @@ class OptimalTransport:
             ot_matrix = self.compute_ot_matrix(frame_curr, frame_next)
 
             # Save matrix
-            np.save(cut_ot_path / f'{i}-{i+1}.npy', ot_matrix)
+            filename = f'{i}-{i+1}.npy'
+            torch.save(ot_matrix, cut_ot_path / filename)
+    
+    def compute_and_store_ot_matrices_all(self, image_feature_path, image_ot_path, features):
+        # Progress
+        if self.verbose:
+            print("\n=========================================")
+            print("Computing OT Matrices For all Cuts")
+            print("=========================================\n")
+            print(f'Currently computing ot matrices for cut:')
         
+        # Iterate through all cuts
+        for file_name in os.listdir(image_feature_path):
+            # Progress
+            if self.verbose:
+                print(file_name)
+
+            # TODO
+            if not file_name.startswith("droplets_"):
+                continue
+
+            # Get cut name
+            cut_name = file_name.replace("droplets_", "ot_matrix_")
+            cut_ot_path = Path(image_ot_path / cut_name)
+
+            if not os.path.exists(cut_ot_path):
+                os.makedirs(cut_ot_path)
+
+            # Get features of current cut
+            ## TODO: 
+            #features = np.load(image_feature_path / cut / 'features.npy')
+
+            # Compute and store ot matrices for current cut
+            self.compute_and_store_ot_matrices_cut(features, cut_ot_path)
