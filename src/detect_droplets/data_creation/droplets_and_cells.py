@@ -158,7 +158,7 @@ def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refin
 
     droplets = []
     cells_dict = []
-    for frame_nr in range(nr_frames):
+    for frame_nr in tqdm(range(nr_frames), disable=cfg.tqdm_disable):
 
         dapi_channel = input_image[frame_nr, 1, :, :]
         bf_channel = input_image[frame_nr, 0, :, :]

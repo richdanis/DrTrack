@@ -33,7 +33,7 @@ def preprocess_for_detection(cfg,
     # For each frame, preprocess channels inplace
     image[:, 0, :, :] = np.uint16(2 ** 16 - (np.int32(image[:, 0, :, :]) + 1))
 
-    for frame in tqdm(image, desc='BF preprocessing'):
+    for frame in tqdm(image, desc='BF preprocessing', disable=cfg.tqdm_disable):
         # Brightfield preprocessing
         bf_chan = np.float64(frame[0, :, :])
         bf_chan_low = np.quantile(bf_chan, 0.1)
@@ -88,12 +88,7 @@ def preprocess_cut_for_detection(cfg,
     # For each frame, preprocess channels inplace
     image[:, 0, :, :] = np.uint16(2 ** 16 - (np.int32(image[:, 0, :, :]) + 1))
 
-    # Progress bar only if verbose is set to True
-    disable = True
-    if cfg.verbose:
-        disable = False
-
-    for frame in tqdm(image, desc='BF Preprocessing for Detection', disable=disable):
+    for frame in tqdm(image, desc='BF Preprocessing for Detection', disable=cfg.tqdm_disable):
         # Brightfield preprocessing
         bf_chan = np.float64(frame[0, :, :])
         bf_chan_low = np.quantile(bf_chan, 0.1)
@@ -137,6 +132,6 @@ def raw_cut_to_preprocessed_for_detection(cfg,
                                            pixel: int = -1) -> np.ndarray:
     """Preprocesses a cut of the raw .nd2 image for detection and saves it as .npy file."""
     preprocessed_image = preprocess_cut_for_detection(cfg, raw_image_path, upper_left_corner, pixel_dimensions, pixel=pixel)
-    path = Path(preprocessed_path / f"preprocessed_drpdtc_{image_name}.npy")
-    np.save(path, preprocessed_image)
+    file_path = Path(preprocessed_path / f"preprocessed_drpdtc_{image_name}.npy")
+    np.save(file_path, preprocessed_image)
     return preprocessed_image

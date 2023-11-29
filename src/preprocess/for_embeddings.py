@@ -31,7 +31,7 @@ def preprocess_for_embeddings(cfg, image_path: str, pixel: int = -1) -> np.ndarr
     # For each frame, preprocess channels inplace
     image[:, 0, :, :] = np.uint16(2 ** 16 - (np.int32(image[:, 0, :, :]) + 1))
 
-    for frame in tqdm(image, desc='BF and DAPI preprocessing'):
+    for frame in tqdm(image, desc='BF and DAPI preprocessing', disable=cfg.tqdm_disable):
         # Brightfield preprocessing
         bf_chan = np.float64(frame[0, :, :])
         bf_chan_low = np.quantile(bf_chan, 0.1)
@@ -95,12 +95,7 @@ def preprocess_cut_for_embeddings(cfg,
     # For each frame, preprocess channels inplace
     image[:, 0, :, :] = np.uint16(2 ** 16 - (np.int32(image[:, 0, :, :]) + 1))
 
-    # Disable progress bar if verbose is False
-    disable = True 
-    if cfg.verbose:
-        disable = False
-
-    for frame in tqdm(image, desc='BF and DAPI Preprocessing for Embeddings', disable=disable):
+    for frame in tqdm(image, desc='BF and DAPI Preprocessing for Embeddings', disable=cfg.tqdm_disable):
         # Brightfield preprocessing
         bf_chan = np.float64(frame[0, :, :])
         bf_chan_low = np.quantile(bf_chan, 0.1)

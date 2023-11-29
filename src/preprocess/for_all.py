@@ -47,6 +47,7 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, ima
         print(f'Image dimensions: {cuts_y}x{cuts_x}')
         print(f'Number of cuts: {cuts_y * cuts_x}')
         print(f'Cut size: {cut_size_y}x{cut_size_x}\n')
+        print(f'Currently Processing:')
     
     # Process and store each cut
     cut_image_names = []
@@ -54,6 +55,11 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, ima
         for j in range(cuts_x):
             image_name_curr = f'{image_name}_y{i*cut_size_y}_x{j*cut_size_x}' # naming s.t. image name, (y, x, stride)
             upper_left_corner = (i * cut_size_y, j * cut_size_x)
+
+            # Progress
+            if cfg.verbose:
+                print(image_name_curr)
+                
             preprocess_cut_and_store(cfg, raw_image_path, upper_left_corner, cut_pixel_dimensions, image_name_curr, preprocessed_path, pixel=cfg.preprocess.pixel)
 
             # Save image names in list
