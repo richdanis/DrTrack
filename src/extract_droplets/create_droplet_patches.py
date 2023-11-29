@@ -100,7 +100,7 @@ def get_patch(image, center_y, center_x, radius, buffer=3, suppress_rest=True, s
 """
     image_path = 'raw_images/smallMovement1.nd2'
     table_path = 'finished_outputs/smallMovement1_droplets.csv'
-    dataset = create_dataset([0], ['BF'], image_path, table_path, allFrames = True, allChannels = True)
+    dataset = create_dataset(['BF'], image_path, table_path, allFrames = True, allChannels = True)
     print(len(dataset))
     print(dataset[0][0])
     print(dataset[0][0]['patch'].shape)
@@ -146,7 +146,7 @@ def create_dataset(channels, image_path, droplet_table_path, allFrames=True, all
 """
     image_path = 'raw_images/smallMovement1.nd2'
     table_path = 'finished_outputs/smallMovement1_droplets.csv'
-    dataset = create_dataset(['BF'], image_path, table_path, allFrames = True, allChannels = True)
+    dataset = create_dataset(image_path, table_path, allFrames = True, allChannels = True)
     print(len(dataset))
     print(dataset[0][0])
     print(dataset[0][0]['patch'].shape)
@@ -193,7 +193,7 @@ def resize_patch(patch, diameter):
 
 
 def create_droplet_patches(image, droplet_feature_table, buffer=3, suppress_rest=True, suppression_slack=1,
-                                              discard_boundaries=False, get_patches=True):
+                           discard_boundaries=False, get_patches=True):
     """
     Create a dataset that combines droplet and cell information from input images and tables.
     ----------
@@ -228,10 +228,11 @@ def create_droplet_patches(image, droplet_feature_table, buffer=3, suppress_rest
                               droplet['radius'], buffer, suppress_rest, suppression_slack,
                               discard_boundaries)
 
-            droplet_patches.append((droplet['droplet_id'], patch))
+            droplet_patches.append((droplet['droplet_id'], droplet['frame'], patch))
 
-    droplet_patches_df = pd.DataFrame(droplet_patches, columns=['droplet_id', 'patch'])
+    droplet_patches_df = pd.DataFrame(droplet_patches, columns=['droplet_id', 'frame', 'patch'])
     return droplet_patches_df
+
 
 def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_path):
     """
@@ -245,6 +246,12 @@ def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_
     image_feature_path: Path:
         Directory where .csv files with droplet features are stored.
     """
+    if cfg.verbose:
+        print("\n===================================================================")
+        print("Cut droplet patches")
+        print("===================================================================\n")
+        print("Currently processing:")
+
     # Read droplet and cell tables from CSV files
     for filename in os.listdir(image_preprocessed_path):
         f = os.path.join(image_preprocessed_path, filename)
@@ -252,11 +259,15 @@ def create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_
         if os.path.isfile(f) and filename.startswith("preprocessed_featextr_bf_"):
             cut_file_name = filename
 
+            if cfg.verbose:
+                print(cut_file_name)
+
             preprocessed_cut_path = Path(image_preprocessed_path / cut_file_name)
             preprocessed_cut = np.load(preprocessed_cut_path)
 
             droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_featextr_bf_", "")
-            droplet_feature_table = pd.read_csv(Path(image_feature_path / f'droplets_{droplet_feature_file_name}.csv'), index_col=False)
+            droplet_feature_table = pd.read_csv(Path(image_feature_path / f'droplets_{droplet_feature_file_name}.csv'),
+                                                index_col=False)
 
             droplet_patches_df = create_droplet_patches(preprocessed_cut, droplet_feature_table)
             np.save(image_feature_path / f'patches_{droplet_feature_file_name}.npy', droplet_patches_df)
