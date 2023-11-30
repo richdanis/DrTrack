@@ -7,8 +7,8 @@ evaluation/**
 !evaluation/01_simulated
 !evaluation/01_simulated/*
 
-!evaluation/03_features
-!evaluation/03_features/paired_patches_9_frames_1848_droplets_40x40.npy
+# !evaluation/03_features
+# !evaluation/03_features/paired_patches_9_frames_1848_droplets_40x40.zip
 
 # Jupyter Notebook
 .ipynb_checkpoints
