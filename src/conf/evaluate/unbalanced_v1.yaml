@@ -1,5 +1,5 @@
 # Option to cut out a part of the image - whole image is always (0,0) to (500,500)
-cutout_image: false
+cutout_image: true
 cutout:
   x_min: 50
   x_max: 450
@@ -11,9 +11,6 @@ stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
 
 # Set which frames should be processed - needs to be the same as the number of frames for the embeddings!
 frames: [3, 4, 5, 6, 7, 8, 9, 10]
-
-# Number of droplets to be used
-num_droplets: 1500
 
 # Probabilities for numbers of cells in droplet and droplet radius
 nr_cells_distribution: [0.7, 0.29, 0.01] # first entry is probability for 0 cells, second for 1 cell, etc.

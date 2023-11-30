@@ -22,6 +22,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
 import os
 
+from .preprocess_simulated import SimulatedData
 
 class OtEvaluation():
     """
@@ -35,8 +36,10 @@ class OtEvaluation():
         self.image_ot_path = image_ot_path
         self.results_path = results_path
         self.verbose = cfg.verbose
-        self.position_df = pd.read_csv(image_simulated, index_col=0)
-        
+
+        # Load simulated data
+        self.simulated_data = SimulatedData(cfg, image_simulated, None)
+        # self.position_df = pd.read_csv(image_simulated, index_col=0)
         # Load data
 
     def compute_and_store_scores(self):
@@ -56,8 +59,8 @@ class OtEvaluation():
             if file_name.endswith(".npy"):
                 # Get frame numbers
                 frames = file_name.split(".")[0].split("-")
-                curr = int(frames[0])
-                next = int(frames[1])
+                curr = self.args.frames[int(frames[0])]
+                next = self.args.frames[int(frames[1])]
 
                 if self.verbose:
                     print(f"\nFrames: {curr} - {next}")
@@ -67,8 +70,8 @@ class OtEvaluation():
                 self.ot_matrix = np.array(self.ot_matrix)
                 
                 # Extract droplet and embedding features for current frame
-                self.x_df = self._extract_frame_df(self.position_df, frame=curr, stride=self.args.stride*2)
-                self.y_df = self._extract_frame_df(self.position_df, frame=next, stride=self.args.stride*2)
+                self.x_df = self.simulated_data.get_plain_filtered_position_df(frame=curr, stride=self.args.stride*2)
+                self.y_df = self.simulated_data.get_plain_filtered_position_df(frame=next, stride=self.args.stride*2)
 
                 # Compute scores
                 scores_frame = self.get_scores()
@@ -202,7 +205,7 @@ class OtEvaluation():
 
         sorted_max = np.sort(max_mat.max(1))
 
-        if k > len(sorted_max):
+        if k > len(sorted_max) or k == -1:
             k = len(sorted_max)
             
         # Identify k largest element

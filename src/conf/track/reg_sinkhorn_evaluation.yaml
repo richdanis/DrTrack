@@ -1,6 +1,6 @@
 # Cost params
-alpha: 0.9 #position
-beta: 0.1 #embedding
+alpha: 0.7 #position
+beta: 0.3 #embedding
 
 # Solver params
 max_iterations: 5000
@@ -12,8 +12,8 @@ epsilon: 0.001 # "default" or float
 print_convergence: true
 
 # Problem params
-tau_a: 0.9999
-tau_b: 0.9999
+tau_a: 1
+tau_b: 1
 
 # Save embedding dfs
 save_embedding_df: false

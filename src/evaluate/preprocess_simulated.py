@@ -56,6 +56,21 @@ class SimulatedData():
 
         return df
     
+    def get_plain_filtered_position_df(self, frame, stride=2):
+        x = jnp.array(self.position_df.iloc[::stride,frame])
+        y = jnp.array(self.position_df.iloc[1::stride,frame])
+        pos = jnp.array([x,y]).T
+        index = self.position_df.index[::stride]
+        index = [i[:-2] for i in index]
+        df = pd.DataFrame(pos, index=index, columns=["center_x", "center_y"])
+
+        # Filter data if necessary
+        if self.args.cutout_image:
+            df = df[(df["center_x"] > self.args.cutout.x_min) & (df["center_x"] < self.args.cutout.x_max)]
+            df = df[(df["center_y"] > self.args.cutout.y_min) & (df["center_y"] < self.args.cutout.y_max)]
+
+        return df
+    
     def create_and_store_position_dfs(self):
         # Progress
         if self.verbose:
