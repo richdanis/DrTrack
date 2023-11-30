@@ -1,12 +1,12 @@
 defaults:
   - _self_
-  - preprocess: small_mvt_2_full
+  - preprocess: small_mvt_3
   - detect_droplets: ransac3
   - extract_visual_embeddings: cl_efficientnet
   - track: unb_reg_sinkhorn
 
 # Name for this experiment
-experiment_name: "small_mvt_2_full"
+experiment_name: "small_mvt_3"
 
 # Progress Output Settings
 verbose: true
@@ -19,8 +19,8 @@ device: cpu
 # Pipeline Settings
 skip_preprocessing: true # less than a few minutes for 4k*4k
 skip_droplet_extraction: true # about 5 minutes for 4k*4k
-skip_droplet_patch_extraction: true # not very long either
-skip_visual_embedding_extraction: true # 2 minutes
+skip_droplet_patch_extraction: false # not very long either
+skip_visual_embedding_extraction: false # 2 minutes
 skip_tracking: false # 40 minutes 4k*4k on my laptop (Mike, on CPU!)
 skip_results_generation: false
 # skip_preprocessing: true
@@ -33,7 +33,6 @@ skip_results_generation: false
 # Path Settings (relative to project root)
 project_path: "."
 data_path: "data"
-models_path: "models"
 
 # Data directories (relative to data_path)
 raw_dir: "01_raw"
