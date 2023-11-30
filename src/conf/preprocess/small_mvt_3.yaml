@@ -5,5 +5,5 @@ raw_image: "matched_data.nd2"
 pixel: 1000
 
 # Number of cuts for each image (only relevant if pixel = -1)
-cuts_x: 2
-cuts_y: 2
+cuts_x: 1
+cuts_y: 1

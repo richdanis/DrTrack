@@ -1,0 +1,14 @@
+results: "results_small_mvt_3_full_y0_x0.csv"
+raw_image: "matched_data.nd2"
+pixel: 1000
+
+# Name of the experiment to visualize
+experiment_name: "small_mvt_3_full"
+
+# Path Settings (relative to project root)
+project_path: "."
+data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
+
+# Data directories (relative to data_path)
+raw_dir: "01_raw"
+results_dir: "05_trajectories"

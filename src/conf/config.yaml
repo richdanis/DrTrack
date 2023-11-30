@@ -6,7 +6,7 @@ defaults:
   - track: unb_reg_sinkhorn
 
 # Name for this experiment
-experiment_name: "small_mvt_3"
+experiment_name: "small_mvt_3_full"
 
 # Progress Output Settings
 verbose: true
@@ -17,8 +17,8 @@ device: cpu
 
 
 # Pipeline Settings
-skip_preprocessing: true # less than a few minutes for 4k*4k
-skip_droplet_extraction: true # about 5 minutes for 4k*4k
+skip_preprocessing: false # less than a few minutes for 4k*4k
+skip_droplet_extraction: false # about 5 minutes for 4k*4k
 skip_droplet_patch_extraction: false # not very long either
 skip_visual_embedding_extraction: false # 2 minutes
 skip_tracking: false # 40 minutes 4k*4k on my laptop (Mike, on CPU!)
@@ -32,7 +32,7 @@ skip_results_generation: false
 
 # Path Settings (relative to project root)
 project_path: "."
-data_path: "data"
+data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
 
 # Data directories (relative to data_path)
 raw_dir: "01_raw"
