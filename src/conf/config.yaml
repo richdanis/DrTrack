@@ -1,0 +1,111 @@
+defaults:
+  - _self_
+  - preprocess: small_mvt_3
+  - detect_droplets: ransac3
+  - extract_visual_embeddings: cl_efficientnet
+  - track: unb_reg_sinkhorn
+
+# Name for this experiment
+experiment_name: "small_mvt_3_full"
+
+# Progress Output Settings
+verbose: true
+tqdm_disable: false
+
+# Device Settings
+device: cpu
+
+
+# Pipeline Settings
+skip_preprocessing: false # less than a few minutes for 4k*4k
+skip_droplet_extraction: false # about 5 minutes for 4k*4k
+skip_droplet_patch_extraction: false # not very long either
+skip_visual_embedding_extraction: false # 2 minutes
+skip_tracking: false # 40 minutes 4k*4k on my laptop (Mike, on CPU!)
+skip_results_generation: false
+# skip_preprocessing: true
+# skip_droplet_extraction: true
+# skip_droplet_patch_extraction: true
+# skip_visual_embedding_extraction: true
+# skip_tracking: false
+# skip_results_generation: false
+
+# Path Settings (relative to project root)
+project_path: "."
+data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
+
+# Data directories (relative to data_path)
+raw_dir: "01_raw"
+preprocessed_dir: "02_preprocessed"
+feature_dir: "03_features"
+ot_dir: "04_ot"
+results_dir: "05_trajectories"
+
+
+
+
+
+
+
+
+# OLD ARGS
+#     parser = argparse.ArgumentParser(description='Generate a tracking of droplets from an image.')
+
+#     parser.add_argument('raw_image', type=str,
+#                         help=f'ND2 image file name')
+
+#     parser.add_argument('-g', '--generate_embeddings', action='store_false',
+#                         help=f'generate embeddings. '
+#                              'default = True.')
+
+#     parser.add_argument('-t', '--train_model', action='store_true',
+#                         help=f'train model. '
+#                              'default = False')
+
+#     parser.add_argument('-s', '--skip_dataset', action='store_true',
+#                         help=f'Skip dataset generation. '
+#                              'default = False')
+
+#     parser.add_argument('-e', '--embeddings', action='store_false',
+#                         help=f'Use embeddings. '
+#                              'default = True')
+
+#     parser.add_argument('-l', '--linking', action='store_false',
+#                         help=f'Make linking. '
+#                              'default = True')
+
+#     parser.add_argument('--similarity_weight', type=float, default=0.5,
+#                         help='a number between 0 and 1. 1 means we only link droplets if they have exactly the same features. '
+#                              '0 means we allow linking of droplets even if they look very different. '
+#                              'default = 0.5')
+
+#     parser.add_argument('--vicinity_weight', type=float, default=0.5,
+#                         help='a number between 0 and 1. 1 means we prefer only spacial vicinity. '
+#                              '0 means we consider spacial vicinity and visual similarity. '
+#                              'default = 0.5')
+
+#     parser.add_argument('--max_dist', type=int, default=250,
+#                         help='a positive integer that indicates the maximal distance in pixels that a droplet can move between frames. '
+#                              'default = 250')
+
+#     parser.add_argument('--movement_variability', type=float, default=1.0,
+#                         help='a positive floating point number (typically close to 1, seem to work best). '
+#                              'Close to 0 means we prefer few droplets that move a lot. '
+#                              '1 means we are neutral. Greater than 1 means we prefer if many droplets move a bit. '
+#                              'default = 1')
+
+#     parser.add_argument('--radius_min', type=int, default=12,
+#                         help='Minimum radius of droplets to be detected in pixels. '
+#                              'default = 1')
+
+#     parser.add_argument('--radius_max', type=int, default=25,
+#                         help='Maximum radius of droplets to be detected in pixels. '
+#                              'default = 25')
+
+#     parser.add_argument('--pixel', type=int, default=-1,
+#                         help='number of pixels used per axis - just for training.')
+
+#     parser.add_argument('--skip_preprocessing', type=bool, default=False,
+#                         help='Whether to skip preprocessing. Defaults to False.')
+
+#     args = parser.parse_args()
