@@ -100,9 +100,10 @@ def main(cfg: DictConfig):
         create_dir(image_results_path)
         compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
 
+    # End timer
     end_time = time.time()
     if cfg.verbose:
-        print(f"Total processing time: {round(end_time - start_time)} seconds")
+        print(f"\nTotal processing time: {round(end_time - start_time)} seconds")
 
 
 if __name__ == '__main__':

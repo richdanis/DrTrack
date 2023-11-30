@@ -5,7 +5,7 @@ from pathlib import Path
 import nd2
 import numpy as np
 import pandas as pd
-
+import shutil
 import jax
 
 jax.devices("cpu")[0]
@@ -66,13 +66,24 @@ def main(cfg: DictConfig):
         sim_data.create_and_store_position_dfs()
 
 
-    ### FEATURE CREATION ###
-    create_dir(image_feature_path)
+    ### VISUAL EMBEDDING EXTRACTION ###
+    # Check conf/extract_features.yaml for settings
 
-    # if not cfg.skip_feature_creation:
-    #     # For now just use spacial embeddings
-    #     sim_data = SimulatedData(cfg, image_simulated, image_feature_path)
-    #     sim_data.create_and_store_position_dfs()
+    if not cfg.skip_visual_embedding_extraction:
+        # Create paths if they do not exist
+        create_dir(image_feature_path)
+
+        # Copy paired patches to data_path/feature_dir
+        paired_patches_path = FEATURE_PATH / Path(cfg.paired_patches)
+        new_name = "patches_" + cfg.experiment_name + ".npy"
+        new_path = image_feature_path / Path(new_name)
+
+        # Copy to required location if it does not exist
+        if not os.path.exists(new_path):
+            shutil.copyfile(paired_patches_path, new_path)
+
+        # Create embeddings using configured model
+        create_and_save_droplet_embeddings(cfg, image_feature_path)
 
     
     ### TRACKING ###
