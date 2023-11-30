@@ -92,9 +92,8 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
                                     'radius': f'r0',
                                     'nr_cells': f'nr_cells0'})
     result['droplet_id_next'] = pd.DataFrame({'droplet_id': np.arange(max_droplets)}, dtype=int)
-    result = result.astype({'x0': 'Int32', 'y0': 'Int32','r0': 'Int32','nr_cells0': 'Int32'})
+    result = result.astype({'x0': float, 'y0': float,'r0': 'Int32','nr_cells0': 'Int32'})
     for i, df in tracking_table.groupby('frame'):
-
         next = droplets[i+1]
         result = result.merge(df[['droplet_id_this', 'prob', 'droplet_id_next']], left_on='droplet_id_next', right_on='droplet_id_this', how='left')
         full_prob = full_prob * result['prob'].fillna(0.0).to_numpy()
@@ -105,7 +104,7 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
                                         'center_y': f'y{i+1}',
                                         'radius': f'r{i+1}',
                                         'nr_cells': f'nr_cells{i+1}'}).drop(columns='droplet_id_y')
-        result = result.astype({f'x{i+1}': 'Int32', f'y{i+1}': 'Int32', f'r{i+1}': 'Int32',f'nr_cells{i+1}': 'Int32'})
+        result = result.astype({f'x{i+1}': float, f'y{i+1}': float, f'r{i+1}': 'Int32',f'nr_cells{i+1}': 'Int32'})
         
     result['p'] = full_prob
     result = result.drop(columns=['droplet_id_next'])
@@ -165,19 +164,19 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
         print(f'Currently generating results for cut:')
     
     # Iterate through all cuts
-    for file_name in os.listdir(image_ot_path):
-        if not file_name.startswith("ot_matrix_"):
+    for dir_name in os.listdir(image_ot_path):
+        if not dir_name.startswith("ot_matrix_"):
             continue
 
         # Get cut name
-        cut_name = file_name.replace("ot_matrix_", "")[:-4]
+        cut_name = dir_name.replace("ot_matrix_", "")
 
         # Progress
         if cfg.verbose:
             print(cut_name)
 
         # Get features of current cut
-        cut_ot_path = Path(image_ot_path / file_name)
+        cut_ot_path = Path(image_ot_path / dir_name)
         cut_feature_droplets_file_path = Path(image_feature_path / f'droplets_{cut_name}.csv')
         cut_feature_droplets_df = pd.read_csv(cut_feature_droplets_file_path)
 

@@ -20,7 +20,8 @@ from extract_droplets.create_droplet_patches import create_and_save_droplet_patc
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
-
+from evaluate.preprocess_simulated import SimulatedData
+from evaluate.get_scores import OtEvaluation
 #from utils.globals import *
 
 import hydra
@@ -44,15 +45,60 @@ def setup_directories(cfg):
 @hydra.main(config_path="conf", config_name="config_evaluate_tracking", version_base=None)
 def main(cfg: DictConfig):
     # Setup directories
-    RAW_PATH = Path(cfg.data_path) / Path(cfg.simulated_dir)
+    SIMULATED_PATH = Path(cfg.data_path) / Path(cfg.simulated_dir)
     PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
     FEATURE_PATH = Path(cfg.data_path) / Path(cfg.feature_dir)
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
     setup_directories(cfg)
 
-    # Start timer
-    start_time = time.time()
+
+    ### PREPROCESSING ###
+    # Preprocess simulated data
+    image_simulated = Path(SIMULATED_PATH / cfg.simulated_image)
+    image_preprocessed_path = Path(PREPROCESSED_PATH / cfg.experiment_name)
+    image_feature_path = Path(FEATURE_PATH / cfg.experiment_name)
+    create_dir(image_preprocessed_path)
+    create_dir(image_feature_path)
+
+    if not cfg.skip_preprocessing:
+        sim_data = SimulatedData(cfg, image_simulated, image_feature_path)
+        sim_data.create_and_store_position_dfs()
+
+
+    ### FEATURE CREATION ###
+    create_dir(image_feature_path)
+
+    # if not cfg.skip_feature_creation:
+    #     # For now just use spacial embeddings
+    #     sim_data = SimulatedData(cfg, image_simulated, image_feature_path)
+    #     sim_data.create_and_store_position_dfs()
+
+    
+    ### TRACKING ###
+    image_ot_path = Path(OT_PATH / cfg.experiment_name)
+    if not cfg.skip_tracking:
+        # Create paths if they do not exist
+        create_dir(image_ot_path)
+
+        test_features = np.random.rand(3, 2, 3)
+        ot = OptimalTransport(cfg)
+        ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
+
+
+    ### GENERATING RESULTS (Trajectories and Scores) ###
+    image_results_path = Path(RESULTS_PATH / cfg.experiment_name)
+
+    if not cfg.skip_results_generation:
+        # Create paths if they do not exist
+        create_dir(image_results_path)
+
+        if not cfg.skip_trajectory_generation:
+            compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
+
+        if not cfg.skip_scoring:
+            ot_evaluation = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path)
+            ot_evaluation.compute_and_store_scores()
 
 if __name__ == '__main__':
     main()

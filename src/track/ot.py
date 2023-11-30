@@ -92,8 +92,8 @@ class OptimalTransport:
         
         # Concatenate features
         features_df['combined'] = features_df.apply(lambda row: np.concatenate(([row['center_x'], row['center_y']], row['embeddings']), axis=0), axis=1)
+        
         features = features_df['combined'].to_numpy()
-
         # Stack 'combined' into a 2D numpy array and convert to float32
         features = np.stack(features_df['combined'].values).astype(np.float32)
 
@@ -103,8 +103,6 @@ class OptimalTransport:
         """Compute and store optimal transport matrices for a single cut."""
 
         # Iterate through frames
-        
-
         for i in tqdm(range(max_frame), disable=self.tqdm_disable):
             # Extract droplet and embedding features for current frame
             if (i == 0):
@@ -134,6 +132,7 @@ class OptimalTransport:
             print(f'Currently computing ot matrices for cut:')
         
         # Iterate through all cuts
+        num_files = len(os.listdir(image_feature_path))
         for file_name in os.listdir(image_feature_path):
             # Use droplets file for name reference only - all pairs (droplet, embeddings) must exist 
             if not file_name.startswith("droplets"):
@@ -148,7 +147,7 @@ class OptimalTransport:
             cut_feature_embedding_name = file_name.replace("droplets", "embeddings")[:-4] + ".npy"
 
             cut_ot_name = file_name.replace("droplets", "ot_matrix")
-            cut_ot_path = Path(image_ot_path / cut_ot_name)
+            cut_ot_path = Path(image_ot_path / cut_ot_name[:-4])
 
             if not os.path.exists(cut_ot_path):
                 os.makedirs(cut_ot_path)
@@ -157,7 +156,11 @@ class OptimalTransport:
             droplet_df = pd.read_csv(image_feature_path / cut_feature_droplet_name)
             embedding_df = np.load(image_feature_path / cut_feature_embedding_name, allow_pickle=True).item()
             embedding_df = pd.DataFrame.from_dict(embedding_df)
-            max_frame = droplet_df['frame'].max()
             
-            # Compute ot matrices for current cut
+            # Save embedding df
+            if self.args.save_embedding_df:
+                name = "df_" + cut_feature_embedding_name.replace(".npy", ".csv")
+                embedding_df.to_csv(image_feature_path / name, index=False)
+
+            max_frame = droplet_df['frame'].max()
             self.compute_and_store_ot_matrices_cut(droplet_df, embedding_df, cut_ot_path, max_frame)

@@ -1,5 +1,15 @@
+# Setting for the preprocessing pipeline
+defaults:
+  - _self_
+  - extract_visual_embeddings: cl_efficientnet
+  - track: unb_reg_sinkhorn_evaluation
+  - evaluate: unbalanced_v1
+
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "test_cl_efficientnet_v1"
+experiment_name: "test_cl_efficientnet_v2"
+
+# Name of the simulated image file to be processed - should be in data_path/simulated_dir
+simulated_image: "small_mvt_2000_droplets.csv"
 
 # Path Settings (relative to project root)
 project_path: "."
@@ -13,14 +23,13 @@ feature_dir: "03_features"
 ot_dir: "04_ot"
 results_dir: "05_results"
 
-# Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "small_mvt_1.csv"
-
-# Setting for the preprocessing pipeline
-defaults:
-  - _self_
-  - extract_visual_embeddings: cl_efficientnet
-  - track: unb_reg_sinkhorn
+# Skip steps if they have already been completed
+skip_preprocessing: false
+skip_feature_creation: false
+skip_tracking: false 
+skip_results_generation: false
+skip_trajectory_generation: false
+skip_scoring: false
 
 # Detail level of the progress indications
 verbose: true
