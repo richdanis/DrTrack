@@ -1,0 +1,30 @@
+# Name for this experiment - will be used to name the output files and directories
+experiment_name: "test_cl_efficientnet_v1"
+
+# Path Settings (relative to project root)
+project_path: "."
+data_path: "evaluation"
+models_path: "checkpoints"
+
+# Evaluation directories (will be directories in data_path)
+simulated_dir: "01_simulated"
+preprocessed_dir: "02_preprocessed"
+feature_dir: "03_features"
+ot_dir: "04_ot"
+results_dir: "05_results"
+
+# Name of the simulated image file to be processed - should be in data_path/simulated_dir
+simulated_image: "small_mvt_1.csv"
+
+# Setting for the preprocessing pipeline
+defaults:
+  - _self_
+  - extract_visual_embeddings: cl_efficientnet
+  - track: unb_reg_sinkhorn
+
+# Detail level of the progress indications
+verbose: true
+tqdm_disable: false
+
+# Device Settings
+device: cpu

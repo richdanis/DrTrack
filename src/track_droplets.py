@@ -41,7 +41,7 @@ def setup_directories(cfg):
     create_dir(Path(cfg.data_path) / Path(cfg.ot_dir))
     create_dir(Path(cfg.data_path) / Path(cfg.results_dir))
 
-@hydra.main(config_path="conf", config_name="config", version_base=None)
+@hydra.main(config_path="conf", config_name="config_track_droplets", version_base=None)
 def main(cfg: DictConfig):
     # Setup directories
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
@@ -56,7 +56,7 @@ def main(cfg: DictConfig):
 
     # Get name of image configuration to be processed
     experiment_name = cfg.experiment_name
-    image_name = cfg.preprocess.raw_image[:-4].lower().replace(' ', '_')
+    image_name = cfg.raw_image[:-4].lower().replace(' ', '_')
 
     ### PREPROCESSING ###
     # Check conf/preprocess.yaml for settings

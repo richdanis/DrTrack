@@ -18,7 +18,7 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, ima
     Preprocess the .nd2 images seperated into cuts and save as .npy arrays.
     """
     # Create paths
-    raw_image_path = Path(RAW_PATH / cfg.preprocess.raw_image)
+    raw_image_path = Path(RAW_PATH / cfg.raw_image)
 
     # Preprocess the image cuts if required
     # Open nd2 file and check sizes

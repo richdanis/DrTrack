@@ -1,5 +1,6 @@
 # ignore data
 data/**
+evaluation/**
 *.nd2
 
 # Jupyter Notebook
