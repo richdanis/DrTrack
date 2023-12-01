@@ -198,6 +198,11 @@ class OtEvaluation():
         return df
 
     def max_k_accuracy(self, k):
+        """
+        Calculate the accuracy of the OT matrix - only consider the k largest entries
+        If k == -1, consider all entries
+        If there are ties, consider all tied entries
+        """
         max_mat = np.zeros_like(self.ot_matrix)
 
         # Only keep maximal entries (choices of algorithm)
@@ -213,6 +218,9 @@ class OtEvaluation():
 
         # Filter all choices where the value is lower than the k-largest
         max_mat[max_mat < k_largest_elem] = 0
+
+        # Deal with ties
+        k_eff = np.count_nonzero(max_mat)
 
         # Make matrix binary
         max_mat[max_mat > 0] = 1 
@@ -230,7 +238,7 @@ class OtEvaluation():
         true_labels.loc[common_indices, common_indices] = np.identity(len(common_indices))
 
         # Return the normalized score
-        score = np.bitwise_and(max_mat.astype(int), true_labels.astype(int)).sum().sum()/k
+        score = np.bitwise_and(max_mat.astype(int), true_labels.astype(int)).sum().sum()/(k_eff)
 
         # # Code for when matrix symm
         # max_mat = np.zeros_like(self.ot_matrix)

@@ -61,7 +61,7 @@ def main(cfg: DictConfig):
     # Check conf/extract_droplets.yaml for settings
     image_feature_path = Path(FEATURE_PATH / experiment_name)
 
-    if not cfg.skip_droplet_extraction:
+    if not cfg.skip_droplet_detection:
         # Create paths if they do not exist
         create_dir(image_feature_path)
         detect_and_store_all(cfg, image_preprocessed_path, image_feature_path)
@@ -88,7 +88,6 @@ def main(cfg: DictConfig):
         # Create paths if they do not exist
         create_dir(image_ot_path)
 
-        test_features = np.random.rand(3, 2, 3)
         ot = OptimalTransport(cfg)
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
 

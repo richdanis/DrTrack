@@ -3,10 +3,10 @@ defaults:
   - _self_
   - extract_visual_embeddings: cl_efficientnet
   - track: reg_sinkhorn_evaluation
-  - evaluate: balanced_v1
+  - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "test_cl_efficientnet_balanced"
+experiment_name: "test_cl_efficientnet_v2"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
 simulated_image: "small_mvt_1848_droplets.csv"
@@ -27,9 +27,9 @@ ot_dir: "04_ot"
 results_dir: "05_results"
 
 # Skip steps if they have already been completed
-skip_preprocessing: false
-skip_visual_embedding_extraction: false
-skip_tracking: false
+skip_preprocessing: true
+skip_visual_embedding_extraction: true
+skip_tracking: true
 skip_results_generation: false
 skip_trajectory_generation: false
 skip_scoring: false
