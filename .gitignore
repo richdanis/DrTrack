@@ -25,3 +25,6 @@ experiments
 
 # Hydra files
 outputs
+
+# .pth files
+*.pth
