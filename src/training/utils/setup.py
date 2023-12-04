@@ -25,6 +25,7 @@ def get_args():
     parser.add_argument('--embed_dim', default=32, type=int, help='Dimension of the embedding layer.')
     parser.add_argument('--samples_per_epoch', default=None, type=int, help='Number of samples per epoch.')
     parser.add_argument('--validation_batch_size', default=32, type=int, help='Batch size for validation.')
+    parser.add_argument('--use_dapi', action='store_true', help='Whether to use DAPI channel.')
 
     return parser.parse_args()
 

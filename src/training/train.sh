@@ -19,8 +19,9 @@ $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
     --lr 1e-3 \
     --wandb \
     --checkpoint_path /cluster/scratch/$USER/checkpoints/ \
-    --embed_dim 10 \
+    --embed_dim 20 \
     --validation_batch_size 32 \
-    --weight_decay 1e-4
+    --weight_decay 1e-4 \
+    --use_dapi
 
 

@@ -1,6 +1,5 @@
 import torch
 import torchvision
-from tqdm import tqdm
 
 
 class EfficientNet(torch.nn.Module):
@@ -12,6 +11,7 @@ class EfficientNet(torch.nn.Module):
         # does not work on euler!
         # download model yourself and transfer to euler
         # self.layers = torchvision.models.efficientnet_b1(weights='DEFAULT')
+        self.args = args
 
         # load from local state dict
         self.layers = torchvision.models.efficientnet_b1()
@@ -29,7 +29,11 @@ class EfficientNet(torch.nn.Module):
         # repeat along first dimension
         # this tutorial explains nicely why this is necessary:
         # https://towardsdatascience.com/transfer-learning-on-greyscale-images-how-to-fine-tune-pretrained-models-on-black-and-white-9a5150755c7a
-        x = x.repeat(1, 3, 1, 1)
+        if self.args.use_dapi:
+            # concatenate first channel to make it three channels
+            x = torch.cat((x, x[:, :1, :, :]), dim=1)
+        else:
+            x = x.repeat(1, 3, 1, 1)
 
         return self.layers(x)
 

@@ -2,11 +2,8 @@ import os
 
 import wandb
 import torch
-import argparse
 import logging
-import numpy as np
 from info_nce import InfoNCE
-from tqdm import tqdm
 from dataset import LocalDataset
 from models.efficientnet import EfficientNet
 
@@ -25,11 +22,11 @@ def main():
 
     # load datasets
     train_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
-                                 config='train')
+                                 config='train', use_dapi=args.use_dapi)
     train_eval_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
-                                      config='val')
+                                      config='val', use_dapi=args.use_dapi)
     val_dataset = LocalDataset(os.path.join(args.data_path, 'validation'),
-                               config='val')
+                               config='val', use_dapi=args.use_dapi)
     
     logging.info(f"Datasets loaded.")
 

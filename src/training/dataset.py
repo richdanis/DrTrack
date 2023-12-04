@@ -9,7 +9,7 @@ class CellDataset(Dataset):
     # TODO: currently my patches are of size 40x40.
     # Should be turned into parameter.
 
-    def __init__(self, dataset_path, both_channels=False):
+    def __init__(self, dataset_path, use_dapi=False):
         self.dataset = np.load(dataset_path)
         # format: (N, 2, C, H, W)
         # N: number of patches
@@ -25,7 +25,7 @@ class CellDataset(Dataset):
         self.dataset = self.dataset.float()
 
         # remove one channel if necessary
-        if not both_channels:
+        if not use_dapi:
             self.dataset = self.dataset[:, :, :1, :, :]
 
     def __len__(self):
@@ -39,7 +39,7 @@ class CellDataset(Dataset):
 
 class LocalDataset(Dataset):
 
-    def __init__(self, dataset_path, config, both_channels=False):
+    def __init__(self, dataset_path, config, use_dapi=False):
 
         self.patches = np.load(dataset_path + '/patches.npy')
         # format: (N, C, H, W)
@@ -60,23 +60,8 @@ class LocalDataset(Dataset):
         # train or validation
         self.config = config
 
-        # augmentation
-        self.transform = A.OneOf([
-            A.RandomResizedCrop(40,40, scale=(0.6, 0.8), p=1),
-            A.CoarseDropout(
-                            max_holes=9,
-                            max_height=7,
-                            max_width=7,
-                            min_holes=5,
-                            min_height=4,
-                            min_width=4,
-                            fill_value=0,
-                            p=1,
-            )
-        ], p=0.8)
-
         # remove one channel (done by default)
-        if not both_channels:
+        if not use_dapi:
             self.patches = self.patches[:, :1, :, :]
 
     def __len__(self):
