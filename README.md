@@ -14,17 +14,28 @@ Data Science Lab 2023 at ETH Zurich. Challenge: Tracking Droplets in Microfluidi
 ## Training on Euler
 
 ### Data
+Move training and validation folders into /cluster/scratch/$USER/data/local_datasets.
+Folder structure:
+```
+training
+    ├── patches.npy
+    ├── labels.npy
+    ├── negatives.npy
+```
 
-Move train.npy, validation.npy and test.npy into /cluster/scratch/$USER/data.
-These contain the data in the following shape (subject to change):
-    
 ```
-train.npy: (N, 2, 2, 40, 40)
-N: number of images
-Second Dimension: 0: droplet, 1: label (corresponding droplet in the next frame)
-Third Dimension: 0: BF channel, 1: DAPI channel 
-```
-There are around 24k samples in train.npy and around 2k in validation.npy and test.npy. (80/10/10 split)
+patches.npy: (N, 2, 40, 40)
+N: number of patches
+Second Dimension: 0: BF channel, 1: DAPI channel 
+
+labels.npy: (N, 1)
+
+negatives.npy: (N, 128)
+``` 
+
+**labels.npy** contains the index of the matched droplet in the next time step.
+
+**negatives.npy** contains the 128 nearest neighbors (excluding the true match) in the next time step.
 
 
 ### Download Model
@@ -42,15 +53,15 @@ And then upload the model to euler:
 $ scp src/training/efficientnet_b1.pth $USER@euler.ethz.ch:/cluster/home/$USER/DrTrack/src/training/models
 ```
 
-### Virtual Environment
+### Set Up Virtual Environment
 Then create the virtual environment on euler:
 
 ```
 $ module load gcc/8.2.0 python_gpu/3.11.2
 
-$ python -m venv --system-site-packages dslab_env
+$ python -m venv --system-site-packages lab_env
 
-$ pip install requirements.txt
+$ pip install -r requirements.txt
 ```
 
 ### Submit Job

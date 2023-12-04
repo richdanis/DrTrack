@@ -28,6 +28,8 @@ def setup_logging():
 
 
 def main():
+
+    # need to be adapted to local datasets
     args = get_args()
     setup_logging()
 
