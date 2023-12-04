@@ -23,6 +23,9 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
     Returns:
     DataFrame: A DataFrame with droplet patches mapped across frames with position information.
     """
+    number_cells = 0
+    number_no_cells = 0
+
     mapping = None
     columns = ["dropletIdNext"]
     num_frames = len(patches_df[0])
@@ -40,7 +43,6 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
         frame2 = frame2.rename(columns={'patch': 'patch' + str(i+1),
                                         'center_row': 'x' + str(i+1),
                                         'center_col': 'y' + str(i+1)})
-
         if mapping is None:
 
             mapping = tracking_df[tracking_df["framePrev"] == i]
@@ -82,6 +84,29 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
                               mapping["x" + str(i+1)]) < distance]
         mapping = mapping[abs(mapping["y" + str(i)] -
                               mapping["y" + str(i+1)]) < distance]
+        
+        # if row has no cells, drop it with 50% probability
+        if not only_cells:
+            # iterate over indices
+            for j in mapping.index:
+                # get row with index j
+                row = mapping.loc[j]
+                # if no cells in row
+                if "nr_cells_x" in row and "nr_cells_y" in row:
+                    if row["nr_cells_x"] == 0 and row["nr_cells_y"] == 0:
+                        if np.random.rand() > 0.8:
+                            mapping = mapping.drop([j])
+                else:
+                    if row["nr_cells"] == 0:
+                        if np.random.rand() > 0.8:
+                            mapping = mapping.drop([j])
+
+        if "nr_cells_x" in mapping and "nr_cells_y" in mapping:
+            number_cells += len(mapping[(mapping["nr_cells_x"] > 0) & (mapping["nr_cells_y"] > 0)])
+            number_no_cells += len((mapping[(mapping["nr_cells_x"] == 0) & (mapping["nr_cells_y"] == 0)]))
+        else:
+            number_cells += len(mapping[mapping["nr_cells"] > 0])
+            number_no_cells += len(mapping[mapping["nr_cells"] == 0])
 
         mapping = mapping[columns]
 
@@ -89,6 +114,9 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
 
     # reset indices
     mapping = mapping.reset_index(drop=True)
+
+    print("Number of cells: " + str(number_cells))
+    print("Number of no cells: " + str(number_no_cells))
 
     return mapping[columns]
 
@@ -290,6 +318,9 @@ def main():
     print("Shape of dataset: " + str(dataset.shape))
     print("Shape of labels: " + str(label.shape))
     print("Shape of negative indices: " + str(neg_indices.shape))
+
+    if not args.only_cells:
+        fname = fname + "_with_no_cells"
 
     # make directories
     os.makedirs(SAVE_PATH + fname + "/", exist_ok=True)
