@@ -9,7 +9,7 @@ DATA_PATH = '/cluster/scratch/rdanis/data/'
 SAVE_PATH = '/cluster/scratch/rdanis/data/local_datasets/'
 
 
-def create_mapping_df(patches_df, tracking_df, distance=10):
+def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
     """
     Creates a DataFrame mapping droplet patches across frames with position information.
 
@@ -35,7 +35,8 @@ def create_mapping_df(patches_df, tracking_df, distance=10):
 
         # drop nan values and rows with no cells
         frame2 = frame2.dropna()
-        frame2 = frame2[frame2["nr_cells"] > 0]
+        if only_cells:
+            frame2 = frame2[frame2["nr_cells"] > 0]
         frame2 = frame2.rename(columns={'patch': 'patch' + str(i+1),
                                         'center_row': 'x' + str(i+1),
                                         'center_col': 'y' + str(i+1)})
@@ -47,7 +48,8 @@ def create_mapping_df(patches_df, tracking_df, distance=10):
             # drop nan values and rows with no cells
             frame1 = pd.DataFrame(patches_df[0].iloc[i])
             frame1 = frame1.dropna()
-            frame1 = frame1[frame1["nr_cells"] > 0]
+            if only_cells:
+                frame1 = frame1[frame1["nr_cells"] > 0]
 
             frame1 = frame1.rename(columns={'patch': 'patch' + str(i),
                                             'center_row': 'x' + str(i),
@@ -251,6 +253,8 @@ def main():
                         help='Name of the input image. (without .nd2 ending)')
     parser.add_argument('--distance', type=int, default=10,
                         help='Maximum distance between droplets to be considered a match between two frames.')
+    parser.add_argument('--only_cells', action='store_true',
+                        help='Whether to only use patches with cells in them.')
 
     args = parser.parse_args()
 
@@ -274,7 +278,7 @@ def main():
     num_frames = len(patches_df[0])
 
     # create the chains of droplet patches
-    mapping = create_mapping_df(patches_df, tracking_df, distance)
+    mapping = create_mapping_df(patches_df, tracking_df, distance, args.only_cells)
 
     # resize patches
     mapping = resize_patch_columns(mapping, num_frames)
