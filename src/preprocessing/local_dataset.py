@@ -23,8 +23,6 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
     Returns:
     DataFrame: A DataFrame with droplet patches mapped across frames with position information.
     """
-    number_cells = 0
-    number_no_cells = 0
 
     mapping = None
     columns = ["dropletIdNext"]
@@ -86,27 +84,20 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
                               mapping["y" + str(i+1)]) < distance]
         
         # if row has no cells, drop it with 50% probability
-        if not only_cells:
-            # iterate over indices
-            for j in mapping.index:
-                # get row with index j
-                row = mapping.loc[j]
-                # if no cells in row
-                if "nr_cells_x" in row and "nr_cells_y" in row:
-                    if row["nr_cells_x"] == 0 and row["nr_cells_y"] == 0:
-                        if np.random.rand() > 0.8:
-                            mapping = mapping.drop([j])
-                else:
-                    if row["nr_cells"] == 0:
-                        if np.random.rand() > 0.8:
-                            mapping = mapping.drop([j])
-
-        if "nr_cells_x" in mapping and "nr_cells_y" in mapping:
-            number_cells += len(mapping[(mapping["nr_cells_x"] > 0) & (mapping["nr_cells_y"] > 0)])
-            number_no_cells += len((mapping[(mapping["nr_cells_x"] == 0) & (mapping["nr_cells_y"] == 0)]))
-        else:
-            number_cells += len(mapping[mapping["nr_cells"] > 0])
-            number_no_cells += len(mapping[mapping["nr_cells"] == 0])
+        # if not only_cells:
+        #     # iterate over indices
+        #     for j in mapping.index:
+        #         # get row with index j
+        #         row = mapping.loc[j]
+        #         # if no cells in row
+        #         if "nr_cells_x" in row and "nr_cells_y" in row:
+        #             if row["nr_cells_x"] == 0 and row["nr_cells_y"] == 0:
+        #                 if np.random.rand() > 0.8:
+        #                     mapping = mapping.drop([j])
+        #         else:
+        #             if row["nr_cells"] == 0:
+        #                 if np.random.rand() > 0.8:
+        #                     mapping = mapping.drop([j])
 
         mapping = mapping[columns]
 
@@ -114,9 +105,6 @@ def create_mapping_df(patches_df, tracking_df, distance=10, only_cells=True):
 
     # reset indices
     mapping = mapping.reset_index(drop=True)
-
-    print("Number of cells: " + str(number_cells))
-    print("Number of no cells: " + str(number_no_cells))
 
     return mapping[columns]
 
@@ -136,7 +124,7 @@ def local_negatives(mapped_patches, num_frames):
     num = min(len(mapped_patches) - 1, 128)
 
     # create empty index list
-    indices = np.empty((len(mapped_patches) * (num_frames - 1), num), dtype=np.int16)
+    indices = np.empty((len(mapped_patches) * (num_frames - 1), num), dtype=np.int32)
 
     # iterate over frames:
     for i in tqdm.tqdm(range(num_frames-1), desc="Creating local negatives..."):
@@ -171,7 +159,7 @@ def local_negatives(mapped_patches, num_frames):
 def get_labels(mapped_patches, num_frames):
 
     labels = np.empty(
-        (len(mapped_patches) * (num_frames - 1),), dtype=np.int16)
+        (len(mapped_patches) * (num_frames - 1),), dtype=np.int32)
 
     for i in range(num_frames-1):
         for j in range(len(mapped_patches)):
