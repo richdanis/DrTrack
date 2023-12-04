@@ -13,7 +13,7 @@ def get_args():
     parser.add_argument('--data_path', type=str, required=True, help='Path to data.')
     parser.add_argument('--model', default="efficientnet-b0", help='Which model to use. Default is None.')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size. Default is 32.')
-    parser.add_argument('--epochs', type=int, default=20, help='Number of epochs. Default is 100.')
+    parser.add_argument('--epochs', type=int, default=30, help='Number of epochs. Default is 100.')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate. Default is 0.001.')
     parser.add_argument('--weight_decay', type=float, default=0, help='Weight decay. Default is 0.')
     parser.add_argument('--temperature', type=float, default=0.1, help='Temperature for InfoNCE loss. Default is 0.1.')

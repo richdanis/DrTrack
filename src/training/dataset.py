@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-
+import albumentations as A
 from torch.utils.data import Dataset
 
 
@@ -39,9 +39,6 @@ class CellDataset(Dataset):
 
 class LocalDataset(Dataset):
 
-    # TODO: currently my patches are of size 40x40.
-    # Should be turned into parameter.
-
     def __init__(self, dataset_path, config, both_channels=False):
 
         self.patches = np.load(dataset_path + '/patches.npy')
@@ -60,14 +57,23 @@ class LocalDataset(Dataset):
         self.negatives = np.load(dataset_path + '/negatives.npy')
         # format: (M, 128)
 
-        # turn into torch tensor
-        self.patches = torch.from_numpy(self.patches)
-
-        # turn into float
-        self.patches = self.patches.float()
-
         # train or validation
         self.config = config
+
+        # augmentation
+        self.transform = A.OneOf([
+            A.RandomResizedCrop(40,40, scale=(0.6, 0.8), p=1),
+            A.CoarseDropout(
+                            max_holes=9,
+                            max_height=7,
+                            max_width=7,
+                            min_holes=5,
+                            min_height=4,
+                            min_width=4,
+                            fill_value=0,
+                            p=1,
+            )
+        ], p=0.8)
 
         # remove one channel (done by default)
         if not both_channels:
@@ -80,8 +86,11 @@ class LocalDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        # TODO: Augmentation?
+        
         if self.config == 'val':
             return self.patches[idx]
+        
+        x = self.patches[idx]
+        y = self.patches[self.labels[idx]]
 
-        return self.patches[idx], self.patches[self.labels[idx]]
+        return x, y
