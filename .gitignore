@@ -11,5 +11,5 @@ logs/**
 # python cache in all directories
 **/__pycache__/**
 
-# .pth files
-*.pth
+
+efficientnet_b1.pth
