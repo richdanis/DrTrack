@@ -26,5 +26,5 @@ experiments
 # Hydra files
 outputs
 
-# .pth files
-*.pth
+# Efficient Net
+efficientnet_b1.pth
