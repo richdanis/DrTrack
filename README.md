@@ -51,3 +51,7 @@ Then you can need to submit the job with the following command:
 $ sbatch euler/track_droplets.sh "env_name"
 ```
 
+The model stored under checkpoints was trained on droplets containing cells only.
+You can download a model trained on droplets without cells from here:
+https://www.polybox.ethz.ch/index.php/s/a1N5XC2lZNmccvf
+
