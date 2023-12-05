@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 
 from visualizer import interactive_explorer
 
-@hydra.main(config_path="conf", config_name="visualizer", version_base=None)
+@hydra.main(config_path="../conf", config_name="visualizer", version_base=None)
 def main(cfg: DictConfig):
 
 

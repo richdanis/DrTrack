@@ -42,7 +42,7 @@ def setup_directories(cfg):
     create_dir(Path(cfg.data_path) / Path(cfg.ot_dir))
     create_dir(Path(cfg.data_path) / Path(cfg.results_dir))
 
-@hydra.main(config_path="conf", config_name="config_evaluate_tracking", version_base=None)
+@hydra.main(config_path="../conf", config_name="config_evaluate_tracking", version_base=None)
 def main(cfg: DictConfig):
     # Setup directories
     SIMULATED_PATH = Path(cfg.data_path) / Path(cfg.simulated_dir)
