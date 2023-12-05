@@ -21,9 +21,9 @@ def main():
     setup_logging(args)
 
     # load datasets
-    train_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
+    train_dataset = LocalDataset(os.path.join(args.data_path, args.train_folder),
                                  config='train', use_dapi=args.use_dapi)
-    train_eval_dataset = LocalDataset(os.path.join(args.data_path, 'training'),
+    train_eval_dataset = LocalDataset(os.path.join(args.data_path, args.train_folder),
                                       config='val', use_dapi=args.use_dapi)
     val_dataset = LocalDataset(os.path.join(args.data_path, 'validation'),
                                config='val', use_dapi=args.use_dapi)

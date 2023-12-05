@@ -22,6 +22,7 @@ $HOME/lab_env/bin/python3.11 $HOME/DrTrack/src/training/train.py \
     --embed_dim 20 \
     --validation_batch_size 32 \
     --weight_decay 1e-4 \
-    --use_dapi
+    --use_dapi \
+    --train_folder "small_mvt_1_with_no_cells"
 
 
