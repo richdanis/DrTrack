@@ -41,6 +41,8 @@ First you need to create your environment on euler.
 $ module load gcc/8.2.0 python_gpu/3.11.2
 $ python -m venv --system-site-packages env_name
 $ source env_name/bin/activate
+$ pip install -U "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+$ pip install --upgrade --force-reinstall nvidia-cuda-cupti-cu11
 $ pip install -r euler/requirements.txt
 ```
 Then you can need to submit the job with the following command:
@@ -48,3 +50,4 @@ Then you can need to submit the job with the following command:
 ```
 $ sbatch euler/track_droplets.sh "env_name"
 ```
+

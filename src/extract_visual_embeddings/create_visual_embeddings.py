@@ -37,6 +37,8 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
     loader = torch.utils.data.DataLoader(dataset, batch_size=cfg.extract_visual_embeddings.inference_batch_size,
                                          shuffle=False)
 
+    model = model.to(cfg.device)
+
     for patch_batch, droplet_ids, frames in tqdm(loader, disable=not cfg.verbose):
         patch_batch = patch_batch.to(cfg.device)
         with torch.no_grad():

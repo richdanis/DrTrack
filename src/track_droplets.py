@@ -7,8 +7,6 @@ import hydra
 from omegaconf import DictConfig
 import jax
 
-jax.devices("cpu")[0]
-
 from preprocess.for_all import preprocess_cuts_and_store_all
 from detect_droplets.detect_and_store import detect_and_store_all
 from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
@@ -33,6 +31,9 @@ def setup_directories(cfg):
 
 @hydra.main(config_path="../conf", config_name="config_track_droplets", version_base=None)
 def main(cfg: DictConfig):
+
+    if cfg.device == 'cpu':
+        jax.devices("cpu")[0]
     # Setup directories
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
     PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
