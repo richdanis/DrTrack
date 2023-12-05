@@ -1,4 +1,4 @@
 # This file contains
 inference_batch_size: 32
-model_checkpoint_path: checkpoints/2023-11-23_22-07-29_embeddings_model.pt
-embed_dim: 10
+model_checkpoint_path: checkpoints/2023-12-04_10-34-14_dim_20.pth
+embed_dim: 20
