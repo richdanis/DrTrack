@@ -131,10 +131,8 @@ def raw_to_preprocessed_for_embeddings(cfg, raw_image_path: Path, image_name: st
                                        pixel: int = -1) -> np.ndarray:
     """Preprocesses the raw .nd2 image for embedding creation and saves it as .npy file."""
     preprocessed_image = preprocess_for_embeddings(cfg, raw_image_path, pixel)
-    path = Path(PREPROCESSED_PATH / f"preprocessed_featextr_bf_{image_name}.npy")
-    np.save(path, preprocessed_image[:, 0, :, :])
-    path = Path(PREPROCESSED_PATH / f"preprocessed_featextr_dapi_{image_name}.npy")
-    np.save(path, preprocessed_image[:, 1, :, :])
+    path = Path(PREPROCESSED_PATH / f"preprocessed_featextr_{image_name}.npy")
+    np.save(path, preprocessed_image[:, 0:2, :, :])
     return preprocessed_image
 
 def raw_cut_to_preprocessed_for_embeddings(cfg, 
@@ -146,8 +144,6 @@ def raw_cut_to_preprocessed_for_embeddings(cfg,
                                            pixel: int = -1) -> np.ndarray:
     """Preprocesses the raw .nd2 image for embedding creation and saves it as .npy file."""
     preprocessed_image = preprocess_cut_for_embeddings(cfg, raw_image_path, upper_left_corner, pixel_dimensions, pixel=pixel)
-    path = Path(preprocessed_path / f"preprocessed_featextr_bf_{image_name}.npy")
-    np.save(path, preprocessed_image[:, 0, :, :])
-    path = Path(preprocessed_path / f"preprocessed_featextr_dapi_{image_name}.npy")
-    np.save(path, preprocessed_image[:, 1, :, :])
+    path = Path(preprocessed_path / f"preprocessed_featextr_{image_name}.npy")
+    np.save(path, preprocessed_image[:, 0:2, :, :])
     return preprocessed_image
