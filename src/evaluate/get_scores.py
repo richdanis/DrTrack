@@ -20,6 +20,7 @@ from ott.problems.linear import linear_problem
 
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
+
 import os
 
 from .preprocess_simulated import SimulatedData
@@ -54,7 +55,8 @@ class OtEvaluation():
         # Iterate through all cuts
         scores = []
 
-        dir_name = os.listdir(self.image_ot_path)[0]
+        # Get ot information type
+        dir_name = [dir for dir in os.listdir(self.image_ot_path) if dir.startswith(self.args.decision_matrix_type)][0]
         for file_name in os.listdir(self.image_ot_path / dir_name):
             if file_name.endswith(".npy"):
                 # Get frame numbers
@@ -72,6 +74,13 @@ class OtEvaluation():
                 # Extract droplet and embedding features for current frame
                 self.x_df = self.simulated_data.get_plain_filtered_position_df(frame=curr, stride=self.args.stride*2)
                 self.y_df = self.simulated_data.get_plain_filtered_position_df(frame=next, stride=self.args.stride*2)
+
+                # Get indices of droplets in each frame
+                self.x_indices = np.array(self.x_df.index)
+                self.y_indices = np.array(self.y_df.index)
+
+                # Compute common indices
+                self.common_indices = np.intersect1d(self.x_indices, self.y_indices)
 
                 # Compute scores
                 scores_frame = self.get_scores()
@@ -140,20 +149,28 @@ class OtEvaluation():
                 if self.verbose:
                     print(f'rank_accuracy_{k_rank}: {rank_accuracy}')
            
-
+        if self.args.auroc_matchable_threshold_stride == "default":
+            stride = self.ot_matrix.shape[0]*self.ot_matrix.shape[1]//50000
+        else :
+            stride = self.args.auroc_matchable_threshold_stride
         if self.args.auroc_matchable:
-            auroc_matchable = self.get_roc_auc_score(threshold_stride=self.args.auroc_matchable_threshold_stride)
-            scores[f'auroc_matchable_{self.args.auroc_matchable_threshold_stride}'] = auroc_matchable
+            auroc_matchable = self.get_roc_auc_score(threshold_stride=stride)
+            scores[f'auroc_matchable_{stride}'] = auroc_matchable
 
             if self.verbose:
                 print(f'AUROC Matchable: {auroc_matchable}')
 
+        if self.args.auroc_all_threshold_stride == "default":
+            stride = self.ot_matrix.shape[0]*self.ot_matrix.shape[1]//50000
+        else :
+            stride = self.args.auroc_all_threshold_stride
         if self.args.auroc_all:
-            auroc_all = self.get_roc_auc_score_all(threshold_stride=self.args.auroc_all_threshold_stride)
-            scores[f'auroc_all_{self.args.auroc_all_threshold_stride}'] = auroc_all
+            auroc_all = self.get_roc_auc_score_all(threshold_stride=stride)
+            scores[f'auroc_all_{stride}'] = auroc_all
 
             if self.verbose:
                 print(f'AUROC All: {auroc_all}')
+
 
         if self.args.auroc_rank_matchable:
             auroc_rank_matchable = self.get_roc_auc_score_rank(max_rank=self.args.auroc_rank_matchable_num_ranks)
@@ -161,6 +178,13 @@ class OtEvaluation():
 
             if self.verbose:
                 print(f'AUROC Rank Matchable: {auroc_rank_matchable}')
+
+        if self.args.auroc_rank_all:
+            auroc_rank_matchable = self.get_roc_auc_score_rank_all(max_rank=self.args.auroc_rank_all_num_ranks)
+            scores[f'auroc_rank_matchable_{self.args.auroc_rank_all_num_ranks}'] = auroc_rank_matchable
+
+            if self.verbose:
+                print(f'AUROC Rank Matchable All: {auroc_rank_matchable}')
         
         return scores
 
@@ -230,7 +254,7 @@ class OtEvaluation():
         y_indices = np.array(self.y_df.index)
 
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
 
         # True labels
         true_labels = self.ot_matrix_to_df().astype(bool)
@@ -265,7 +289,7 @@ class OtEvaluation():
         y_indices = np.array(self.y_df.index)
 
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
 
         # Filter indices by dropets which can be matched
         df = self.ot_matrix_to_df()
@@ -316,12 +340,13 @@ class OtEvaluation():
         threshold_values = np.sort(self.ot_matrix.reshape(-1))
         threshold_values = threshold_values[threshold_values > 0]
         threshold_values = np.unique(threshold_values)
-
+        
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
 
         # Create true labels vector -> 1 if droplet is matched
         true_labels = np.identity(len(common_indices)).flatten()
+        y_true = np.concatenate([true_labels]*len(threshold_values[::threshold_stride]))
 
         # Create predictions vector -> 1 if droplet is matched
         y_score = np.array([])
@@ -344,7 +369,8 @@ class OtEvaluation():
             y_score = np.concatenate((y_score, np_t.flatten()))
 
         # Calculate ROC-AUC score
-        return roc_auc_score(y_true, y_score)
+        # return roc_auc_score(y_true, y_score)
+        return average_precision_score(y_true, y_score)
 
     def get_roc_auc_score_all(self, threshold_stride = 1):
         """
@@ -362,7 +388,7 @@ class OtEvaluation():
         threshold_values = np.unique(threshold_values)
 
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
 
         # Create true labels vector -> 1 if droplet is matched
         true_labels = self.ot_matrix_to_df().astype(bool)
@@ -387,7 +413,7 @@ class OtEvaluation():
 
             
         # Calculate ROC-AUC score
-        return roc_auc_score(y_true, y_score)
+        return average_precision_score(y_true, y_score)
 
     def get_roc_auc_score_rank(self, max_rank = None):
         """
@@ -400,7 +426,7 @@ class OtEvaluation():
         y_indices = np.array(self.y_df.index)
 
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
         
         # Filter indices by dropets which can be matched
         df_filtered = self.ot_matrix_to_df()
@@ -435,11 +461,9 @@ class OtEvaluation():
             np_df[np.arange(len(np_df[:,0])), np_df.argmax(1)] = 0
 
             y_score = np.concatenate((y_score, max_mat.flatten()))
-
-
             
         # Calculate ROC-AUC score
-        return roc_auc_score(y_true, y_score)
+        return average_precision_score(y_true, y_score)
 
     def get_roc_auc_score_rank_all(self, max_rank = None):
         """
@@ -452,7 +476,7 @@ class OtEvaluation():
         y_indices = np.array(self.y_df.index)
 
         # First filter all droplets that do not have a match in the other frame
-        common_indices = np.intersect1d(x_indices, y_indices)
+        common_indices = self.common_indices
 
         # Filter indices by dropets which can be matched
         df = self.ot_matrix_to_df()
@@ -491,7 +515,7 @@ class OtEvaluation():
 
             
         # Calculate ROC-AUC score
-        return roc_auc_score(y_true, y_score)
+        return average_precision_score(y_true, y_score)
         
     def get_bin_accuracy(self):
         return self.best_k_score(self.ot_matrix, k=len(np.diagonal(self.ot_matrix)))

@@ -85,6 +85,9 @@ def main(cfg: DictConfig):
         # Create embeddings using configured model
         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
+        # Remove copied file again
+        #TODO: Remove file
+
     
     ### TRACKING ###
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
@@ -99,6 +102,7 @@ def main(cfg: DictConfig):
 
     ### GENERATING RESULTS (Trajectories and Scores) ###
     image_results_path = Path(RESULTS_PATH / cfg.experiment_name)
+    image_prob_path = Path(OT_PATH / cfg.experiment_name / "probabilities")
 
     if not cfg.skip_results_generation:
         # Create paths if they do not exist
