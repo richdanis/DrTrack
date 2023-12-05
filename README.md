@@ -34,3 +34,17 @@ Store it inside the evaluation/03_features folder. Check out the config_evaluati
 You can run only the setup part of the python script to setup the directory structure automatically.
 - To run the evaluation pipeline, configure your experiment in src/conf/config_evaluation.yaml and run:
 ```python src/evaluate_droplets.py```
+
+## Run on Euler
+First you need to create your environment on euler.
+```
+$ module load gcc/8.2.0 python_gpu/3.11.2
+$ python -m venv --system-site-packages env_name
+$ source env_name/bin/activate
+$ pip install -r euler/requirements.txt
+```
+Then you can need to submit the job with the following command:
+(You may want to change the device and job duration)
+```
+$ sbatch euler/track_droplets.sh "env_name"
+```
