@@ -1,6 +1,30 @@
 # ignore data
 data/**
+evaluation/**
 *.nd2
+
+# Include data necessary for testing
+!evaluation/01_simulated
+!evaluation/01_simulated/*
+
+# !evaluation/03_features
+# !evaluation/03_features/paired_patches_9_frames_1848_droplets_40x40.zip
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Ignore temporary files
+ground_truth_generation
+dslab
+
+# Git stuff
+**/__pycache__/
+
+# Ignore experiments - models
+experiments
+
+# Hydra files
+outputs
+
+# Efficient Net
+efficientnet_b1.pth

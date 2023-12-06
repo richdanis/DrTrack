@@ -1,0 +1,19 @@
+# Cost params
+alpha: 0.5 #position
+beta: 0.5 #embedding
+
+# Solver params
+max_iterations: 1000
+
+# Geometry params
+epsilon: "default" # "default" or float
+
+# Print losses
+print_convergence: true
+
+# Problem params
+tau_a: 0.999
+tau_b: 0.999
+
+# Save embedding dfs
+save_embedding_df: true

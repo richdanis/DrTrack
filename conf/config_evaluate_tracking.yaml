@@ -1,0 +1,43 @@
+# Setting for the preprocessing pipeline
+defaults:
+  - _self_
+  - extract_visual_embeddings: cl_efficientnet
+  - track: unb_reg_sinkhorn_evaluation_debug
+  - generate_results: scaled_ot
+  - evaluate: unbalanced_v1
+
+# Name for this experiment - will be used to name the output files and directories
+experiment_name: "unb_test_cl_efficientnet_v1"
+
+# Name of the simulated image file to be processed - should be in data_path/simulated_dir
+simulated_image: "small_mvt_1848_droplets.csv"
+
+# Path to paired_patches file - should be in data_path/feature_dir
+paired_patches: "paired_patches_9_frames_1848_droplets_40x40.npy"
+
+# Path Settings (relative to project root)
+project_path: "."
+data_path: "evaluation" #data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
+models_path: "checkpoints"
+
+# Evaluation directories (will be directories in data_path)
+simulated_dir: "01_simulated"
+preprocessed_dir: "02_preprocessed"
+feature_dir: "03_features"
+ot_dir: "04_ot"
+results_dir: "05_results"
+
+# Skip steps if they have already been completed
+skip_preprocessing: true
+skip_visual_embedding_extraction: true
+skip_tracking: true
+skip_results_generation: false
+skip_trajectory_generation: false
+skip_scoring: false
+
+# Detail level of the progress indications
+verbose: true
+tqdm_disable: false
+
+# Device Settings
+device: cpu

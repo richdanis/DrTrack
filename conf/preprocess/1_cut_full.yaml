@@ -1,0 +1,6 @@
+# Cut out a small region of the image
+pixel: -1
+
+# Number of cuts for each image (only relevant if pixel = -1)
+cuts_x: 1
+cuts_y: 1
