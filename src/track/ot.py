@@ -1,8 +1,11 @@
 import time
+from enum import Enum
+
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+from sklearn.metrics.pairwise import euclidean_distances, cosine_distances
 from tqdm import tqdm
 import torch
 
@@ -17,17 +20,25 @@ from ott.solvers.linear import sinkhorn
 from pathlib import Path
 import os
 
+EmbDist = Enum('EmbdDist', ['euclid', 'cosine'])
+
 
 @jax.tree_util.register_pytree_node_class
 class SpatioVisualCost(costs.CostFn):
     """Cost function for combined features (position and visual embedding information)."""
 
-    def __init__(self, alpha=0.5, beta=0.5):
+    def __init__(self, alpha, beta=None, embedding_dist: EmbDist = EmbDist.euclid):
+        super().__init__()
         self.alpha = alpha
-        self.beta = beta
+        if beta is None:
+            self.beta = 1 - alpha
+        else:
+            self.beta = beta
+
+        self.embedding_dist = embedding_dist
 
     def pairwise(self, x, y):
-        if x.ndim <= 2:
+        if x.size <= 2:
             return self.pairwise_spatial(x, y)
         else:
             return self.beta * self.pairwise_embedding(x, y) + self.alpha * self.pairwise_spatial(x, y)
@@ -36,7 +47,22 @@ class SpatioVisualCost(costs.CostFn):
         return mu.norm(x[:2] - y[:2])
 
     def pairwise_embedding(self, x, y):
-        return mu.norm(x[2:] - y[2:])
+        if self.embedding_dist == EmbDist.euclid:
+            return mu.norm(x[2:] - y[2:])
+        elif self.embedding_dist == EmbDist.cosine:
+            return 1 - jnp.dot(x[2:], y[2:]) / (jnp.linalg.norm(x[2:]) * jnp.linalg.norm(y[2:]))
+        else:
+            raise NotImplementedError(f'Distance {self.embedding_dist} not implemented. In ot.py.')
+
+    # The two functions below are necessary, because ott instantiates more classes of this type under the hood.
+    # If we don't define these 2 functions, the newly created objects will have default parameters.
+    def tree_flatten(self):  # noqa: D102
+        return (), (self.alpha, self.beta, self.embedding_dist)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):  # noqa: D102
+        del children
+        return cls(*aux_data)
 
 
 class OptimalTransport:
@@ -48,8 +74,10 @@ class OptimalTransport:
         self.verbose = cfg.verbose
         self.tqdm_disable = cfg.tqdm_disable
 
-        # Instantiate cost function
-        self.cost_fn = SpatioVisualCost(alpha=self.args.alpha, beta=self.args.beta)
+        # Instantiate cost function and params
+        self.embedding_dist = EmbDist[self.args.embedding_dist]
+        self.cost_fn = SpatioVisualCost(alpha=self.args.alpha,
+                                        embedding_dist=self.embedding_dist)
 
         # Instantiate solver for fused_gw version for better performance
         self.solver = jax.jit(
@@ -60,11 +88,52 @@ class OptimalTransport:
 
     def compute_ot_matrix(self, x, y):
         """Compute optimal transport between two point clouds."""
-        # Create geometry and problem
-        if self.args.epsilon == "default":
-            geom = pointcloud.PointCloud(jnp.array(x), jnp.array(y))
+
+        # Scale the data, so that cost weights and epsilon are meaningful
+        spatial_dists = euclidean_distances(x[:, :2], y[:, :2])
+        if x.shape[1] > 2:
+            visual_dists = cosine_distances(x[:, 2:],
+                                            y[:, 2:]) if self.embedding_dist == EmbDist.cosine else euclidean_distances(
+                x[:, 2:], y[:, 2:])
         else:
-            geom = pointcloud.PointCloud(jnp.array(x), jnp.array(y), epsilon=self.args.epsilon)
+            visual_dists = 0
+
+        # Use quantiles to avoid outliers
+        spatial_dist_range = np.quantile(spatial_dists, 0.95)
+        if self.verbose:
+            print("Stats before scaling")
+            print(
+                f"Spatial data distances 0.95 quantile: {spatial_dist_range}, max: {np.max(spatial_dists)}")
+            print(
+                f"Visual embeddings distances 0.95 quantile: {np.quantile(visual_dists, 0.95)}, max: {np.max(visual_dists)}")
+
+        if x.shape[1] <= 2:
+            visual_dist_range = 1.0
+        elif self.embedding_dist == EmbDist.cosine:
+            # Cosine distance is bounded by definition
+            visual_dist_range = 2.0
+        else:
+            visual_dist_range = np.quantile(visual_dists, 0.95)
+
+        x[:, :2] = visual_dist_range * x[:, :2] / spatial_dist_range
+        y[:, :2] = visual_dist_range * y[:, :2] / spatial_dist_range
+
+        if self.verbose:
+            new_spatial_dists = euclidean_distances(x[:, :2], y[:, :2])
+            print("Stats after scaling")
+            print(
+                f"Spatial data distances 0.95 quantile: {np.quantile(new_spatial_dists, 0.95)}, max: {np.max(new_spatial_dists)}")
+            print(
+                f"Visual embeddings distances 0.95 quantile: {np.quantile(visual_dists, 0.95)}, max: {np.max(visual_dists)}")
+
+        # Create geometry and problem
+        if self.args.relative_epsilon == "default":
+            geom = pointcloud.PointCloud(jnp.array(x), jnp.array(y), cost_fn=self.cost_fn)
+        else:
+            # We are using relative epsilon, because the ratio between mean values in the cost matrix and the epsilon
+            # is more informative than the epsilon itself.
+            geom = pointcloud.PointCloud(jnp.array(x), jnp.array(y), epsilon=self.args.relative_epsilon,
+                                         relative_epsilon=True, cost_fn=self.cost_fn)
 
         ot_prob = linear_problem.LinearProblem(geom,
                                                tau_a=self.args.tau_a,
@@ -160,7 +229,7 @@ class OptimalTransport:
             droplet_df = pd.read_csv(image_feature_path / cut_feature_droplet_name)
             embedding_df = np.load(image_feature_path / cut_feature_embedding_name, allow_pickle=True).item()
             embedding_df = pd.DataFrame.from_dict(embedding_df)
-            
+
             # Save embedding df
             if self.args.save_embedding_df:
                 name = "df_" + cut_feature_embedding_name.replace(".npy", ".csv")

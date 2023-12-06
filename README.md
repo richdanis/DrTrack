@@ -4,12 +4,12 @@ Data Science Lab 2023 at ETH Zurich. Challenge: Tracking Droplets in Microfluidi
 
 ## Team
 | Name                 | Email               | Github                                        |
-| -------------------- | ------------------- | --------------------------------------------- |
-| Sven Gutjahr | sgutjahr@ethz.ch | [svenlg](https://github.com/svenlg) |
-| Tiago Hungerland     | thungerland@ethz.ch     | [thungerland](https://github.com/thungerland)         |
-| Richard Danis        | rdanis@ethz.ch   | [richdanis](https://github.com/richdanis)     |
-| Weronika Ormaniec        | weronika.ormaniec@gmail.com   | [werkaaa](https://github.com/werkaaa)     |
-| Michael Vollenweider        | michavol@ethz.ch   | [michavol](https://github.com/michavol)     |
+| -------------------- |---------------------| --------------------------------------------- |
+| Sven Gutjahr | sgutjahr@ethz.ch    | [svenlg](https://github.com/svenlg) |
+| Tiago Hungerland     | thungerland@ethz.ch | [thungerland](https://github.com/thungerland)         |
+| Richard Danis        | rdanis@ethz.ch      | [richdanis](https://github.com/richdanis)     |
+| Weronika Ormaniec        | wormaniec@ethz.ch   | [werkaaa](https://github.com/werkaaa)     |
+| Michael Vollenweider        | michavol@ethz.ch    | [michavol](https://github.com/michavol)     |
 
 ## Setup for Linux
 - First create a python environment, using the requirements.txt
@@ -54,4 +54,3 @@ $ sbatch euler/track_droplets.sh "env_name"
 The model stored under checkpoints was trained on droplets containing cells only.
 You can download a model trained on droplets without cells from here:
 https://www.polybox.ethz.ch/index.php/s/a1N5XC2lZNmccvf
-
