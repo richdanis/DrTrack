@@ -2,7 +2,7 @@
 defaults:
   - _self_
   - extract_visual_embeddings: cl_efficientnet
-  - track: unb_reg_sinkhorn_evaluation_debug
+  - track: param_search
   - generate_results: scaled_ot
   - evaluate: unbalanced_v1
 
