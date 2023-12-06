@@ -16,9 +16,6 @@ frames: [3, 4, 5, 6, 7, 8, 9, 10]
 nr_cells_distribution: [0.7, 0.29, 0.01] # first entry is probability for 0 cells, second for 1 cell, etc.
 droplet_radius: 21
 
-# Type of information to be used for scoring
-decision_matrix_type: "scaled_ot" # "ot_matrix" or "scaled_ot" or "prob_matrix"
-
 # Scores to be computed
 accuracy: true
 accuracy_k: [100, 200, 500, 1500, -1]

@@ -3,7 +3,7 @@ defaults:
   - _self_
   - extract_visual_embeddings: cl_efficientnet
   - track: unb_reg_sinkhorn_evaluation_debug
-  - generate_results: scaled_ot
+  - generate_results: scaled_entries_eval
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
@@ -28,12 +28,12 @@ ot_dir: "04_ot"
 results_dir: "05_results"
 
 # Skip steps if they have already been completed
-skip_preprocessing: true
+skip_preprocessing: false
 skip_visual_embedding_extraction: true
-skip_tracking: true
+skip_tracking: false
 skip_results_generation: false
 skip_trajectory_generation: false
-skip_scoring: false
+skip_scoring: true
 
 # Detail level of the progress indications
 verbose: true

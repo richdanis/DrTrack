@@ -56,7 +56,7 @@ class OtEvaluation():
         scores = []
 
         # Get ot information type
-        dir_name = [dir for dir in os.listdir(self.image_ot_path) if dir.startswith(self.args.decision_matrix_type)][0]
+        dir_name = [dir for dir in os.listdir(self.image_ot_path) if dir.startswith("prob_matrix")][0]
         for file_name in os.listdir(self.image_ot_path / dir_name):
             if file_name.endswith(".npy"):
                 # Get frame numbers

@@ -24,7 +24,7 @@ defaults:
   - detect_droplets: ransac3
   - extract_visual_embeddings: cl_efficientnet
   - track: unb_reg_sinkhorn
-  - generate_results: scaled_ot
+  - generate_results: scaled_entries
 
 # Skip steps if they have already been completed
 skip_preprocessing: false # less than a few minutes for 4k*4k

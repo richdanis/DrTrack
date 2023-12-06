@@ -1,0 +1,3 @@
+uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks" or "original"
+prob_agregation: "average"
+evaluation_mode: True
