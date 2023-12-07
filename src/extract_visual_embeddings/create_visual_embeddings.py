@@ -31,7 +31,7 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
     embeddings: Dict
         A dictionary with droplet_id, frame and visual embedding for each droplet.
     """
-    print("model type", type(model))
+
     embeddings = {'embeddings': [], 'droplet_id': [], 'frame': []}
 
     loader = torch.utils.data.DataLoader(dataset, batch_size=cfg.extract_visual_embeddings.inference_batch_size,
@@ -39,13 +39,19 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
 
     model = model.to(cfg.device)
 
-    for patch_batch, droplet_ids, frames in tqdm(loader, disable=not cfg.verbose):
+    for patch_batch, droplet_ids, frames, cell_nrs in tqdm(loader, disable=not cfg.verbose):
         patch_batch = patch_batch.to(cfg.device)
-        with torch.no_grad():
 
-            embedding_batch = model(patch_batch)
+        # Embed only droplets with cells or all droplets depending on the flag
+        if cfg.extract_visual_embeddings.embed_without_cells:
+            embedding_mask = torch.ones_like(cell_nrs, dtype=torch.bool)
+        else:
+            embedding_mask = cell_nrs > 0
 
-            embedding_batch = embedding_batch.detach().cpu().numpy()
+        embedding_batch = np.zeros((patch_batch.shape[0], cfg.extract_visual_embeddings.embed_dim))
+        if torch.sum(embedding_mask) > 0:
+            with torch.no_grad():
+                embedding_batch[embedding_mask] = model(patch_batch[embedding_mask]).detach().cpu().numpy()
 
         for j in range(embedding_batch.shape[0]):
             embeddings['embeddings'].append(embedding_batch[j])
@@ -85,10 +91,12 @@ def create_and_save_droplet_embeddings(cfg: DictConfig, image_feature_path: Path
                 print(cut_patch_file_name)
 
             cut_patch_path = Path(image_feature_path / cut_patch_file_name)
-            dataset = DropletDataset(cut_patch_path)
+
+            droplet_base_file_name = cut_patch_file_name.replace("patches_", "").replace(".npy", "")
+            cut_droplet_path = Path(image_feature_path / f"droplets_{droplet_base_file_name}.csv")
+
+            dataset = DropletDataset(cut_patch_path, cut_droplet_path)
 
             droplet_embeddings_df = create_droplet_embeddings(cfg, dataset, model)
 
-            droplet_base_file_name = cut_patch_file_name.replace("patches_", "")
-
-            np.save(str(image_feature_path / f'embeddings_{droplet_base_file_name}'), droplet_embeddings_df)
+            np.save(str(image_feature_path / f'embeddings_{droplet_base_file_name}.npy'), droplet_embeddings_df)

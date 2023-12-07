@@ -107,12 +107,13 @@ class OptimalTransport:
             print(
                 f"Visual embeddings distances 0.95 quantile: {np.quantile(visual_dists, 0.95)}, max: {np.max(visual_dists)}")
 
-        if x.shape[1] <= 2:
-            visual_dist_range = 1.0
-        elif self.embedding_dist == EmbDist.cosine:
+        visual_dist_range = 1.0
+        if self.embedding_dist == EmbDist.cosine:
             # Cosine distance is bounded by definition
             visual_dist_range = 2.0
-        else:
+        elif self.embedding_dist == EmbDist.euclid and np.sum(visual_dists) > 0:
+            # We don't want to scale by visual_dist_range if it's zero, which can sometimes happen
+            # if all droplets are empty.
             visual_dist_range = np.quantile(visual_dists, 0.95)
 
         x[:, :2] = visual_dist_range * x[:, :2] / spatial_dist_range
@@ -143,6 +144,7 @@ class OptimalTransport:
         ot = jax.jit(self.solver)(ot_prob)
 
         if self.args.print_convergence:
+            # TODO: Think what to do when we gat a nan in the first step - it happens for one testing configuration.
             print(f'Sinkhorn has converged: {ot.converged}, in {jnp.sum(ot.errors > -1)} iterations\n'
                   f'Error upon last iteration: {ot.errors[(ot.errors > -1)][-1]:.4e}\n')
 
