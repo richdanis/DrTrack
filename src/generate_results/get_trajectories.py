@@ -64,14 +64,49 @@ def get_epsilon_dependent_id_mapping(cfg, ot_matrix):
 
     return this_frame_ids, next_frame_ids, probs
 
-def scale_ot_matrix(cfg, ot_matrix):
+def transform_to_entry_based_probability_matrix(cfg, ot_matrix):
     """
     This function scales the OT matrix to a range of [0,1].
     """
+
     # Scale onto 0-1 range
     ot_matrix_scaled = (ot_matrix - ot_matrix.min()) / (ot_matrix.max() - ot_matrix.min())
 
     return ot_matrix_scaled
+
+    ## VERSION 2 - more similar to rank based by using cutoff
+    # # Scale onto 0-1 range
+    # # Cut off the lowest 1% of the values
+    # ot_m = np.array(ot_matrix)
+   
+    # # Standardize and scale the entries
+    # ot_m = (ot_m - ot_m.min()) / (ot_m.max() - ot_m.min())
+
+    # # Flatten the matrix into 1D array
+    # flattened = np.array(ot_m).flatten()
+
+    # # Get max rank per vector along maximal dimension
+    # max_entry_per_vector = np.max(np.array(ot_m), axis=0)
+    # cut_off = np.min(max_entry_per_vector)
+
+    # # Get uncertainty resolution
+    # uncertainty_resolution = cfg.generate_results.uncertainty_resolution
+
+    # # Make sure to create contrast in probabilities where it matters
+    # flattened[flattened <= cut_off / uncertainty_resolution] = cut_off / uncertainty_resolution
+    
+    # # 0-1 normalize the ranks
+    # max_rank = np.max(flattened)
+    # min_rank = np.min(flattened)
+
+    # # Scale to 0-1 range
+    # prob_matrix = (np.array(ot_m) - min_rank) / (max_rank - min_rank)
+
+    # # Make sure that probabilities are uniformly distributed on [0,1]
+    # prob_matrix = ot_m
+    # prob_matrix[prob_matrix < 0] = 0
+
+    # return prob_matrix
 
 def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     """
@@ -87,10 +122,10 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     ranks = ranks.reshape(ot_matrix.shape)
 
     # Make sure to create contrast in probabilities where it matters
-    max_dim = np.argmax(ot_matrix.shape)
+    # max_dim = np.argmax(ot_matrix.shape)
     
     # Get max rank per vector along maximal dimension
-    max_rank_per_vector = np.max(ranks, axis=max_dim, )
+    max_rank_per_vector = np.max(ranks, axis=0)
     min_max_rank_per_vector = np.min(max_rank_per_vector)
 
     # Get uncertainty resolution
@@ -197,7 +232,7 @@ def get_epsilon_independent_id_mapping(cfg, ot_matrix, frame_id):
         prob_matrix = transform_to_rank_based_probability_matrix(cfg, ot_matrix)
 
     elif cfg.generate_results.uncertainty_type == "scaled_entries":
-        prob_matrix = scale_ot_matrix(cfg, ot_matrix)
+        prob_matrix = transform_to_entry_based_probability_matrix(cfg, ot_matrix)
 
     elif cfg.prob_matrix_type == "original":
         return get_epsilon_dependent_id_mapping(cfg, ot_matrix)

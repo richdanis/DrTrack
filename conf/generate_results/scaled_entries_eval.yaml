@@ -1,3 +1,4 @@
 uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks" or "original"
+uncertainty_resolution: 1 # Lower numbers give higher resolution
 prob_agregation: "average"
 evaluation_mode: True

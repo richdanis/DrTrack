@@ -3,14 +3,14 @@ defaults:
   - _self_
   - extract_visual_embeddings: cl_efficientnet
   - track: param_search
-  - generate_results: scaled_ranks_eval
+  - generate_results: scaled_entries_eval
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
 experiment_name: "unb_test_cl_efficientnet_v1"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "large_mvt_1848_droplets.csv"
+simulated_image: "small_mvt_1848_droplets.csv"
 
 # Path to paired_patches file - should be in data_path/feature_dir
 paired_patches: "paired_patches_9_frames_1848_droplets_40x40.npy"
@@ -28,12 +28,12 @@ ot_dir: "04_ot"
 results_dir: "05_results"
 
 # Skip steps if they have already been completed
-skip_preprocessing: true
+skip_preprocessing: false
 skip_visual_embedding_extraction: true
-skip_tracking: true
+skip_tracking: false
 skip_results_generation: false
 skip_trajectory_generation: false
-skip_scoring: true
+skip_scoring: false
 skip_calibration_plot: false
 
 # Detail level of the progress indications
