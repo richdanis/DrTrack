@@ -21,7 +21,7 @@ defaults:
   - _self_
   - preprocess: 4_cuts_small
   - detect_droplets: ransac3
-  - extract_visual_embeddings: cl_efficientnet
+  - extract_visual_embeddings: droplets_all
   - track: param_search
   - generate_results: scaled_entries
 

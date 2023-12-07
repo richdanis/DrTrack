@@ -1,0 +1,4 @@
+inference_batch_size: 32
+model_checkpoint_path: checkpoints/2023-12-04_21-08-07_empty_droplets_dim_20.pth
+embed_without_cells: True
+embed_dim: 20
