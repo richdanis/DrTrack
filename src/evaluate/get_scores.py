@@ -63,6 +63,10 @@ class OtEvaluation():
         # List of k values to compute accuracy
         k_values = self.args.accuracy_k
 
+        # For total auroc, auprc
+        y_true_all = []
+        y_prob_all = []
+
         # Retrieve frame ids from results df
         id_cols = sorted([col for col in results_df.columns if col.startswith("id_")])
         for id_col in id_cols[:-1]:
@@ -82,6 +86,8 @@ class OtEvaluation():
             # get true positives
             y_true = results_df[f"id_{id}"] == results_df[f"id_{id+1}"]
             y_prob = results_df[f"p{id}_{id+1}"].to_numpy()
+            y_true_all.append(y_true)
+            y_prob_all.append(y_prob)
     
             # get auprc, and auroc
             if self.args.auprc:
@@ -127,8 +133,30 @@ class OtEvaluation():
             # store scores for current frame
             scores.append(scores_frame)
 
+
+
         # Save scores
         scores_df = pd.DataFrame.from_records(scores)
+        
+
+        # Compute total auroc, auprc
+        if self.args.auprc or self.args.auroc:
+            y_true_all = np.concatenate(y_true_all)
+            y_prob_all = np.concatenate(y_prob_all)
+
+        if self.args.auprc:
+            auprc = average_precision_score(y_true_all, y_prob_all)
+            scores_df[f"auprc_total"] = auprc
+
+            if self.verbose:
+                print(f'\nAll Frames:\nauprc_total: {auprc}')
+        
+        if self.args.auroc:
+            auroc = roc_auc_score(y_true_all, y_prob_all)
+            scores_df[f"auroc_total"] = auroc
+
+            if self.verbose:
+                print(f'auroc_total: {auroc}')
 
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)
