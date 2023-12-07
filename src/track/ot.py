@@ -79,7 +79,7 @@ class OptimalTransport:
         self.cost_fn = SpatioVisualCost(alpha=self.args.alpha,
                                         embedding_dist=self.embedding_dist)
 
-        # Instantiate solver for fused_gw version for better performance
+        # Instantiate Sinkhorn solver only once for better performance
         self.solver = jax.jit(
             sinkhorn.Sinkhorn(
                 max_iterations=self.args.max_iterations
