@@ -22,6 +22,7 @@ from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
 from evaluate.preprocess_simulated import SimulatedData
 from evaluate.get_scores import OtEvaluation
+from evaluate.calibration_plot import save_calibration_plot
 #from utils.globals import *
 
 import hydra
@@ -114,6 +115,9 @@ def main(cfg: DictConfig):
         if not cfg.skip_scoring:
             ot_evaluation = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path)
             ot_evaluation.compute_and_store_scores()
+
+        if not cfg.skip_calibration_plot:
+            save_calibration_plot(cfg, image_results_path)
 
 if __name__ == '__main__':
     main()

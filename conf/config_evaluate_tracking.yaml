@@ -3,7 +3,7 @@ defaults:
   - _self_
   - extract_visual_embeddings: cl_efficientnet
   - track: param_search
-  - generate_results: scaled_entries
+  - generate_results: scaled_entries_eval
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
@@ -33,7 +33,8 @@ skip_visual_embedding_extraction: false
 skip_tracking: false
 skip_results_generation: false
 skip_trajectory_generation: false
-skip_scoring: false
+skip_scoring: true
+skip_calibration_plot: false
 
 # Detail level of the progress indications
 verbose: true

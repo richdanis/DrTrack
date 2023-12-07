@@ -144,7 +144,7 @@ class OptimalTransport:
 
         if self.args.print_convergence:
             print(f'Sinkhorn has converged: {ot.converged}, in {jnp.sum(ot.errors > -1)} iterations\n'
-                  f'Error upon last iteration: {ot.errors[(ot.errors > -1)][-1]:.4e}')
+                  f'Error upon last iteration: {ot.errors[(ot.errors > -1)][-1]:.4e}\n')
 
         return ot.matrix
 
