@@ -1,4 +1,11 @@
-uncertainty_type: "scaled_ranks" # "scaled_entries" or "scaled_ranks" or "original"
-uncertainty_resolution: 8 # Lower numbers give higher resolution
+# Which method to use for uncertainty estimation
+uncertainty_type: "scaled_ranks" # "scaled_entries" or "scaled_ranks"
+
+# Resolution of the uncertainty values. Lower numbers give higher resolution. Very small changes (+-0.01) already have a large effect.
+uncertainty_resolution: 1 
+
+# How to aggregate the probabilities for the same droplet from different frames
 prob_agregation: "average"
+
+# To let general pipeline code know that this is an evaluation run
 evaluation_mode: False

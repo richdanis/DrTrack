@@ -20,17 +20,20 @@ droplet_radius: 21
 accuracy: true
 accuracy_k: [100, 200, 500, 1000, -1]
 
-rank_accuracy: false
-rank_accuracy_k: [1, 2, 3, 5, 10]
+auprc: true
+auroc: true
 
-auroc_matchable: false
-auroc_matchable_threshold_stride: "default" # "default" or int
+# rank_accuracy: false
+# rank_accuracy_k: [1, 20, 30, 50, 100]
 
-auroc_all: false
-auroc_all_threshold_stride: "default"
+# auroc_matchable: false
+# auroc_matchable_threshold_stride: "default" # "default" or int
 
-auroc_rank_matchable: false
-auroc_rank_matchable_num_ranks: 15
+# auroc_all: false
+# auroc_all_threshold_stride: "default"
 
-auroc_rank_all: false
-auroc_rank_all_num_ranks: 15
+# auroc_rank_matchable: false
+# auroc_rank_matchable_num_ranks: 20
+
+# auroc_rank_all: false
+# auroc_rank_all_num_ranks: 20
