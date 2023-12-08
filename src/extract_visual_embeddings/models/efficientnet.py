@@ -1,11 +1,13 @@
 import torch
 import torchvision
+import os
 
 
 class EfficientNet(torch.nn.Module):
 
     def __init__(self, cfg):
         model_args = cfg.extract_visual_embeddings
+        checkpoint_path = os.path.join(cfg.checkpoint_dir, model_args.checkpoint)
         super().__init__()
 
         # initialize with pretrained weights
@@ -24,7 +26,7 @@ class EfficientNet(torch.nn.Module):
             self.layers.classifier = torch.nn.Linear(1280, model_args.embed_dim)
 
         self.load_state_dict(
-            torch.load(model_args.model_checkpoint_path, map_location=torch.device(cfg.device))['model_state_dict'])
+            torch.load(checkpoint_path, map_location=torch.device(cfg.device))['model_state_dict'])
 
     def forward(self, x):
         assert len(x.shape) == 4, "Inputs must be images of shape (N, 2, H, W)"

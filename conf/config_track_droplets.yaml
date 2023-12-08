@@ -5,6 +5,7 @@ experiment_name: "small_mvt_2_debug"
 # Path Settings (relative to project root)
 project_path: "."
 data_path: "data"
+checkpoint_dir: "checkpoints"
 
 # Data directories (will be directories in data_path)
 raw_dir: "01_raw"

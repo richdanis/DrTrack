@@ -1,11 +1,20 @@
 command:
-  - ../evaluating/bin/python3.11
+  - ../tracking/bin/python3.11
   - ${program}
-  - ${args}
   - ${args_no_hyphens}
+  - data_path=/cluster/scratch/${envvar:USER}/data/evaluation
+  - models_path=/cluster/scratch/${envvar:USER}/checkpoints
 program: src/evaluate_tracking.py
 method: grid
 parameters:
+  wandb:
+    values:
+      - true
+  simulated_image:
+    values:
+      - small_mvt_1848_droplets.csv
+      - medium_mvt_1848_droplets.csv
+      - large_mvt_1848_droplets.csv
   track.alpha:
     values:
       - 0.0
@@ -27,5 +36,4 @@ parameters:
   extract_visual_embeddings:
     values:
       - droplets_all
-      - droplets_all_no_cells
       - droplets_only_cells

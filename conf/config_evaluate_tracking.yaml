@@ -17,8 +17,8 @@ paired_patches: "paired_patches_9_frames_1848_droplets_40x40.npy"
 
 # Path Settings (relative to project root)
 project_path: "."
-data_path: "evaluation" #data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
-models_path: "checkpoints"
+data_path: "evaluation"
+checkpoint_dir: "checkpoints"
 
 # Evaluation directories (will be directories in data_path)
 simulated_dir: "01_simulated"
