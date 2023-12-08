@@ -33,7 +33,7 @@ Store it inside the evaluation/03_features folder. Check out the config_evaluati
 ```python src/track_droplets.py```
 You can run only the setup part of the python script to setup the directory structure automatically.
 - To run the evaluation pipeline, configure your experiment in src/conf/config_evaluation.yaml and run:
-```python src/evaluate_droplets.py```
+```python src/evaluate_tracking.py```
 
 ## Run on Euler
 First you need to create your environment on euler.

@@ -42,3 +42,6 @@ tqdm_disable: false
 
 # Device Settings
 device: cpu
+
+# wandb
+wandb: false

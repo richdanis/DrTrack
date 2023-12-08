@@ -9,6 +9,6 @@
 
 module load gcc/8.2.0 python_gpu/3.11.2
 
-export JAX_PLATFORMS=GPU,CPU
+export JAX_PLATFORMS=cuda,cpu
 
 $HOME/$1/bin/python3.11 $HOME/Pipeline/src/track_droplets.py

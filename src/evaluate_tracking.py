@@ -1,29 +1,16 @@
 import os
-import time
-import argparse
 from pathlib import Path
-import nd2
 import numpy as np
-import pandas as pd
 import shutil
 import jax
+import wandb
 
-jax.devices("cpu")[0]
-
-from preprocess.for_detection import raw_to_preprocessed_for_detection
-from preprocess.for_embeddings import raw_to_preprocessed_for_embeddings
-from preprocess.for_detection import raw_cut_to_preprocessed_for_detection
-from preprocess.for_embeddings import raw_cut_to_preprocessed_for_embeddings
-from preprocess.for_all import preprocess_cuts_and_store_all
-from detect_droplets.detect_and_store import detect_and_store_all
-from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
 from evaluate.preprocess_simulated import SimulatedData
 from evaluate.get_scores import OtEvaluation
 from evaluate.calibration_plot import save_calibration_plot
-#from utils.globals import *
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -33,26 +20,27 @@ def create_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def setup_directories(cfg):
-    # Create directories if they do not exist
-    create_dir(Path(cfg.data_path))
-    create_dir(Path(cfg.models_path))
-    create_dir(Path(cfg.data_path) / Path(cfg.simulated_dir))
-    create_dir(Path(cfg.data_path) / Path(cfg.preprocessed_dir))
-    create_dir(Path(cfg.data_path) / Path(cfg.feature_dir))
-    create_dir(Path(cfg.data_path) / Path(cfg.ot_dir))
-    create_dir(Path(cfg.data_path) / Path(cfg.results_dir))
-
 @hydra.main(config_path="../conf", config_name="config_evaluate_tracking", version_base=None)
 def main(cfg: DictConfig):
+
+    if cfg.device == 'cpu':
+        jax.devices("cpu")[0]
+
+    if cfg.wandb:
+        os.environ["WANDB__SERVICE_WAIT"] = "300"
+
+        wandb.init(
+            project="DrTrack",
+            entity="dslab-23",
+            config=OmegaConf.to_container(cfg),
+            dir="logs"
+        )
     # Setup directories
     SIMULATED_PATH = Path(cfg.data_path) / Path(cfg.simulated_dir)
     PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
     FEATURE_PATH = Path(cfg.data_path) / Path(cfg.feature_dir)
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
-    setup_directories(cfg)
-
 
     ### PREPROCESSING ###
     # Preprocess simulated data
@@ -118,6 +106,9 @@ def main(cfg: DictConfig):
 
         if not cfg.skip_calibration_plot:
             save_calibration_plot(cfg, image_results_path)
+
+    if cfg.wandb:
+        wandb.finish()
 
 if __name__ == '__main__':
     main()

@@ -1,29 +1,9 @@
-import jax
-import jax.numpy as jnp
 import pandas as pd 
-import torch
 import numpy as np
-
-import matplotlib.pyplot as plt
-from IPython import display
-
-import ott
-from ott import utils
-from ott.math import utils as mu
-import tqdm
-from ott import problems
-from ott.geometry import geometry, pointcloud, costs
-from ott.solvers import linear
-from ott.solvers.linear import acceleration, sinkhorn, sinkhorn_lr
-from ott.tools.sinkhorn_divergence import sinkhorn_divergence
-from ott.problems.linear import linear_problem
+import wandb
 
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
-
-import os
-
-from .preprocess_simulated import SimulatedData
 
 class OtEvaluation():
     """
@@ -36,6 +16,7 @@ class OtEvaluation():
         self.args = cfg.evaluate
         self.results_path = results_path
         self.verbose = cfg.verbose
+        self.wandb = cfg.wandb
 
         # Load simulated data
         results_df_name = "results_" + cfg.experiment_name + ".csv"
@@ -131,14 +112,16 @@ class OtEvaluation():
                         print(f'{k}_accuracy: {top_k_accuracy[-1]}')
 
             # store scores for current frame
+            if self.wandb:
+                for key, value in scores_frame.items():
+                    if key != "frames":
+                        wandb.log({key: value})
+    
             scores.append(scores_frame)
-
-
 
         # Save scores
         scores_df = pd.DataFrame.from_records(scores)
         
-
         # Compute total auroc, auprc
         if self.args.auprc or self.args.auroc:
             y_true_all = np.concatenate(y_true_all)
@@ -150,6 +133,9 @@ class OtEvaluation():
 
             if self.verbose:
                 print(f'\nAll Frames:\nauprc_total: {auprc}')
+
+            if self.wandb:
+                wandb.log({"auprc_total": auprc})
         
         if self.args.auroc:
             auroc = roc_auc_score(y_true_all, y_prob_all)
@@ -157,6 +143,9 @@ class OtEvaluation():
 
             if self.verbose:
                 print(f'auroc_total: {auroc}')
+
+            if self.wandb: 
+                wandb.log({"auroc_total": auroc})
 
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)
@@ -169,6 +158,8 @@ class OtEvaluation():
         scores_df.loc['max'] = max_row
 
         scores_df.to_csv(self.results_path / "scores.csv", index=False)
+
+
 
     ### OLD CODE ###
     # def compute_and_store_scores_old(self):
