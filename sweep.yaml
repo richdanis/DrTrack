@@ -15,6 +15,11 @@ parameters:
       - small_mvt_1848_droplets.csv
       - medium_mvt_1848_droplets.csv
       - large_mvt_1848_droplets.csv
+  track:
+    values:
+      - tau_9999
+      - tau_999
+      - tau_99
   track.alpha:
     values:
       - 0.0

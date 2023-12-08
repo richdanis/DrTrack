@@ -4,6 +4,8 @@ import numpy as np
 import shutil
 import jax
 import wandb
+import time
+import datetime
 
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
@@ -41,6 +43,10 @@ def main(cfg: DictConfig):
     FEATURE_PATH = Path(cfg.data_path) / Path(cfg.feature_dir)
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
+
+    # change experiment name to timestamp
+    cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
+
 
     ### PREPROCESSING ###
     # Preprocess simulated data
