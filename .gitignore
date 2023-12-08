@@ -8,6 +8,8 @@ data/**
 # logs
 logs/**
 
+euler
+
 # python cache in all directories
 **/__pycache__/**
 
