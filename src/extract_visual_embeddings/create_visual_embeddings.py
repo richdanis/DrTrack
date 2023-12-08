@@ -38,6 +38,7 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
                                          shuffle=False)
 
     model = model.to(cfg.device)
+    model.eval()
 
     for patch_batch, droplet_ids, frames, cell_nrs in tqdm(loader, disable=not cfg.verbose):
         patch_batch = patch_batch.to(cfg.device)
