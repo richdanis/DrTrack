@@ -3,6 +3,9 @@ data/**
 evaluation/**
 *.nd2
 
+# ignore logs
+logs
+
 # Include data necessary for testing
 !evaluation/01_simulated
 !evaluation/01_simulated/*
