@@ -5,6 +5,9 @@ command:
   - data_path=/cluster/scratch/${envvar:USER}/data/evaluation
   - checkpoint_dir=/cluster/scratch/${envvar:USER}/checkpoints
   - wandb=true
+  - skip_preprocessing=true
+  - skip_visual_embedding_extraction=true
+  - skip_calibration_plot=true
 program: src/evaluate_tracking.py
 method: grid
 parameters:

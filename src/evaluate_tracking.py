@@ -44,9 +44,8 @@ def main(cfg: DictConfig):
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 
-    # change experiment name to timestamp
-    cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
-
+    # Whack workaround for hyperparameter sweep
+    cfg.experiment_name = cfg.extract_visual_embeddings.experiment_name
 
     ### PREPROCESSING ###
     # Preprocess simulated data
@@ -85,12 +84,13 @@ def main(cfg: DictConfig):
 
     
     ### TRACKING ###
+    # change experiment name to timestamp
+    cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_ot_path)
 
-        test_features = np.random.rand(3, 2, 3)
         ot = OptimalTransport(cfg)
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
 

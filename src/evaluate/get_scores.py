@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 import wandb
+import os
 
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
@@ -19,8 +20,10 @@ class OtEvaluation():
         self.wandb = cfg.wandb
 
         # Load simulated data
-        results_df_name = "results_" + cfg.experiment_name + ".csv"
-        self.results_df = pd.read_csv(self.results_path / results_df_name)
+        for file in os.listdir(self.results_path):
+            if file.startswith("results"):
+                results_df_name = file
+                self.results_df = pd.read_csv(self.results_path / results_df_name)
 
         # OLD CODE
         # self.image_ot_path = image_ot_path

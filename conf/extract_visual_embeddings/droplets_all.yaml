@@ -1,4 +1,5 @@
 inference_batch_size: 32
 checkpoint: 2023-12-04_21-08-07_empty_droplets_dim_20.pth
 embed_without_cells: True
+experiment_name: all_dim_20 # NAME CANNOT CONTAIN the word "droplets" !!!
 embed_dim: 20
