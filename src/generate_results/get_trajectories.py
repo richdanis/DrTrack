@@ -206,7 +206,7 @@ def filter_and_reindex_droplets(cfg, droplet_table: pd.DataFrame, frame_id: int,
     droplets = droplet_table[droplet_table['frame'] == frame_id]
 
     # Filter the droplets that are cut out to imitate the unbalanced real data
-    if cfg.generate_results.evaluation_mode == True and cfg.evaluate.cutout == True:
+    if cfg.generate_results.evaluation_mode == True and cfg.evaluate.cutout_image == True:
         droplets = droplets[droplets['center_x'] > cfg.evaluate.cutout.x_min]
         droplets = droplets[droplets['center_x'] < cfg.evaluate.cutout.x_max]
         droplets = droplets[droplets['center_y'] > cfg.evaluate.cutout.y_min]

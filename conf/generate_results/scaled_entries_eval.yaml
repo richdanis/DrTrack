@@ -5,7 +5,7 @@ uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks"
 uncertainty_resolution: 1 
 
 # How to aggregate the probabilities for the same droplet from different frames
-prob_agregation: "average"
+prob_agregation: "average" # "multiplication"
 
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: True

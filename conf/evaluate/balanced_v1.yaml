@@ -1,10 +1,10 @@
 # Option to cut out a part of the image - whole image is always (0,0) to (500,500)
 cutout_image: false
-cutout:
-  x_min: 200
-  x_max: 400
-  y_min: 200
-  y_max: 400
+# cutout:
+#   x_min: 200
+#   x_max: 400
+#   y_min: 200
+#   y_max: 400
 
 # Possible to reduce the number of droplets to be processed
 stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
