@@ -1,0 +1,27 @@
+# results table (leave away result and .csv)
+results: "small_mvt_2_debug_y0_x0"
+image_name: "Small_mvt_1.nd2"
+
+# Name of the experiment to visualize
+experiment_name: "small_mvt_1"
+
+# All channels to visualize (False means only DAPI and BF)
+all_channels: False
+
+# Frames to visualize (end_frame = -1 means all frames)
+start_frame: 0
+end_frame: -1
+
+# Path Settings (relative to project root)
+project_path: "."
+data_path: "data"
+
+# Data directories (relative to data_path)
+raw_dir: "01_raw"
+results_dir: "05_results"
+
+# Print progress
+verbose: False
+
+# Save the refined tracked droplet data after labeling
+save: False
