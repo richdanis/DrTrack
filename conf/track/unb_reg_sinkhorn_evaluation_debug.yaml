@@ -1,12 +1,13 @@
 # Cost params
 alpha: 0.7 #position
-beta: 0.3 #embedding
+beta: None
+embedding_dist: euclid # cosine or euclid
 
 # Solver params
-max_iterations: 100
+max_iterations: 5000
 
 # Geometry params
-epsilon: 0.05 # "default" or float
+relative_epsilon: 0.001 # "default" or float
 
 # Print losses
 print_convergence: true

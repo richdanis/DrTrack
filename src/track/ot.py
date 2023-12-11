@@ -86,8 +86,11 @@ class OptimalTransport:
             )
         )
 
-    def compute_ot_matrix(self, x, y):
+    def compute_ot_matrix(self, features_curr, features_next):
         """Compute optimal transport between two point clouds."""
+        # THIS IS NECESSARY - PYTHON IS PASS BY REFERENCE
+        x = features_curr.copy()
+        y = features_next.copy()
 
         # Scale the data, so that cost weights and epsilon are meaningful
         spatial_dists = euclidean_distances(x[:, :2], y[:, :2])

@@ -2,12 +2,12 @@
 defaults:
   - _self_
   - extract_visual_embeddings: droplets_all
-  - track: param_search
+  - track: unb_reg_sinkhorn_evaluation_debug
   - generate_results: scaled_ranks_eval
-  - evaluate: balanced_v1
+  - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "unb_test_cl_efficientnet_v1"
+experiment_name: "find_frame_bug"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
 simulated_image: "small_mvt_1848_droplets.csv"

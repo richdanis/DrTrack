@@ -85,7 +85,9 @@ def main(cfg: DictConfig):
     
     ### TRACKING ###
     # change experiment name to timestamp
-    cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
+
+    ## The following should only be used for parameter sweeps - otherwise, when running the script manually, the experiment name should be set in the config file
+    # cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
     if not cfg.skip_tracking:
         # Create paths if they do not exist
