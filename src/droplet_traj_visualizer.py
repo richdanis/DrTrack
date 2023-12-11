@@ -15,10 +15,10 @@ class Trajectories:
 
     def __init__(self, cfg, RAW_PATH, RESULTS_PATH):
 
-        if os.path.exists(f"{RESULTS_PATH}/flagged_results_{cfg.results}.csv"):
-            tmp = pd.read_csv(f"{RESULTS_PATH}/flagged_results_{cfg.results}.csv")
+        if os.path.exists(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_results_{cfg.results}.csv"):
+            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_results_{cfg.results}.csv")
         else:
-            tmp = pd.read_csv(f"{RESULTS_PATH}/results_{cfg.results}.csv")
+            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/results_{cfg.results}.csv")
         
         self.final_output = tmp
         counter = 0
