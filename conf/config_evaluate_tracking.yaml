@@ -41,7 +41,7 @@ verbose: true
 tqdm_disable: false
 
 # Device Settings
-device: cuda
+device: cpu
 
 # wandb
 wandb: false

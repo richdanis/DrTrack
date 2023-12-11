@@ -8,6 +8,8 @@ command:
   - skip_preprocessing=true
   - skip_visual_embedding_extraction=true
   - skip_calibration_plot=true
+  - evaluate=unbalanced_v1
+  - evaluate.auroc=false
 program: src/evaluate_tracking.py
 method: grid
 parameters:

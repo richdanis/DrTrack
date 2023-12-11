@@ -90,5 +90,5 @@ class SimulatedData():
             df_list += [df]
         
         droplets_df = pd.concat(df_list)
-        droplets_df.to_csv(Path(self.image_processed_path / f"droplets_{self.experiment_name}.csv"), index=False)
+        droplets_df.to_csv(Path(self.image_processed_path / f"droplets_.csv"), index=False)
     
