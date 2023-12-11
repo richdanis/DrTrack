@@ -1,5 +1,3 @@
-import os
-import argparse
 from pathlib import Path
 
 import hydra
@@ -9,7 +7,6 @@ from visualizer import interactive_explorer
 
 @hydra.main(config_path="../conf", config_name="visualizer", version_base=None)
 def main(cfg: DictConfig):
-
 
     assert cfg.raw_image[-4:] == '.nd2', 'Image mast be an .nd2 file, or add ".nd2" to the end of the name'
     assert cfg.results[-4:] == '.csv', 'Results mast be an .csv file, or add ".csv" to the end of the name'

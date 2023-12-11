@@ -7,7 +7,7 @@ experiment_name: "small_mvt_3_full"
 
 # Path Settings (relative to project root)
 project_path: "."
-data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
+data_path: "data"
 checkpoint_dir: "checkpoints"
 
 # Data directories (relative to data_path)

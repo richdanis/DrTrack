@@ -15,10 +15,10 @@ class Trajectories:
 
     def __init__(self, cfg, RAW_PATH, RESULTS_PATH):
 
-        if os.path.exists(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_results_{cfg.results}.csv"):
-            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_results_{cfg.results}.csv")
+        if os.path.exists(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_{cfg.results}"):
+            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_{cfg.results}")
         else:
-            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/results_{cfg.results}.csv")
+            tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/{cfg.results}")
         
         self.final_output = tmp
         counter = 0
@@ -33,7 +33,6 @@ class Trajectories:
         IMAGE_PATH = Path(RAW_PATH / cfg.image_name)
         self.image = get_image_as_ndarray(channels=self.channels, path_to_image=IMAGE_PATH, frames=self.frames)
         
-
         # cut all columns that are not needed since frames are specified
         full_prob_col = self.final_output.columns[self.final_output.columns.str.match(f'p{cfg.start_frame}-{end_frame-1}')]
         full_traj_prob = self.final_output[full_prob_col]
@@ -66,7 +65,7 @@ class Trajectories:
         stride = self.get_stride(cfg.results)
         self.trajectories = self.adjust_positions(self.trajectories, stride[0], stride[1])
 
-        self.radius = 25
+        self.radius = cfg.radius
         self.y_max = self.image.shape[2]
         self.x_max = self.image.shape[3]
 
@@ -212,37 +211,48 @@ class Visualizer:
         images = self.traj.get_group_patch(self.current_idx)
         if self.all_channels:
             for col_idx, (img_0, img_1, img_2, img_3, img_4) in enumerate(images):
-                self.axarr[0, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
-                self.axarr[0, col_idx].imshow(img_0, vmin=0)
-                self.axarr[1, col_idx].imshow(img_1, vmin=0)
-                self.axarr[2, col_idx].imshow(img_2, vmin=0)
-                self.axarr[3, col_idx].imshow(img_3, vmin=0)
-                self.axarr[4, col_idx].imshow(img_4, vmin=0)
+                # img_0 == DAPI, img_1 == FITC, img_2 == TRITC, img_3 == Cy5, img_4 == BF
+                # But want to display in the order BF, DAPI, FITC, TRITC, Cy5
+                self.axarr[0, col_idx].imshow(img_4, vmin=0)
                 if col_idx == 0:
-                    self.axarr[1, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                    self.axarr[0, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
-                    self.axarr[1, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
-
+                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
+                self.axarr[0, col_idx].set_xlabel('x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
+                                                  + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
+                                                  fontsize=10)
+                self.axarr[1, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
+                self.axarr[1, col_idx].imshow(img_0, vmin=0)
+                self.axarr[2, col_idx].imshow(img_1, vmin=0)
+                self.axarr[3, col_idx].imshow(img_2, vmin=0)
+                self.axarr[4, col_idx].imshow(img_3, vmin=0)
+               
             # the original order is DAPI, FITC, TRITC, Cy5, BF
-            self.axarr[0, 0].set_ylabel("DAPI", fontsize=10)
-            self.axarr[1, 0].set_ylabel("FITC", fontsize=10)
-            self.axarr[2, 0].set_ylabel("TRITC", fontsize=10)
-            self.axarr[3, 0].set_ylabel("Cy5", fontsize=10)
-            self.axarr[4, 0].set_ylabel("BF", fontsize=10)
+            self.axarr[0, 0].set_ylabel("BF", fontsize=10)
+            self.axarr[1, 0].set_ylabel("DAPI", fontsize=10)
+            self.axarr[2, 0].set_ylabel("FITC", fontsize=10)
+            self.axarr[3, 0].set_ylabel("TRITC", fontsize=10)
+            self.axarr[4, 0].set_ylabel("Cy5", fontsize=10)
+
 
         else:
             for col_idx, (img_0, img_1) in enumerate(images):
-                self.axarr[0, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
-                self.axarr[0, col_idx].imshow(img_0, vmin=0)
-                self.axarr[1, col_idx].imshow(img_1, vmin=0)
+                # img_0 == DAPI, img_1 == BF
+                # But want to display in the order BF, DAPI
+                self.axarr[0, col_idx].imshow(img_1, vmin=0)
                 if col_idx == 0:
-                    self.axarr[1, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                    self.axarr[0, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
-                    self.axarr[1, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
-            
+                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
+                self.axarr[0, col_idx].set_xlabel('x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
+                                                    + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
+                                                    fontsize=10)
+                self.axarr[1, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
+                self.axarr[1, col_idx].imshow(img_0, vmin=0)
+               
             # the original order is DAPI, BF
-            self.axarr[0, 0].set_ylabel("DAPI", fontsize=10)
-            self.axarr[1, 0].set_ylabel("BF", fontsize=10)
+            self.axarr[0, 0].set_ylabel("BF", fontsize=10)
+            self.axarr[1, 0].set_ylabel("DAPI", fontsize=10)
 
         plt.draw()
         # Update the label text
