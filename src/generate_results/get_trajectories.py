@@ -1,18 +1,18 @@
-import time
-import jax
-import jax.numpy as jnp
+# import time
+# import jax
+# import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+# from tqdm import tqdm
 import torch 
 
-import matplotlib.pyplot as plt
-from IPython import display
+# import matplotlib.pyplot as plt
+# from IPython import display
 
-from ott import utils
-from ott.geometry import costs, pointcloud
-from ott.problems.linear import linear_problem
-from ott.solvers.linear import sinkhorn
+# from ott import utils
+# from ott.geometry import costs, pointcloud
+# from ott.problems.linear import linear_problem
+# from ott.solvers.linear import sinkhorn
 from pathlib import Path
 import os
 
@@ -252,7 +252,7 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
     # Rename columns and drop droplet_ids
     result = result.rename(columns={'center_x': 'x0', 
                                     'center_y': 'y0', 
-                                    'nr_cells': 'nr_cells_0'}).drop(columns=['reindexed_droplet_id','droplet_id'])
+                                    'nr_cells': 'nr_cells0'}).drop(columns=['reindexed_droplet_id','droplet_id'])
     
     # Add starting probabilities of 1
     full_prob = np.ones((droplets_first_frame.shape[0],), dtype=np.float64)
