@@ -258,7 +258,7 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
     full_prob = np.ones((droplets_first_frame.shape[0],), dtype=np.float64)
     
     # Define types
-    result = result.astype({'x0': float, 'y0': float,'nr_cells_0': 'Int32'})
+    result = result.astype({'x0': float, 'y0': float,'nr_cells0': 'Int32'})
 
     # Id column for merging
     curr_droplet_ids = droplets_first_frame.copy()
@@ -444,9 +444,9 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
 #     result = result.rename(columns={'center_x': f'x0', 
 #                                     'center_y': f'y0', 
 #                                     'radius': f'r0',
-#                                     'nr_cells': f'nr_cells_0'})
+#                                     'nr_cells': f'nr_cells0'})
 #     result['droplet_id_next'] = pd.DataFrame({'droplet_id': np.arange(max_droplets)}, dtype=int)
-#     result = result.astype({'x0': float, 'y0': float,'r0': 'Int32','nr_cells_0': 'Int32'})
+#     result = result.astype({'x0': float, 'y0': float,'r0': 'Int32','nr_cells0': 'Int32'})
 #     for i, df in tracking_table.groupby('frame'):
 #         next = droplets[i+1]
 
@@ -461,8 +461,8 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
 #                                         'center_x': f'x{i+1}', 
 #                                         'center_y': f'y{i+1}',
 #                                         'radius': f'r{i+1}',
-#                                         'nr_cells': f'nr_cells_{i+1}'}).drop(columns='droplet_id_y')
-#         result = result.astype({f'x{i+1}': float, f'y{i+1}': float, f'r{i+1}': 'Int32',f'nr_cells_{i+1}': 'Int32'})
+#                                         'nr_cells': f'nr_cells{i+1}'}).drop(columns='droplet_id_y')
+#         result = result.astype({f'x{i+1}': float, f'y{i+1}': float, f'r{i+1}': 'Int32',f'nr_cells{i+1}': 'Int32'})
 
 #         # Set the probability of transitions that are not possible to zero
 #         # get rows where there are no entries for x, y positions
