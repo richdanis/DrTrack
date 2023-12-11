@@ -45,13 +45,30 @@ def main(cfg: DictConfig):
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 
     # Whack workaround for hyperparameter sweep
-    cfg.experiment_name = cfg.extract_visual_embeddings.experiment_name
+    # cfg.experiment_name = cfg.extract_visual_embeddings.experiment_name
 
     ### PREPROCESSING ###
     # Preprocess simulated data
     image_simulated = Path(SIMULATED_PATH / cfg.simulated_image)
     image_preprocessed_path = Path(PREPROCESSED_PATH / cfg.experiment_name)
     image_feature_path = Path(FEATURE_PATH / cfg.experiment_name)
+
+    # for sweep
+    if cfg.extract_visual_embeddings == "droplets_all":
+        if cfg.simulated_image == "small_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "small_all")
+        elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "medium_all")
+        elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "large_all")
+    elif cfg.extract_visual_embeddings == "droplets_only_cells":
+        if cfg.simulated_image == "small_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "small_only_cells")
+        elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "medium_only_cells")
+        elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
+            image_feature_path = Path(FEATURE_PATH / "large_only_cells")
+
     create_dir(image_preprocessed_path)
     create_dir(image_feature_path)
 
@@ -69,7 +86,7 @@ def main(cfg: DictConfig):
 
         # Copy paired patches to data_path/feature_dir
         paired_patches_path = FEATURE_PATH / Path(cfg.paired_patches)
-        new_name = "patches_" + cfg.experiment_name + ".npy"
+        new_name = "patches_.npy"
         new_path = image_feature_path / Path(new_name)
 
         # Copy to required location if it does not exist
@@ -79,14 +96,12 @@ def main(cfg: DictConfig):
         # Create embeddings using configured model
         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
-        # Remove copied file again
-        #TODO: Remove file
-
     
     ### TRACKING ###
     # change experiment name to timestamp
     cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
+
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_ot_path)
@@ -97,7 +112,6 @@ def main(cfg: DictConfig):
 
     ### GENERATING RESULTS (Trajectories and Scores) ###
     image_results_path = Path(RESULTS_PATH / cfg.experiment_name)
-    image_prob_path = Path(OT_PATH / cfg.experiment_name / "probabilities")
 
     if not cfg.skip_results_generation:
         # Create paths if they do not exist
