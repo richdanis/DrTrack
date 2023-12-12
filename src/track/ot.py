@@ -1,4 +1,3 @@
-import time
 from enum import Enum
 
 import jax
@@ -8,9 +7,6 @@ import pandas as pd
 from sklearn.metrics.pairwise import euclidean_distances, cosine_distances
 from tqdm import tqdm
 import torch
-
-import matplotlib.pyplot as plt
-from IPython import display
 
 from ott import utils
 from ott.math import utils as mu
@@ -27,37 +23,48 @@ EmbDist = Enum('EmbdDist', ['euclid', 'cosine'])
 class SpatioVisualCost(costs.CostFn):
     """Cost function for combined features (position and visual embedding information)."""
 
-    def __init__(self, alpha, beta=None, embedding_dist: EmbDist = EmbDist.euclid):
+    def __init__(self, alpha, beta=None, gamma=None, use_nr_cells=True, embedding_dist: EmbDist=EmbDist.euclid):
         super().__init__()
         self.alpha = alpha
-        if beta is None:
+        if (beta is None) or (beta == 'None'):
             self.beta = 1 - alpha
         else:
             self.beta = beta
 
+        if (gamma is None) or (gamma == 'None'):
+            self.gamma = 0.5 * self.alpha
+        else:
+            self.gamma = gamma
+
+        self.use_nr_cells = use_nr_cells
         self.embedding_dist = embedding_dist
 
     def pairwise(self, x, y):
         if x.size <= 2:
             return self.pairwise_spatial(x, y)
+        elif self.use_nr_cells:
+            return self.alpha * self.pairwise_spatial(x, y) + self.beta * self.pairwise_embedding(x, y) + self.gamma * self.pairwise_nr_cells(x, y)
         else:
-            return self.beta * self.pairwise_embedding(x, y) + self.alpha * self.pairwise_spatial(x, y)
+            return self.alpha * self.pairwise_spatial(x, y) + self.beta * self.pairwise_embedding(x, y)
 
     def pairwise_spatial(self, x, y):
         return mu.norm(x[:2] - y[:2])
+    
+    def pairwise_nr_cells(self, x, y):
+        return mu.norm(x[2] - y[2])
 
     def pairwise_embedding(self, x, y):
         if self.embedding_dist == EmbDist.euclid:
-            return mu.norm(x[2:] - y[2:])
+            return mu.norm(x[3:] - y[3:])
         elif self.embedding_dist == EmbDist.cosine:
-            return 1 - jnp.dot(x[2:], y[2:]) / (jnp.linalg.norm(x[2:]) * jnp.linalg.norm(y[2:]))
+            return 1 - jnp.dot(x[3:], y[3:]) / (jnp.linalg.norm(x[3:]) * jnp.linalg.norm(y[3:]))
         else:
             raise NotImplementedError(f'Distance {self.embedding_dist} not implemented. In ot.py.')
 
     # The two functions below are necessary, because ott instantiates more classes of this type under the hood.
     # If we don't define these 2 functions, the newly created objects will have default parameters.
     def tree_flatten(self):  # noqa: D102
-        return (), (self.alpha, self.beta, self.embedding_dist)
+        return (), (self.alpha, self.beta, self.gamma, self.use_nr_cells, self.embedding_dist)
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):  # noqa: D102
@@ -77,6 +84,9 @@ class OptimalTransport:
         # Instantiate cost function and params
         self.embedding_dist = EmbDist[self.args.embedding_dist]
         self.cost_fn = SpatioVisualCost(alpha=self.args.alpha,
+                                        beta=self.args.beta,
+                                        gamma=self.args.gamma,
+                                        use_nr_cells=self.args.use_nr_cells,
                                         embedding_dist=self.embedding_dist)
 
         # Instantiate Sinkhorn solver only once for better performance
@@ -94,29 +104,27 @@ class OptimalTransport:
 
         # Scale the data, so that cost weights and epsilon are meaningful
         spatial_dists = euclidean_distances(x[:, :2], y[:, :2])
-        if x.shape[1] > 2:
-            visual_dists = cosine_distances(x[:, 2:],
-                                            y[:, 2:]) if self.embedding_dist == EmbDist.cosine else euclidean_distances(
-                x[:, 2:], y[:, 2:])
+        if x.shape[1] > 3 and self.embedding_dist == EmbDist.cosine:
+            visual_dists = cosine_distances(x[:, 3:], y[:, 3:]) 
+        elif x.shape[1] > 3 and self.embedding_dist == EmbDist.euclid:
+            visual_dists = euclidean_distances(x[:, 3:], y[:, 3:])
         else:
             visual_dists = 0
 
         # Use quantiles to avoid outliers
         spatial_dist_range = np.quantile(spatial_dists, 0.95)
         if self.verbose:
-            print("Stats before scaling")
-            print(
-                f"Spatial data distances 0.95 quantile: {spatial_dist_range}, max: {np.max(spatial_dists)}")
-            print(
-                f"Visual embeddings distances 0.95 quantile: {np.quantile(visual_dists, 0.95)}, max: {np.max(visual_dists)}")
+            print("Distances before scaling")
+            print(f"Spatial: 95%-quantile: {spatial_dist_range:.3f}, max: {np.max(spatial_dists):.3f}")
+            print(f"Visual embeddings: 95%-quantile: {np.quantile(visual_dists, 0.95):.3f}, max: {np.max(visual_dists):.3f}")
 
         visual_dist_range = 1.0
         if self.embedding_dist == EmbDist.cosine:
             # Cosine distance is bounded by definition
             visual_dist_range = 2.0
         elif self.embedding_dist == EmbDist.euclid and np.sum(visual_dists) > 0:
-            # We don't want to scale by visual_dist_range if it's zero, which can sometimes happen
-            # if all droplets are empty.
+            # We don't want to scale by visual_dist_range if it's zero, 
+            # which can sometimes happen if all droplets are empty.
             visual_dist_range = np.quantile(visual_dists, 0.95)
 
         x[:, :2] = visual_dist_range * x[:, :2] / spatial_dist_range
@@ -124,11 +132,9 @@ class OptimalTransport:
 
         if self.verbose:
             new_spatial_dists = euclidean_distances(x[:, :2], y[:, :2])
-            print("Stats after scaling")
-            print(
-                f"Spatial data distances 0.95 quantile: {np.quantile(new_spatial_dists, 0.95)}, max: {np.max(new_spatial_dists)}")
-            print(
-                f"Visual embeddings distances 0.95 quantile: {np.quantile(visual_dists, 0.95)}, max: {np.max(visual_dists)}")
+            print("Distances after scaling")
+            print(f"Spatial: 95%-quantile: {np.quantile(new_spatial_dists, 0.95):.3f}, max: {np.max(new_spatial_dists):.3f}")
+            print(f"Visual embeddings: 95%-quantile: {np.quantile(visual_dists, 0.95):.3f}, max: {np.max(visual_dists):.3f}")
 
         # Create geometry and problem
         if self.args.relative_epsilon == "default":
@@ -142,7 +148,7 @@ class OptimalTransport:
         ot_prob = linear_problem.LinearProblem(geom,
                                                tau_a=self.args.tau_a,
                                                tau_b=self.args.tau_b)
-
+        
         # Solve problem using given solver
         ot = jax.jit(self.solver)(ot_prob)
 
@@ -156,7 +162,7 @@ class OptimalTransport:
     def extract_features(self, droplet_df, embedding_df):
         """Extract features from droplet and embedding dataframes."""
         # Get droplet features
-        droplet_df = droplet_df[['center_x', 'center_y', 'droplet_id']]
+        droplet_df = droplet_df[['center_x', 'center_y', 'nr_cells', 'droplet_id']]
         droplet_df = droplet_df.set_index(['droplet_id'])
 
         # Get embedding features
@@ -169,8 +175,8 @@ class OptimalTransport:
 
         # Concatenate features
         features_df['combined'] = features_df.apply(
-            lambda row: np.concatenate(([row['center_x'], row['center_y']], row['embeddings']), axis=0), axis=1)
-        features = features_df['combined'].to_numpy()
+            lambda row: np.concatenate(([row['center_x'], row['center_y'], row['nr_cells']], row['embeddings']), axis=0), axis=1)
+        
         # Stack 'combined' into a 2D numpy array and convert to float32
         features = np.stack(features_df['combined'].values).astype(np.float32)
 
