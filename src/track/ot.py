@@ -1,5 +1,5 @@
 from enum import Enum
-
+from typing import Optional, Tuple
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -23,7 +23,15 @@ EmbDist = Enum('EmbdDist', ['euclid', 'cosine'])
 class SpatioVisualCost(costs.CostFn):
     """Cost function for combined features (position and visual embedding information)."""
 
-    def __init__(self, alpha, beta=None, gamma=None, use_nr_cells=True, embedding_dist: EmbDist=EmbDist.euclid):
+    def __init__(self, alpha: float, 
+                       beta: Optional[float] = None, 
+                       gamma: Optional[float] = None, 
+                       use_nr_cells: bool = True, 
+                       embedding_dist: EmbDist=EmbDist.euclid):
+        """
+        Initialize the cost function.
+        """
+        
         super().__init__()
         self.alpha = alpha
         if (beta is None) or (beta == 'None'):
