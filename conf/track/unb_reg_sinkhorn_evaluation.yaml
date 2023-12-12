@@ -1,19 +1,22 @@
 # Cost params
-alpha: 0.9 #position
-beta: 0.1 #embedding
+alpha: 0.8 # position
+beta: 0.15 # None means 1-alpha
+gamma: 0.05 # None means alpha * 0.5
+use_nr_cells: True # True means use nr_cells in the loss function
+embedding_dist: euclid # cosine or euclid
 
 # Solver params
 max_iterations: 5000
 
 # Geometry params
-epsilon: 0.001 # "default" or float
+relative_epsilon: 0.001 # "default" or float
 
 # Print losses
 print_convergence: true
 
 # Problem params
-tau_a: 0.9999
-tau_b: 0.9999
+tau_a: 0.999
+tau_b: 0.999
 
 # Save embedding dfs
 save_embedding_df: false

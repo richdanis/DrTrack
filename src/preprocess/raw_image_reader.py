@@ -24,7 +24,7 @@ def get_image_as_ndarray(channels: list,
     frames: Optional[list] - a list of frames in case not all of them are used
     all_channels: bool (default = False)
         if true returns all channels - otherwise as indicated in channels
-      pixels: int
+    pixels: int
         num of pixels to cut out of the full image, if -1 the full image is taken
     ----------
     Returns:
@@ -81,24 +81,30 @@ def get_image_cut_as_ndarray(cfg,
                             pixel_dimensions: tuple,
                             all_frames: bool = True, 
                             all_channels: bool = False, 
-                            frames = None,
-                            pixel: int = -1) -> np.ndarray:
+                            frames: Optional[list] = None,
+                            pixel: Optional[int] = -1) -> np.ndarray:
     """
-    Get the clip as a ndarray - PRIMARY FUNCTION
+    Get the image as a ndarray - PRIMARY FUNCTION
     ----------
-    Parameters:″
-    frames: list[int]
-        frames wanted from the clip
+    Parameters:
     channels: list[str]
         channels wanted from: [DAPI, FITC, TRITC, Cy5, BF] 
             'BF' is the identifier for the bright-field images,
             'DAPI' is the identifier for the DAPI channel
     path_to_image: str
-        relative path to the clip (clip as .nd2 file)
+        relative path to the image (image as .nd2 file)
+    upper_left_corner: tuple
+        coordinates of the upper left corner of the cutout (y,x)
+    pixel_dimensions: tuple
+        dimensions of the cutout (y,x)
     all_frames: bool (default = True)
         if true returns all frames - otherwise as indicated in frames 
     all_channels: bool (default = False)
         if true returns all channels - otherwise as indicated in channels 
+    frames: Optional[list] 
+        a list of frames in case not all of them are used
+    pixel: int
+        num of pixels to cut out of the full image, if -1 the full image is taken
     ----------
     Returns:
     ndarray: 4d numpy array (uint16)
