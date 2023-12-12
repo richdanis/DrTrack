@@ -280,7 +280,7 @@ class Visualizer:
             self.rows_false.remove(tmp)
         elif tmp in self.rows_unsure:
             self.rows_unsure.remove(tmp)
-        self.on_next_clicked()
+        self.on_next_clicked(event)
 
     def on_unsure_clicked(self, event):
         if self.verbose:
@@ -292,7 +292,7 @@ class Visualizer:
             self.rows_false.remove(tmp)
         elif tmp in self.rows_true:
             self.rows_true.remove(tmp)
-        self.on_next_clicked()
+        self.on_next_clicked(event)
 
     def on_false_clicked(self, event):
         if self.verbose:
@@ -304,7 +304,7 @@ class Visualizer:
             self.rows_true.remove(tmp)
         elif tmp in self.rows_unsure:
             self.rows_unsure.remove(tmp)
-        self.on_next_clicked()
+        self.on_next_clicked(event)
 
     def on_delete_clicked(self, event):
         if self.verbose:
@@ -316,7 +316,7 @@ class Visualizer:
             self.rows_true.remove(self.current_idx)
         elif self.current_idx in self.rows_unsure:
             self.rows_unsure.remove(self.current_idx)
-        self.on_next_clicked()
+        self.on_next_clicked(event)
 
     def on_prev_clicked(self, event):
         if self.current_idx == 0:

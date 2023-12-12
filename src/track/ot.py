@@ -31,7 +31,7 @@ class SpatioVisualCost(costs.CostFn):
         """
         Initialize the cost function.
         """
-        
+
         super().__init__()
         self.alpha = alpha
         if (beta is None) or (beta == 'None'):
@@ -129,7 +129,7 @@ class OptimalTransport:
         visual_dist_range = 1.0
         if self.embedding_dist == EmbDist.cosine:
             # Cosine distance is bounded by definition
-            visual_dist_range = 2.0
+            visual_dist_range = np.quantile(visual_dists, 0.95)
         elif self.embedding_dist == EmbDist.euclid and np.sum(visual_dists) > 0:
             # We don't want to scale by visual_dist_range if it's zero, 
             # which can sometimes happen if all droplets are empty.
