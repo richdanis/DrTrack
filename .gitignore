@@ -13,5 +13,6 @@ euler
 # python cache in all directories
 **/__pycache__/**
 
-
+2023-12-04_10-34-14_dim_20.pth
+2023-12-04_21-08-07_empty_droplets_dim_20.pth
 efficientnet_b1.pth
