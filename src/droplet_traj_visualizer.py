@@ -380,6 +380,7 @@ class Visualizer:
         # Clear the contents of the TextBox after processing the input
         text_box.set_val('')
 
+
 @hydra.main(config_path="../conf", config_name="droplet_traj_visualizer", version_base=None)
 def main(cfg: DictConfig):
 

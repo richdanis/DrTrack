@@ -15,7 +15,7 @@ def preprocess_cut_and_store(cfg, raw_image_path: Path, upper_left_corner: tuple
 
 def preprocess_cuts_and_store_all(cfg, RAW_PATH:str, preprocessed_path: str, image_name: str):
     """
-    Preprocess the .nd2 images seperated into cuts and save as .npy arrays.
+    Preprocess the .nd2 images separated into cuts and save as .npy arrays.
     """
     # Create paths
     raw_image_path = Path(RAW_PATH / cfg.raw_image)
