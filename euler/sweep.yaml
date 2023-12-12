@@ -10,6 +10,7 @@ command:
   - skip_calibration_plot=true
   - evaluate=unbalanced_v1
   - evaluate.auroc=false
+  - sweep=true
 program: src/evaluate_tracking.py
 method: grid
 parameters:
