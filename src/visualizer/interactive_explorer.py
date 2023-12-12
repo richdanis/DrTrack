@@ -13,7 +13,7 @@ from matplotlib.widgets import LassoSelector
 from matplotlib.lines import Line2D
 
 sys.path.append('src/')
-from preprocess.raw_image_reader import get_image_as_ndarray
+from preprocess.raw_image_reader import get_image_cut_as_ndarray
 
 PROJECT_PATH = Path(os.getcwd())
 DATA_PATH = Path(PROJECT_PATH / "data")
@@ -47,7 +47,7 @@ all_lines = None
 trajectory_beginning = None
 
 
-def select_trajectories(image_path, results_path, image_name, pixel=-1):
+def select_trajectories(image_path, results_path, image_name, y_stride, x_stride):
     # Must declare to use the global variables
     global results_df_x
     global results_df_y
@@ -61,8 +61,8 @@ def select_trajectories(image_path, results_path, image_name, pixel=-1):
     # There is no real need to drop the NA rows
     results_df['discard'] = True
 
-    results_df_x = results_df[[i for i in results_df.columns if str(i).startswith("x")]].astype(np.float32)
-    results_df_y = results_df[[i for i in results_df.columns if str(i).startswith("y")]].astype(np.float32)
+    results_df_x = results_df[[i for i in results_df.columns if str(i).startswith("x")]].astype(np.float32) + x_stride
+    results_df_y = results_df[[i for i in results_df.columns if str(i).startswith("y")]].astype(np.float32) + y_stride
 
     trajectory_beginning = np.zeros((results_df_x.shape[0], 2))
 
@@ -79,7 +79,10 @@ def select_trajectories(image_path, results_path, image_name, pixel=-1):
         plt.setp(line, gid=str(idx))
 
     # Load the image and plot each frame
-    image = get_image_as_ndarray(["BF"], image_path, all_frames=True, all_channels=False, pixel=pixel)
+    image = get_image_cut_as_ndarray(None, ["BF"], image_path, 
+                                    upper_left_corner=(0, 0),
+                                    pixel_dimensions=(-1,-1))
+    
     frames = []
     for i, frame in enumerate(image):
         f = plt.imshow(frame[0], cmap="gray", alpha=0.3)

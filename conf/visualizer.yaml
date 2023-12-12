@@ -1,6 +1,5 @@
-results: "results_small_mvt_1_y0_x0.csv"
+results: "results_small_mvt_1_y0_x2325.csv"
 raw_image: "Small_mvt_1.nd2"
-pixel: 1500
 
 # Name of the experiment to visualize
 experiment_name: "small_mvt_1"
