@@ -6,7 +6,7 @@ import matplotlib.widgets as widgets
 from pathlib import Path
 import os
 import re
-from preprocess.raw_image_reader import get_image_as_ndarray
+from preprocess.raw_image_reader import get_image_cut_as_ndarray
 import hydra
 from omegaconf import DictConfig
 
@@ -31,7 +31,10 @@ class Trajectories:
 
         self.channels = ['DAPI', 'BF'] if not cfg.all_channels else ['DAPI', 'FITC', 'TRITC', 'Cy5', 'BF']
         IMAGE_PATH = Path(RAW_PATH / cfg.image_name)
-        self.image = get_image_as_ndarray(channels=self.channels, path_to_image=IMAGE_PATH, frames=self.frames)
+        self.image = get_image_cut_as_ndarray(None, channels=self.channels, path_to_image=IMAGE_PATH, 
+                                              upper_left_corner=(0,0),
+                                              pixel_dimensions=(-1,-1),
+                                              frames=self.frames)
         
         # cut all columns that are not needed since frames are specified
         full_prob_col = self.final_output.columns[self.final_output.columns.str.match(f'p{cfg.start_frame}-{end_frame-1}')]

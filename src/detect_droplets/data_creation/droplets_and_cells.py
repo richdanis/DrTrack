@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 import pandas as pd
-import argparse
 from tqdm.auto import tqdm
 from . import manual_circle_hough, cell_detector, droplet_retriever
 from pathlib import Path
@@ -151,7 +150,13 @@ def get_droplet_output(bf_image, refine, radius_min = 12, radius_max = 25):
 
 # The input image should be an ndarray with shape (f,c,h,w) where f = frames, c = channels, h = height and w = width of the image.
 # IMPORTANT: Datatype should be uint16 just as with the raw images and BF and DAPI must be channels Nr 0 and 1 respectively
-def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refine, optional_output_directory, optional_output, radius_min = 12, radius_max = 25):
+def generate_output_from_ndarray(cfg, 
+                                 input_image: np.ndarray, 
+                                 output_string_droplets: Path,
+                                 refine: bool,
+                                 radius_min: int = 12, 
+                                 radius_max: int = 25):
+    
     nr_frames = input_image.shape[0]
     nr_channels = input_image.shape[1]
 
@@ -208,48 +213,7 @@ def generate_output_from_ndarray(cfg, input_image, output_string_droplets, refin
                                    "intensity_score": local_cells_intens[coord[0], coord[1]],
                                    "persistence_score": local_cells_pers[coord[0], coord[1]]})
                 cell_id_counter = cell_id_counter + 1
-        if optional_output:
-            to_display = np.float32(np.transpose(np.asarray([visualization_channel * 1, (bf_channel - bf_channel.min()) / (bf_channel.max() - bf_channel.min()), 1.0 * (dapi_channel - dapi_channel.min()) / (dapi_channel.max() - dapi_channel.min())]), [1, 2, 0]))
-            cv.imwrite(optional_output_directory + 'detection_visualization_frame_' + str(frame_nr) + '.tiff', to_display)
-    
+      
     droplet_df = pd.DataFrame(droplets)
     droplet_df.to_csv(output_string_droplets, index = False)
 
-    # cell_df = pd.DataFrame(cells_dict)
-    # cell_df.to_csv(output_string_cells, index = False)
-
-
-def main():
-
-    parser = argparse.ArgumentParser(description='Droplets and Cells Processing')
-
-    parser.add_argument('--imgname', required=True, help='Image name')
-    parser.add_argument('--imgdir', required=True, help='Image directory')
-    parser.add_argument('--outdir', help='Output directory (optional, defaults to input directory)')
-    parser.add_argument('--outid', help='Output ID (optional, will append to output table names)')
-    parser.add_argument('-r','--refine', action='store_true', help='Use refined droplet detection')
-    parser.add_argument('-o','--optional', action='store_true', help='Generate output images')
-
-    args = parser.parse_args()
-
-    imgname = args.imgname
-    output_path = args.outdir
-    output_id = '_id' + args.outid if args.outid else ''
-
-    if not output_path:
-        output_path = args.imgdir
-        print('Output Directory set to: ' + output_path)
-
-    complete_image_path = args.imgdir + imgname + '.nd2'
-    complete_output_path_droplets = output_path + imgname + '_droplets' + output_id + '.csv'
-    complete_output_path_cells = output_path + imgname + '_cells' + output_id + '.csv'
-
-    print('Input file is ' + complete_image_path)
-    print('Output file for droplets is ' + complete_output_path_droplets)
-    print('Output file for cells is ' + complete_output_path_cells)
-
-    # Call the generate_output function with the necessary arguments
-    # generate_output(complete_image_path, complete_output_path_droplets, complete_output_path_cells, args.refine, output_path, args.optional)
-
-if __name__ == "__main__":
-    main()

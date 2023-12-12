@@ -82,7 +82,7 @@ def get_patch(image, center_y, center_x, radius, buffer=3, suppress_rest=True, s
 
 def create_droplet_patches(image: np.ndarray, droplet_feature_table: pd.DataFrame, buffer: int = 3,
                            suppress_rest: bool = True, suppression_slack: int = 1,
-                           discard_boundaries=False) -> Dict:
+                           discard_boundaries: bool = False) -> Dict:
     """
     Create a dataframe with droplet patches.
     ----------

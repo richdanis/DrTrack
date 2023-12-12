@@ -2,7 +2,6 @@ import os
 import time
 from pathlib import Path
 
-import numpy as np
 import hydra
 from omegaconf import DictConfig
 import jax
@@ -28,6 +27,7 @@ def setup_directories(cfg):
     create_dir(Path(cfg.data_path) / Path(cfg.feature_dir))
     create_dir(Path(cfg.data_path) / Path(cfg.ot_dir))
     create_dir(Path(cfg.data_path) / Path(cfg.results_dir))
+
 
 @hydra.main(config_path="../conf", config_name="config_track_droplets", version_base=None)
 def main(cfg: DictConfig):

@@ -1,18 +1,12 @@
 import os
-import re
 from pathlib import Path
-import toml
-import pandas as pd
-import random
-import logging
-import torch
 import numpy as np
 from .data_creation import droplets_and_cells
 
 def detect_and_store_cut(cfg,
-                         cut_file_name,
-                         FEATURE_PATH, 
-                         PREPROCESSED_PATH) -> None:
+                         cut_file_name: Path,
+                         FEATURE_PATH: Path, 
+                         PREPROCESSED_PATH: Path) -> None:
 
     # Retrieve image
     preprocessed_cut_path = Path(PREPROCESSED_PATH / cut_file_name)
@@ -21,15 +15,16 @@ def detect_and_store_cut(cfg,
     droplet_feature_file_name = preprocessed_cut_path.stem.replace("preprocessed_drpdtc_", "")
 
     droplet_feature_path = Path(FEATURE_PATH / f"droplets_{droplet_feature_file_name}.csv")
-    #cell_feature_path = Path(FEATURE_PATH / f"cells_{image_name}.csv")
+    
     droplets_and_cells.generate_output_from_ndarray(cfg,
                                                     preprocessed_cut, 
                                                     droplet_feature_path,
-                                                    True, "", False, 
+                                                    True,
                                                     radius_min = cfg.detect_droplets.radius_min, 
                                                     radius_max = cfg.detect_droplets.radius_max)
 
-def detect_and_store_all(cfg, image_preprocessed_path, image_feature_path):
+
+def detect_and_store_all(cfg, image_preprocessed_path: Path, image_feature_path: Path):
     """ 
     Detect droplets and cells in all preprocessed cuts of an image and store them in a csv file
     """
