@@ -1,6 +1,5 @@
-
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "small_mvt_2_debug"
+experiment_name: "small_mvt_3"
 
 # Path Settings (relative to project root)
 project_path: "."
@@ -15,12 +14,12 @@ ot_dir: "04_ot"
 results_dir: "05_results"
 
 # Name of the raw image file to be processed - should be in data_path/raw_dir
-raw_image: "Small mvt 1.nd2"
+raw_image: "Small mvt 3.nd2"
 
 # Setting for the preprocessing pipeline
 defaults:
   - _self_
-  - preprocess: 4_cuts_small
+  - preprocess: 1_cut_full
   - detect_droplets: ransac3
   - extract_visual_embeddings: droplets_all
   - track: param_search

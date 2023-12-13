@@ -1,9 +1,8 @@
-# results table (leave away result and .csv)
-results: "results_small_mvt_1_y0_x0.csv"
-image_name: "Small_mvt_1.nd2"
+results: "results_small_mvt_3_y0_x0.csv"
+image_name: "Small mvt 3.nd2"
 
 # Name of the experiment to visualize
-experiment_name: "small_mvt_1"
+experiment_name: "small_mvt_3"
 
 # All channels to visualize (False means only DAPI and BF)
 all_channels: False

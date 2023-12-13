@@ -1,13 +1,12 @@
-results: "results_small_mvt_1_y0_x2325.csv"
-raw_image: "Small_mvt_1.nd2"
+results: "results_small_mvt_3_y0_x0.csv"
+raw_image: "Small mvt 3.nd2"
 
 # Name of the experiment to visualize
-experiment_name: "small_mvt_1"
+experiment_name: "small_mvt_3"
 
 # Path Settings (relative to project root)
 project_path: "."
 data_path: "data"
-checkpoint_dir: "checkpoints"
 
 # Data directories (relative to data_path)
 raw_dir: "01_raw"

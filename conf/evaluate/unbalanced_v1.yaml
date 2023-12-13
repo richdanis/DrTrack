@@ -13,7 +13,7 @@ stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
 frames: [3, 4, 5, 6, 7, 8, 9, 10]
 
 # Probabilities for numbers of cells in droplet and droplet radius
-nr_cells_distribution: [0.7, 0.29, 0.01] # first entry is probability for 0 cells, second for 1 cell, etc.
+nr_cells_distribution: [1.0, 0.0, 0.0] # first entry is probability for 0 cells, second for 1 cell, etc.
 droplet_radius: 21
 
 # Scores to be computed

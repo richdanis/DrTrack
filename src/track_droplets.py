@@ -103,7 +103,7 @@ def main(cfg: DictConfig):
     # End timer
     end_time = time.time()
     if cfg.verbose:
-        print(f"\nTotal processing time: {round(end_time - start_time)} seconds")
+        print(f"\nTotal processing time: {round(end_time - start_time)/60} minutes")
 
 
 if __name__ == '__main__':
