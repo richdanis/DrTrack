@@ -22,9 +22,9 @@ def create_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
+
 @hydra.main(config_path="../conf", config_name="config_evaluate_tracking", version_base=None)
 def main(cfg: DictConfig):
-
     if cfg.device == 'cpu':
         jax.devices("cpu")[0]
 
@@ -71,9 +71,12 @@ def main(cfg: DictConfig):
     create_dir(image_feature_path)
 
     if not cfg.skip_preprocessing:
-        sim_data = SimulatedData(cfg, image_simulated, image_feature_path)
+        if len(cfg.paired_patches_metadata) == 0:
+            real_droplet_metadata_path = None
+        else:
+            real_droplet_metadata_path = Path(FEATURE_PATH / cfg.paired_patches_metadata)
+        sim_data = SimulatedData(cfg, image_simulated, image_feature_path, real_droplet_metadata_path)
         sim_data.create_and_store_position_dfs()
-
 
     ### VISUAL EMBEDDING EXTRACTION ###
     # Check conf/extract_features.yaml for settings
@@ -94,7 +97,6 @@ def main(cfg: DictConfig):
         # Create embeddings using configured model
         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
-    
     ### TRACKING ###
     # change experiment name to timestamp
     ## The following should only be used for parameter sweeps - otherwise, when running the script manually, the experiment name should be set in the config file
@@ -108,7 +110,6 @@ def main(cfg: DictConfig):
 
         ot = OptimalTransport(cfg)
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
-
 
     ### GENERATING RESULTS (Trajectories and Scores) ###
     image_results_path = Path(RESULTS_PATH / cfg.experiment_name)
@@ -128,11 +129,12 @@ def main(cfg: DictConfig):
             save_calibration_plot(cfg, image_results_path)
 
     if cfg.wandb:
-        wandb.log({"alpha": cfg.track.alpha, 
+        wandb.log({"alpha": cfg.track.alpha,
                    "dist": cfg.track.embedding_dist,
                    "tau": cfg.track.tau_a,
                    "relative_epsilon": cfg.track.relative_epsilon})
         wandb.finish()
+
 
 if __name__ == '__main__':
     main()
