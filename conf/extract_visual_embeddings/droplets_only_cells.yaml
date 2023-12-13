@@ -1,3 +1,4 @@
+name: droplets_only_cells
 inference_batch_size: 32
 checkpoint: 2023-12-04_10-34-14_dim_20.pth
 embed_without_cells: True

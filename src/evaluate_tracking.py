@@ -44,9 +44,6 @@ def main(cfg: DictConfig):
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 
-    # Whack workaround for hyperparameter sweep
-    # cfg.experiment_name = cfg.extract_visual_embeddings.experiment_name
-
     ### PREPROCESSING ###
     # Preprocess simulated data
     image_simulated = Path(SIMULATED_PATH / cfg.simulated_image)
@@ -54,20 +51,21 @@ def main(cfg: DictConfig):
     image_feature_path = Path(FEATURE_PATH / cfg.experiment_name)
 
     # for sweep
-    if cfg.extract_visual_embeddings == "droplets_all":
-        if cfg.simulated_image == "small_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "small_all")
-        elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "medium_all")
-        elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "large_all")
-    elif cfg.extract_visual_embeddings == "droplets_only_cells":
-        if cfg.simulated_image == "small_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "small_only_cells")
-        elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "medium_only_cells")
-        elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
-            image_feature_path = Path(FEATURE_PATH / "large_only_cells")
+    if cfg.sweep:
+        if cfg.extract_visual_embeddings.name == "droplets_all":
+            if cfg.simulated_image == "small_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "small_all")
+            elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "medium_all")
+            elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "large_all")
+        elif cfg.extract_visual_embeddings.name == "droplets_only_cells":
+            if cfg.simulated_image == "small_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "small_only_cells")
+            elif cfg.simulated_image == "medium_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "medium_only_cells")
+            elif cfg.simulated_image == "large_mvt_1848_droplets.csv":
+                image_feature_path = Path(FEATURE_PATH / "large_only_cells")
 
     create_dir(image_preprocessed_path)
     create_dir(image_feature_path)
@@ -99,9 +97,9 @@ def main(cfg: DictConfig):
     
     ### TRACKING ###
     # change experiment name to timestamp
-
     ## The following should only be used for parameter sweeps - otherwise, when running the script manually, the experiment name should be set in the config file
-    # cfg.experiment_name = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d_%H-%M-%S")
+    if cfg.sweep:
+        cfg.experiment_name = "sweep"
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
 
     if not cfg.skip_tracking:
@@ -130,6 +128,10 @@ def main(cfg: DictConfig):
             save_calibration_plot(cfg, image_results_path)
 
     if cfg.wandb:
+        wandb.log({"alpha": cfg.track.alpha, 
+                   "dist": cfg.track.embedding_dist,
+                   "tau": cfg.track.tau_a,
+                   "relative_epsilon": cfg.track.relative_epsilon})
         wandb.finish()
 
 if __name__ == '__main__':

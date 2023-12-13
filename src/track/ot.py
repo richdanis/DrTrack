@@ -195,7 +195,7 @@ class OptimalTransport:
 
         # Iterate through frames
 
-        for i in tqdm(range(max_frame), disable=self.tqdm_disable):
+        for i in tqdm(range(max_frame), disable=self.tqdm_disable, desc="Computing OT matrices"):
             # Extract droplet and embedding features for current frame
             if (i == 0):
                 droplet_df_curr = droplet_df[droplet_df['frame'] == i]

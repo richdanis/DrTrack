@@ -20,7 +20,7 @@ def save_calibration_plot(cfg, results_dir):
         print("=========================================\n")
 
     # Get results df
-    name = "results_" + cfg.experiment_name + ".csv"
+    name = "results_.csv"
     results_df = pd.read_csv(results_dir / name)
 
     # Prepare plot for calibration curve
