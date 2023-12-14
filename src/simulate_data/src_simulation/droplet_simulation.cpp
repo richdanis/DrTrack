@@ -610,8 +610,8 @@ int main() {
     droplet_simulator->droplet_radius = 4.9;
     droplet_simulator->random_movement = true;
     droplet_simulator->intrinsic_movement = true;
-    droplet_simulator->max_random_velocity = 0.5;
-    droplet_simulator->max_intrinsic_velocity = 0.5;
+    droplet_simulator->max_random_velocity = 0.05;
+    droplet_simulator->max_intrinsic_velocity = 0.05;
 
     // Disappearing droplets
     droplet_simulator->disappearing_droplets = false;
@@ -626,7 +626,7 @@ int main() {
     droplet_simulator->attraction_movement = true;
     droplet_simulator->num_attractions = 5;
     droplet_simulator->attraction_radius = 120;
-    droplet_simulator->attraction_strength = 0.05;
+    droplet_simulator->attraction_strength = 0.01;
     droplet_simulator->attraction_strength_droplets = 0.01;
     droplet_simulator->attraction_speed = 1;
 
@@ -635,13 +635,13 @@ int main() {
     droplet_simulator->repulsion_movement = true;
     droplet_simulator->num_repulsions = 4;
     droplet_simulator->repulsion_radius = 120;
-    droplet_simulator->repulsion_strength = 0.05;
+    droplet_simulator->repulsion_strength = 0.01;
     droplet_simulator->repulsion_strength_droplets = 0.015; // Not being used as a variable at the moment
     droplet_simulator->repulsion_speed = 1;
 
     // Giant droplet parameters
     droplet_simulator->larger_droplet = true;
-    droplet_simulator->larger_droplet_radius = 70;
+    droplet_simulator->larger_droplet_radius = 50;
     droplet_simulator->larger_droplet_speed_x = 0.05;
     droplet_simulator->larger_droplet_speed_y = -0.25;
     droplet_simulator->larger_droplet_start_x = 1.2*droplet_simulator->screen_width / 5.;
