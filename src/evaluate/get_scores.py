@@ -89,6 +89,7 @@ class OtEvaluation():
                     print(f'auroc: {auroc}')
 
             if self.args.accuracy:
+                # TODO: check whether sklearn top_k_accuracy is nicer/better
                 # get top k accuracy
                 k_values = self.args.accuracy_k
                 top_k_accuracy = []

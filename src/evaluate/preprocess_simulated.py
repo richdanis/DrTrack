@@ -59,10 +59,10 @@ class SimulatedData():
 
             df["nr_cells"] = random.choices(poss_num_cells, weights=nr_cells_distribution, k=num_droplets)
         else:
-            print('ncb', self.real_droplet_metadata_df[f"nr_cells{real_data_frame}"])
-            print('ind', index)
+            # print('ncb', self.real_droplet_metadata_df[f"nr_cells{real_data_frame}"])
+            # print('ind', index)
             df["nr_cells"] = self.real_droplet_metadata_df[f"nr_cells{real_data_frame}"]
-            print('nc', df["nr_cells"])
+            # print('nc', df["nr_cells"])
 
         # Filter data if necessary
         if self.args.cutout_image:

@@ -83,4 +83,3 @@ def raw_cut_to_preprocessed_for_detection(cfg,
                                                       pixel=pixel)
     file_path = Path(preprocessed_path / f"preprocessed_drpdtc_{image_name}.npy")
     np.save(file_path, preprocessed_image)
-#     return preprocessed_image

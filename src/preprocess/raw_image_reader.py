@@ -10,8 +10,8 @@ def get_image_cut_as_ndarray(cfg,
                              path_to_image: Path,
                              upper_left_corner: Tuple[int, int],
                              pixel_dimensions: Tuple[int, int],
-                             all_frames: bool = True,
-                             all_channels: bool = False,
+                             all_frames: bool = True, 
+                             all_channels: bool = False, 
                              frames: Optional[list[int]] = None,
                              pixel: int = -1) -> np.ndarray:
     """
@@ -69,28 +69,27 @@ def get_image_cut_as_ndarray(cfg,
         frames = range(nr_frames)
     else:
         frames = frames
-
+    
     fullimage = f.asarray()
 
     # Ensure that the lower right corner is included in the image
     y_upper_left, x_upper_left = upper_left_corner
     size_y, size_x = pixel_dimensions
-    if pixel_dimensions == (-1, -1):
+    if pixel_dimensions == (-1,-1):
         size_y = nr_rows
         size_x = nr_cols
     y_end = y_upper_left + size_y
-    if y_upper_left + 2 * size_y > nr_rows:
+    if y_upper_left + 2*size_y > nr_rows:
         y_end = nr_rows
     x_end = x_upper_left + size_x
-    if x_upper_left + 2 * size_x > nr_cols:
+    if x_upper_left + 2*size_x > nr_cols:
         x_end = nr_cols
 
     if pixel == -1:
         output = (fullimage[frames, :, y_upper_left:y_end, x_upper_left:x_end])[:, channel_idx_precompute, :, :]
     else:
-        output = (fullimage[frames, :, y_upper_left:min(y_upper_left + pixel, y_end),
-                  x_upper_left:min(x_upper_left + pixel, x_end)])[:, channel_idx_precompute, :, :]
-
+        output = (fullimage[frames, :, y_upper_left:min(y_upper_left+pixel,y_end), x_upper_left:min(x_upper_left+pixel,x_end)])[:, channel_idx_precompute, :, :]
+    
     f.close()
-
+    
     return output

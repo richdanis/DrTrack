@@ -7,7 +7,6 @@ from skimage.filters import rank
 from skimage.morphology import disk
 from skimage.util import img_as_ubyte
 
-# from .raw_image_reader import get_image_as_ndarray
 from .raw_image_reader import get_image_cut_as_ndarray
 
 
@@ -93,4 +92,3 @@ def raw_cut_to_preprocessed_for_embeddings(cfg,
                                                        pixel=pixel)
     path = Path(preprocessed_path / f"preprocessed_featextr_{image_name}.npy")
     np.save(path, preprocessed_image[:, 0:2, :, :])
-#     return preprocessed_image
