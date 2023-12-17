@@ -11,73 +11,42 @@ from omegaconf import DictConfig
 sys.path.append('./src/')
 
 
-def get_patch(image, center_y, center_x, radius, buffer=3, suppress_rest=True, suppression_slack=1,
+def get_patch(image, center_x, center_y, radius, buffer=3, suppress_rest=True, suppression_slack=1,
               discard_boundaries=True):
     s = image.shape
-    assert (len(s) == 2 or len(s) == 3), 'axis length of image is not 2 or 3 (create_droplet_patches.py)'
-    if len(s) == 3:
-        # We are in the case where we have channel, image_row and image_col as axes.
-        window_dim = radius + buffer
-        window_y = np.asarray((max(0, center_y - window_dim), min(s[1], center_y + window_dim + 1)), dtype=np.int32)
+    assert len(s) == 3, 'axis length of image is not 2 or 3 (create_droplet_patches.py)'
 
-        window_y = np.asarray((min(max(0, center_y - window_dim), s[1] - 1),
-                               max(0, min(s[1], center_y + window_dim + 1))),
-                              dtype=np.int32)
+    # We have channel, image_row and image_col as axes.
+    window_dim = radius + buffer
 
-        window_x = np.asarray((max(0, center_x - window_dim), min(s[2], center_x + window_dim + 1)), dtype=np.int32)
+    window_y = np.asarray((min(max(0, center_y - window_dim), s[1] - 1),
+                           max(0, min(s[1], center_y + window_dim + 1))),
+                          dtype=np.int32)
 
-        window_x = np.asarray((min(max(0, center_x - window_dim), s[2] - 1),
-                               max(0, min(s[2], center_x + window_dim + 1))),
-                              dtype=np.int32)
+    window_x = np.asarray((min(max(0, center_x - window_dim), s[2] - 1),
+                           max(0, min(s[2], center_x + window_dim + 1))),
+                          dtype=np.int32)
 
-        if ((window_y[1] - window_y[0] != 2 * window_dim + 1) or (
-                window_x[1] - window_x[0] != 2 * window_dim + 1)) and discard_boundaries:
+    if ((window_y[1] - window_y[0] != 2 * window_dim + 1) or (
+            window_x[1] - window_x[0] != 2 * window_dim + 1)) and discard_boundaries:
 
-            return np.zeros((0, 0, 0))
+        return np.zeros((0, 0, 0))
 
-        else:
-            ans = np.zeros((s[0], 2 * window_dim + 1, 2 * window_dim + 1), dtype=np.uint16)
-            target_rows = window_y - (center_y - window_dim)
-            target_cols = window_x - (center_x - window_dim)
+    else:
+        ans = np.zeros((s[0], 2 * window_dim + 1, 2 * window_dim + 1), dtype=np.uint16)
+        target_rows = window_y - (center_y - window_dim)
+        target_cols = window_x - (center_x - window_dim)
 
-            ans[:, target_rows[0]: target_rows[1], target_cols[0]: target_cols[1]] = image[:,
-                                                                                     window_y[0]: window_y[1],
-                                                                                     window_x[0]: window_x[1]]
+        ans[:, target_rows[0]: target_rows[1], target_cols[0]: target_cols[1]] = image[:,
+                                                                                 window_y[0]: window_y[1],
+                                                                                 window_x[0]: window_x[1]]
 
-            if suppress_rest:
-                mask = np.zeros(ans.shape[1:3], dtype=np.uint16)
-                cv.circle(mask, np.asarray((window_dim, window_dim)), radius + suppression_slack, 1, -1)
-                ans = ans * mask[None, :, :]
+        if suppress_rest:
+            mask = np.zeros(ans.shape[1:3], dtype=np.uint16)
+            cv.circle(mask, np.asarray((window_dim, window_dim)), radius + suppression_slack, 1, -1)
+            ans = ans * mask[None, :, :]
 
-            return ans
-
-    elif len(s) == 2:
-        window_dim = radius + buffer
-        window_y = np.asarray((max(0, center_y - window_dim), min(s[0], center_y + window_dim + 1)), dtype=np.int32)
-        window_x = np.asarray((max(0, center_x - window_dim), min(s[1], center_x + window_dim + 1)), dtype=np.int32)
-
-        window_y = np.asarray((min(max(0, center_y - window_dim), s[0] - 1),
-                               max(0, min(s[0], center_y + window_dim + 1))),
-                              dtype=np.int32)
-
-        window_x = np.asarray((min(max(0, center_x - window_dim), s[1] - 1),
-                               max(0, min(s[1], center_x + window_dim + 1))),
-                              dtype=np.int32)
-
-        if ((window_y[1] - window_y[0] != 2 * window_dim + 1) or (
-                window_x[1] - window_x[0] != 2 * window_dim + 1)) and discard_boundaries:
-            return np.zeros((0, 0, 0))
-        else:
-            ans = np.zeros((2 * window_dim + 1, 2 * window_dim + 1), dtype=np.uint16)
-            target_rows = window_y - (center_y - window_dim)
-            target_cols = window_x - (center_x - window_dim)
-            ans[target_rows[0]: target_rows[1], target_cols[0]: target_cols[1]] = image[window_y[0]: window_y[1],
-                                                                                  window_x[0]: window_x[1]]
-            if suppress_rest:
-                mask = np.zeros(ans.shape, dtype=np.uint16)
-                cv.circle(mask, np.asarray((window_dim, window_dim)), radius + suppression_slack, 1, -1)
-                ans = ans * mask
-            return ans
+        return ans
 
 
 def create_droplet_patches(image: np.ndarray, droplet_feature_table: pd.DataFrame, buffer: int = 3,

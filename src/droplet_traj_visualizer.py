@@ -19,7 +19,7 @@ class Trajectories:
             tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/flagged_{cfg.results}")
         else:
             tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/{cfg.results}")
-        
+
         self.final_output = tmp
         counter = 0
         for col in tmp.columns:
@@ -31,16 +31,20 @@ class Trajectories:
 
         self.channels = ['DAPI', 'BF'] if not cfg.all_channels else ['DAPI', 'FITC', 'TRITC', 'Cy5', 'BF']
         IMAGE_PATH = Path(RAW_PATH / cfg.image_name)
-        self.image = get_image_cut_as_ndarray(None, channels=self.channels, path_to_image=IMAGE_PATH, 
-                                              upper_left_corner=(0,0),
-                                              pixel_dimensions=(-1,-1),
-                                              frames=self.frames)
-        
+
+        self.image = get_image_cut_as_ndarray(None, channels=self.channels, path_to_image=IMAGE_PATH,
+                                              upper_left_corner=(0, 0),
+                                              pixel_dimensions=(-1, -1),
+                                              frames=self.frames,
+                                              pixel=cfg.pixel)
+
         # cut all columns that are not needed since frames are specified
-        full_prob_col = self.final_output.columns[self.final_output.columns.str.match(f'p{cfg.start_frame}-{end_frame-1}')]
+        full_prob_col = self.final_output.columns[
+            self.final_output.columns.str.match(f'p{cfg.start_frame}-{end_frame - 1}')]
         full_traj_prob = self.final_output[full_prob_col]
-        tmp = self.final_output.drop(columns=self.final_output.columns[self.final_output.columns.str.match('p(\d+)-(\d+)')])
-        tmp = tmp.drop(columns= ['full_trajectory_uncertainty'])
+        tmp = self.final_output.drop(
+            columns=self.final_output.columns[self.final_output.columns.str.match('p(\d+)-(\d+)')])
+        tmp = tmp.drop(columns=['full_trajectory_uncertainty'])
         tmp = tmp.drop(columns=self.final_output.columns[self.final_output.columns.str.startswith('id')])
         x_cols = tmp.columns[tmp.columns.str.startswith('x')]
         y_cols = tmp.columns[tmp.columns.str.startswith('y')]
@@ -60,7 +64,7 @@ class Trajectories:
             match = re.search(pattern, col)
             if (int(match.group(1)) not in self.frames) or (int(match.group(2)) not in self.frames):
                 tmp = tmp.drop(columns=col)
-        
+
         tmp['trajectory_uncertainty'] = full_traj_prob
 
         # build the trajectories dataframe with the correct columns according to the stride
@@ -80,31 +84,31 @@ class Trajectories:
         match = re.search(pattern, results_str)
         # Extract the x and y values from the matched groups
         return int(match.group(1)), int(match.group(2))
-    
+
     # get x, y positions of the droplets in the given frames
-    def adjust_positions(self, df: pd.DataFrame, 
-                         y_stride:int, 
-                         x_stride:int) -> pd.DataFrame:
+    def adjust_positions(self, df: pd.DataFrame,
+                         y_stride: int,
+                         x_stride: int) -> pd.DataFrame:
 
         df[df.columns[df.columns.str.startswith('x')]] = df[df.columns[df.columns.str.startswith('x')]] + x_stride
         df[df.columns[df.columns.str.startswith('y')]] = df[df.columns[df.columns.str.startswith('y')]] + y_stride
         return df
-    
+
     # Get the patch of the droplet
     def get_patch(self, frame, center_y: int, center_x: int):
         # We are in the case where we have channel, image_row and image_col as axes.
-        window_y = np.asarray((min(max(0, center_y - self.radius),self.y_max-1),
-                            max(0, min(self.y_max, center_y + self.radius))),
-                            dtype=np.int32)
-        
-        window_x = np.asarray((min(max(0, center_x - self.radius),self.x_max-1), 
-                            max(0, min(self.x_max-1, center_x + self.radius))), 
-                            dtype=np.int32)
-        
-        ans = self.image[frame, :, window_y[0]: window_y[1],window_x[0]: window_x[1]]
-        if ans.shape[1] != 2*self.radius or ans.shape[2] != 2*self.radius:
+        window_y = np.asarray((min(max(0, center_y - self.radius), self.y_max - 1),
+                               max(0, min(self.y_max, center_y + self.radius))),
+                              dtype=np.int32)
+
+        window_x = np.asarray((min(max(0, center_x - self.radius), self.x_max - 1),
+                               max(0, min(self.x_max - 1, center_x + self.radius))),
+                              dtype=np.int32)
+
+        ans = self.image[frame, :, window_y[0]: window_y[1], window_x[0]: window_x[1]]
+        if ans.shape[1] != 2 * self.radius or ans.shape[2] != 2 * self.radius:
             print("Warning: Droplet is too close to the edge of the image. The patch is padded with zeros.")
-            tmp = np.zeros((2, 2*self.radius, 2*self.radius))
+            tmp = np.zeros((2, 2 * self.radius, 2 * self.radius))
             tmp[:, :ans.shape[1], :ans.shape[2]] = ans
             ans = tmp
         return ans
@@ -117,7 +121,7 @@ class Trajectories:
         y_pos = traj[traj.index.str.startswith('y')].values
         # Get the patches
         patches = []
-        for frame,(y,x) in enumerate(zip(y_pos, x_pos)):
+        for frame, (y, x) in enumerate(zip(y_pos, x_pos)):
             patches.append(self.get_patch(frame, y, x))
         return np.array(patches)
 
@@ -141,7 +145,7 @@ class Visualizer:
         self.current_idx = 0
 
         # Create a list to keep track of rows
-        self.rows_false = [] 
+        self.rows_false = []
         self.rows_true = []
         self.rows_unsure = []
 
@@ -179,12 +183,12 @@ class Visualizer:
         bottom_position = button_space + button_height
 
         # Define the button axes uniformly distributed
-        ax_prev = plt.axes([middle - 3*offset, bottom_position, button_width, button_height])
-        ax_true = plt.axes([middle - 2*offset, bottom_position, button_width, button_height])
+        ax_prev = plt.axes([middle - 3 * offset, bottom_position, button_width, button_height])
+        ax_true = plt.axes([middle - 2 * offset, bottom_position, button_width, button_height])
         ax_unsure = plt.axes([middle - offset, bottom_position, button_width, button_height])
         ax_false = plt.axes([middle, bottom_position, button_width, button_height])
-        ax_delete = plt.axes([middle + 1*offset, bottom_position, button_width, button_height])
-        ax_next = plt.axes([middle + 2*offset, bottom_position, button_width, button_height])
+        ax_delete = plt.axes([middle + 1 * offset, bottom_position, button_width, button_height])
+        ax_next = plt.axes([middle + 2 * offset, bottom_position, button_width, button_height])
 
         # Create buttons
         btn_prev = Button(ax_prev, 'Prev')
@@ -218,18 +222,22 @@ class Visualizer:
                 # But want to display in the order BF, DAPI, FITC, TRITC, Cy5
                 self.axarr[0, col_idx].imshow(img_4, vmin=0)
                 if col_idx == 0:
-                    self.axarr[0, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                    self.axarr[0, col_idx].set_title(
+                        'Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
-                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
-                self.axarr[0, col_idx].set_xlabel('x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
-                                                  + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
-                                                  fontsize=10)
-                self.axarr[1, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
+                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][
+                                                                        f'p{self.traj.frames[col_idx - 1]}_{self.traj.frames[col_idx]}']))
+                self.axarr[0, col_idx].set_xlabel(
+                    'x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
+                    + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
+                    fontsize=10)
+                self.axarr[1, col_idx].set_title('Cells: ' + str(
+                    int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
                 self.axarr[1, col_idx].imshow(img_0, vmin=0)
                 self.axarr[2, col_idx].imshow(img_1, vmin=0)
                 self.axarr[3, col_idx].imshow(img_2, vmin=0)
                 self.axarr[4, col_idx].imshow(img_3, vmin=0)
-               
+
             # the original order is DAPI, FITC, TRITC, Cy5, BF
             self.axarr[0, 0].set_ylabel("BF", fontsize=10)
             self.axarr[1, 0].set_ylabel("DAPI", fontsize=10)
@@ -244,15 +252,19 @@ class Visualizer:
                 # But want to display in the order BF, DAPI
                 self.axarr[0, col_idx].imshow(img_1, vmin=0)
                 if col_idx == 0:
-                    self.axarr[0, col_idx].set_title('Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                    self.axarr[0, col_idx].set_title(
+                        'Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
-                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'p{self.traj.frames[col_idx-1]}_{self.traj.frames[col_idx]}']))
-                self.axarr[0, col_idx].set_xlabel('x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
-                                                    + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
-                                                    fontsize=10)
-                self.axarr[1, col_idx].set_title('Cells: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
+                    self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][
+                                                                        f'p{self.traj.frames[col_idx - 1]}_{self.traj.frames[col_idx]}']))
+                self.axarr[0, col_idx].set_xlabel(
+                    'x: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'x{self.traj.frames[col_idx]}']))
+                    + ' y: ' + str(int(self.traj.trajectories.iloc[self.current_idx][f'y{self.traj.frames[col_idx]}'])),
+                    fontsize=10)
+                self.axarr[1, col_idx].set_title('Cells: ' + str(
+                    int(self.traj.trajectories.iloc[self.current_idx][f'nr_cells{self.traj.frames[col_idx]}'])))
                 self.axarr[1, col_idx].imshow(img_0, vmin=0)
-               
+
             # the original order is DAPI, BF
             self.axarr[0, 0].set_ylabel("BF", fontsize=10)
             self.axarr[1, 0].set_ylabel("DAPI", fontsize=10)
@@ -331,7 +343,7 @@ class Visualizer:
         else:
             self.current_idx += 1
         self.update_display()
-    
+
     def on_close(self, event):
         # Label the rows in rows_false with "False", the rows in rows_true with "True", and the rows in rows_unsure with "Unsure"
         if 'Label' not in self.traj.final_output.columns:
@@ -344,7 +356,7 @@ class Visualizer:
         save_name = f"{self.results_path}/flagged_results_{self.file}.csv"
 
         # Save the refined_df to CSV
-        if self.save: 
+        if self.save:
             self.traj.final_output.to_csv(save_name, index=False)
             print('Saved the refined tracked droplet data after labeling.')
         else:
@@ -386,7 +398,6 @@ class Visualizer:
 
 @hydra.main(config_path="../conf", config_name="droplet_traj_visualizer", version_base=None)
 def main(cfg: DictConfig):
-
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 

@@ -18,6 +18,9 @@ radius: 25
 project_path: "."
 data_path: "data"
 
+# Cut out a small region of the image
+pixel: -1
+
 # Data directories (relative to data_path)
 raw_dir: "01_raw"
 results_dir: "05_results"

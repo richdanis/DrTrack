@@ -39,7 +39,6 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
 
     model = model.to(cfg.device)
     model.eval()
-
     for patch_batch, droplet_ids, frames, cell_nrs in tqdm(loader, disable=not cfg.verbose):
         patch_batch = patch_batch.to(cfg.device)
 
@@ -48,12 +47,13 @@ def create_droplet_embeddings(cfg: DictConfig, dataset: DropletDataset, model: t
             embedding_mask = torch.ones_like(cell_nrs, dtype=torch.bool)
         else:
             embedding_mask = cell_nrs > 0
+        # Necessary for batches of size 1, as torch tensor of length 1 will be interpreted as a scalar.
+        embedding_mask = embedding_mask.tolist()
 
         embedding_batch = np.zeros((patch_batch.shape[0], cfg.extract_visual_embeddings.embed_dim))
-        if torch.sum(embedding_mask) > 0:
+        if np.sum(embedding_mask) > 0:
             with torch.no_grad():
                 embedding_batch[embedding_mask] = model(patch_batch[embedding_mask]).detach().cpu().numpy()
-
         for j in range(embedding_batch.shape[0]):
             embeddings['embeddings'].append(embedding_batch[j])
 
