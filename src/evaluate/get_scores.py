@@ -51,6 +51,9 @@ class OtEvaluation():
         y_true_all = []
         y_prob_all = []
 
+        # step for wandb plots
+        step = 0
+
         # Retrieve frame ids from results df
         id_cols = sorted([col for col in results_df.columns if col.startswith("id_")])
         for id_col in id_cols[:-1]:
@@ -119,9 +122,10 @@ class OtEvaluation():
             if self.wandb:
                 for key, value in scores_frame.items():
                     if key != "frames":
-                        wandb.log({key: value})
+                        wandb.log({key: value}, step=step)
     
             scores.append(scores_frame)
+            step += 1
 
         # Save scores
         scores_df = pd.DataFrame.from_records(scores)
@@ -139,7 +143,7 @@ class OtEvaluation():
                 print(f'\nAll Frames:\nauprc_total: {auprc}')
 
             if self.wandb:
-                wandb.log({"auprc_total": auprc})
+                wandb.log({"auprc_total": auprc}, step=step)
         
         if self.args.auroc:
             auroc = roc_auc_score(y_true_all, y_prob_all)
@@ -149,7 +153,7 @@ class OtEvaluation():
                 print(f'auroc_total: {auroc}')
 
             if self.wandb: 
-                wandb.log({"auroc_total": auroc})
+                wandb.log({"auroc_total": auroc}, step=step)
 
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)
