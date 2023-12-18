@@ -19,7 +19,6 @@ class DropletDataset(Dataset):
         #self.patches_df = self.patches_df[self.patches_df["droplet_id"] <= 6000]
 
         droplets_df = pd.read_csv(droplet_path)
-
         # For simulated data we can have some difference between the number of droplets in patches_df and droplets_df.
         # For real experiments it should be exactly the same, because one is constructed based on the other.
         self.patches_df = pd.merge(self.patches_df, droplets_df, on=['droplet_id', 'frame'], how='inner')

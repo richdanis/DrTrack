@@ -3,9 +3,13 @@ from pathlib import Path
 import numpy as np
 import shutil
 import jax
+import pandas as pd
 import wandb
 import time
 import datetime
+
+import hydra
+from omegaconf import DictConfig, OmegaConf
 
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
@@ -13,9 +17,7 @@ from generate_results.get_trajectories import compute_and_store_results_all
 from evaluate.preprocess_simulated import SimulatedData
 from evaluate.get_scores import OtEvaluation
 from evaluate.calibration_plot import save_calibration_plot
-
-import hydra
-from omegaconf import DictConfig, OmegaConf
+from evaluate.generate_paired_patches import structure_patches
 
 
 def create_dir(path):
@@ -44,6 +46,27 @@ def main(cfg: DictConfig):
     OT_PATH = Path(cfg.data_path) / Path(cfg.ot_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 
+    ### EXTRACT PATCHES ###
+    if cfg.extract_patches:
+        GT_FEATURE_PATH = Path(cfg.gt_data_path) / Path(cfg.gt_feature_dir) / Path(cfg.gt_experiment_name)
+        GT_RESULTS_PATH = Path(cfg.gt_data_path) / Path(cfg.gt_results_dir) / Path(cfg.gt_experiment_name)
+        base_name = structure_patches(cfg, GT_RESULTS_PATH, GT_FEATURE_PATH, FEATURE_PATH)
+        paired_patches = f'{base_name}.npy'
+        paired_patches_metadata = f'{base_name}_metadata.csv'
+
+        if cfg.verbose:
+            print("***")
+            print(f'Extracted patches from GT data and saved them as: {paired_patches}')
+            print("***")
+    else:
+        paired_patches = cfg.paired_patches
+        paired_patches_metadata = cfg.paired_patches_metadata
+
+        if cfg.verbose:
+            print("***")
+            print(f'Using paired patches from: {paired_patches}')
+            print("***")
+
     ### PREPROCESSING ###
     # Preprocess simulated data
     image_simulated = Path(SIMULATED_PATH / cfg.simulated_image)
@@ -71,10 +94,10 @@ def main(cfg: DictConfig):
     create_dir(image_feature_path)
 
     if not cfg.skip_preprocessing:
-        if len(cfg.paired_patches_metadata) == 0:
+        if len(paired_patches_metadata) == 0:
             real_droplet_metadata_path = None
         else:
-            real_droplet_metadata_path = Path(FEATURE_PATH / cfg.paired_patches_metadata)
+            real_droplet_metadata_path = Path(FEATURE_PATH / paired_patches_metadata)
         sim_data = SimulatedData(cfg, image_simulated, image_feature_path, real_droplet_metadata_path)
         sim_data.create_and_store_position_dfs()
 
@@ -86,7 +109,7 @@ def main(cfg: DictConfig):
         create_dir(image_feature_path)
 
         # Copy paired patches to data_path/feature_dir
-        paired_patches_path = FEATURE_PATH / Path(cfg.paired_patches)
+        paired_patches_path = FEATURE_PATH / Path(paired_patches)
         new_name = "patches_.npy"
         new_path = image_feature_path / Path(new_name)
 

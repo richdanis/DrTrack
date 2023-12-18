@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from pathlib import Path
 
 import numpy as np
@@ -6,13 +6,13 @@ import nd2
 
 
 def get_image_cut_as_ndarray(cfg,
-                             channels: list[str],
+                             channels: List[str],
                              path_to_image: Path,
                              upper_left_corner: Tuple[int, int],
                              pixel_dimensions: Tuple[int, int],
                              all_frames: bool = True, 
                              all_channels: bool = False, 
-                             frames: Optional[list[int]] = None,
+                             frames: Optional[List[int]] = None,
                              pixel: int = -1) -> np.ndarray:
     """
     Get the image as a ndarray - PRIMARY FUNCTION
