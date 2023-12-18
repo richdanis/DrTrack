@@ -7,15 +7,11 @@ defaults:
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "large_mvt_6000"
+experiment_name: "medium_mvt_6000"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "large_mvt_6000_droplets.csv"
+simulated_image: "medium_mvt_6000_droplets.csv"
 #simulated_image: "medium_mvt_6000_droplets.csv"
-
-# Paths to paired_patches and their metadata files - should be in data_path/feature_dir
-paired_patches: "paired_patches_9_frames_52864_droplets.npy"
-paired_patches_metadata: "paired_patches_9_frames_52864_droplets_metadata.csv" # If one wants to sample random cells set to ""
 
 # Path Settings (relative to project root)
 project_path: "."
@@ -41,13 +37,13 @@ gt_margin: 20 # We only keep trajectories with droplets that are not next to the
 gt_uncertainty_threshold: 0.95 # Only trajectories with greater mean uncertainty are kept
 
 # Paths to paired_patches and their metadata files - should be in data_path/feature_dir
-paired_patches: "paired_patches_9_frames_3277_droplets.npy"
-paired_patches_metadata: "paired_patches_9_frames_3277_droplets_metadata.csv" # If one wants to sample random cells set to ""
+paired_patches: "paired_patches_9_frames_52864_droplets.npy"
+paired_patches_metadata: "paired_patches_9_frames_52864_droplets_metadata.csv" # If one wants to sample random cells set to ""
 
 # Skip steps if they have already been completed
-skip_preprocessing: false
-skip_visual_embedding_extraction: false
-skip_tracking: false
+skip_preprocessing: true
+skip_visual_embedding_extraction: true
+skip_tracking: true
 skip_results_generation: false
 skip_trajectory_generation: false
 skip_scoring: false
