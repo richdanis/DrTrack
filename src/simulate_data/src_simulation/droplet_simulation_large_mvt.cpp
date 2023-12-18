@@ -602,16 +602,16 @@ int main() {
     */
     // Set parameters
     // Length of simulation
-    droplet_simulator->number_of_frames = 1000;
+    droplet_simulator->number_of_frames = 3000;
     droplet_simulator->number_of_recordings = 12;
 
     // Droplet parameters
     droplet_simulator->num_droplets = 6000;
-    droplet_simulator->droplet_radius = 3.0;
-    droplet_simulator->random_movement = false;
-    droplet_simulator->intrinsic_movement = false;
-    droplet_simulator->max_random_velocity = 0.05;
-    droplet_simulator->max_intrinsic_velocity = 0.05;
+    droplet_simulator->droplet_radius = 2.8;
+    droplet_simulator->random_movement = true;
+    droplet_simulator->intrinsic_movement = true;
+    droplet_simulator->max_random_velocity = 0.2;
+    droplet_simulator->max_intrinsic_velocity = 0.1;
 
     // Disappearing droplets
     droplet_simulator->disappearing_droplets = false;
@@ -624,26 +624,26 @@ int main() {
     // Attraction point (positive focal point) parameters
     droplet_simulator->attraction_points = true;
     droplet_simulator->attraction_movement = true;
-    droplet_simulator->num_attractions = 5;
+    droplet_simulator->num_attractions = 3;
     droplet_simulator->attraction_radius = 120;
-    droplet_simulator->attraction_strength = 0.01;
+    droplet_simulator->attraction_strength = 0.02;
     droplet_simulator->attraction_strength_droplets = 0.01;
-    droplet_simulator->attraction_speed = 1;
+    droplet_simulator->attraction_speed = 0.5;
 
     // repulsion point (negative focal point) parameters
     droplet_simulator->repulsion_points = true;
     droplet_simulator->repulsion_movement = true;
-    droplet_simulator->num_repulsions = 4;
-    droplet_simulator->repulsion_radius = 120;
-    droplet_simulator->repulsion_strength = 0.01;
+    droplet_simulator->num_repulsions = 10;
+    droplet_simulator->repulsion_radius = 45;
+    droplet_simulator->repulsion_strength = 0.5;
     droplet_simulator->repulsion_strength_droplets = 0.015; // Not being used as a variable at the moment
-    droplet_simulator->repulsion_speed = 1;
+    droplet_simulator->repulsion_speed = 0.5;
 
     // Giant droplet parameters
     droplet_simulator->larger_droplet = true;
-    droplet_simulator->larger_droplet_radius = 50;
-    droplet_simulator->larger_droplet_speed_x = 0.05;
-    droplet_simulator->larger_droplet_speed_y = -0.25;
+    droplet_simulator->larger_droplet_radius = 80;
+    droplet_simulator->larger_droplet_speed_x = 0.08;
+    droplet_simulator->larger_droplet_speed_y = -0.15;
     droplet_simulator->larger_droplet_start_x = 1.2*droplet_simulator->screen_width / 5.;
     droplet_simulator->larger_droplet_start_y = 5.8*droplet_simulator->screen_height / 6.;
 
