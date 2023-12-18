@@ -14,6 +14,10 @@ class DropletDataset(Dataset):
     def __init__(self, patches_path, droplet_path, resize_patches=True):
         patches = np.load(patches_path, allow_pickle=True).item()
         self.patches_df = pd.DataFrame(patches)
+
+        #To reduce the size of the dataset for evalutation purposes
+        #self.patches_df = self.patches_df[self.patches_df["droplet_id"] <= 6000]
+
         droplets_df = pd.read_csv(droplet_path)
 
         # For simulated data we can have some difference between the number of droplets in patches_df and droplets_df.

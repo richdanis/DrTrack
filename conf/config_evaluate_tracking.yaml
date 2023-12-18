@@ -3,18 +3,19 @@ defaults:
   - _self_
   - extract_visual_embeddings: droplets_all
   - track: unb_reg_sinkhorn_evaluation_debug
-  - generate_results: scaled_ranks_eval
+  - generate_results: scaled_entries_eval
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "small_mvt_test"
+experiment_name: "large_mvt_6000"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "small_mvt_1848_droplets.csv"
+simulated_image: "large_mvt_6000_droplets.csv"
+#simulated_image: "medium_mvt_6000_droplets.csv"
 
 # Paths to paired_patches and their metadata files - should be in data_path/feature_dir
-paired_patches: "paired_patches_9_frames_1848_droplets_40x40.npy"
-paired_patches_metadata: "paired_patches_9_frames_1848_droplets_metadata.csv" # If one wants to sample random cells set to ""
+paired_patches: "paired_patches_9_frames_52864_droplets.npy"
+paired_patches_metadata: "paired_patches_9_frames_52864_droplets_metadata.csv" # If one wants to sample random cells set to ""
 
 # Path Settings (relative to project root)
 project_path: "."
@@ -34,8 +35,8 @@ skip_visual_embedding_extraction: false
 skip_tracking: false
 skip_results_generation: false
 skip_trajectory_generation: false
-skip_scoring: true
-skip_calibration_plot: true
+skip_scoring: false
+skip_calibration_plot: false
 
 # Detail level of the progress indications
 verbose: true
