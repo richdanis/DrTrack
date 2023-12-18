@@ -34,7 +34,7 @@ def save_calibration_plot(cfg, results_dir):
         y_true = results_df[f"id_{id}"] == results_df[f"id_{id+1}"]
         y_prob = results_df[f"p{id}_{id+1}"].to_numpy()
         fraction_of_positives, mean_predicted_value = calibration_curve(
-            y_true, y_prob, n_bins=8, strategy="quantile"
+            y_true, y_prob, n_bins=10, strategy="uniform"
         )
         all_predicted = all_predicted + y_prob.tolist()
         ax.plot(mean_predicted_value, fraction_of_positives, label=f"{id}-{id+1}")
