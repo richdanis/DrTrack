@@ -11,7 +11,10 @@ experiment_name: "medium_mvt_6000"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
 simulated_image: "medium_mvt_6000_droplets.csv"
-#simulated_image: "medium_mvt_6000_droplets.csv"
+
+# Paths to paired_patches and their metadata files - should be in data_path/feature_dir
+paired_patches: "paired_patches_9_frames_52864_droplets.npy"
+paired_patches_metadata: "paired_patches_9_frames_52864_droplets_metadata.csv"
 
 # Path Settings (relative to project root)
 project_path: "."
