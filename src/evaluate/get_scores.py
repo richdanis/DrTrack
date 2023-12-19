@@ -3,8 +3,7 @@ import numpy as np
 import wandb
 import os
 
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss
 
 class OtEvaluation():
     """
@@ -91,6 +90,13 @@ class OtEvaluation():
                 if self.verbose:
                     print(f'auroc: {auroc}')
 
+            if self.args.brier:
+                brier_score = brier_score_loss(y_true, y_prob)
+                scores_frame[f"brier"] = brier_score
+
+                if self.verbose:
+                    print(f'brier: {brier_score}')
+
             if self.args.accuracy:
                 # TODO: check whether sklearn top_k_accuracy is nicer/better
                 # get top k accuracy
@@ -154,6 +160,17 @@ class OtEvaluation():
 
             if self.wandb: 
                 wandb.log({"auroc_total": auroc}, step=step)
+
+        if self.args.brier:
+            brier_score = brier_score_loss(y_true_all, y_prob_all)
+            scores_df[f"brier_total"] = brier_score
+
+            if self.verbose:
+                print(f'brier_total: {brier_score}')
+            
+            if self.wandb:
+                wandb.log({"brier_total": brier_score}, step=step)
+
 
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)
