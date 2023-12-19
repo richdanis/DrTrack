@@ -15,6 +15,8 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     data_path=/cluster/scratch/$USER/data/evaluation \
     checkpoint_dir=/cluster/scratch/$USER/checkpoints \
     experiment_name=small_all \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
@@ -26,6 +28,8 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     data_path=/cluster/scratch/$USER/data/evaluation \
     checkpoint_dir=/cluster/scratch/$USER/checkpoints \
     experiment_name=medium_all \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
@@ -37,9 +41,50 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     data_path=/cluster/scratch/$USER/data/evaluation \
     checkpoint_dir=/cluster/scratch/$USER/checkpoints \
     experiment_name=large_all \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
+    simulated_image=large_mvt_20000_droplets.csv \
+    evaluate=unbalanced_v1 \
+    device=cuda
+
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
+    data_path=/cluster/scratch/$USER/data/evaluation \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    experiment_name=small_only_cells \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
+    skip_tracking=true \
+    skip_results_generation=true \
+    extract_visual_embeddings=droplets_only_cells \
+    simulated_image=small_mvt_20000_droplets.csv \
+    evaluate=unbalanced_v1 \
+    device=cuda
+
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
+    data_path=/cluster/scratch/$USER/data/evaluation \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    experiment_name=medium_only_cells \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
+    skip_tracking=true \
+    skip_results_generation=true \
+    extract_visual_embeddings=droplets_only_cells \
+    simulated_image=medium_mvt_20000_droplets.csv \
+    evaluate=unbalanced_v1 \
+    device=cuda
+
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
+    data_path=/cluster/scratch/$USER/data/evaluation \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    experiment_name=large_only_cells \
+    skip_preprocessing=false \
+    skip_visual_embedding_extraction=false \
+    skip_tracking=true \
+    skip_results_generation=true \
+    extract_visual_embeddings=droplets_only_cells \
     simulated_image=large_mvt_20000_droplets.csv \
     evaluate=unbalanced_v1 \
     device=cuda

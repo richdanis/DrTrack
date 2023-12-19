@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --time=24:00:00
-#SBATCH --gpus=rtx_4090:1
-#SBATCH --mem-per-cpu=20G
+#SBATCH --gpus=a100_80gb:1
+#SBATCH --mem-per-cpu=30G
 #SBATCH --output=/cluster/home/%u/DrTrack/logs/%x.out                                                                         
 #SBATCH --error=/cluster/home/%u/DrTrack/logs/%x.err
 

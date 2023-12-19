@@ -76,18 +76,18 @@ def main(cfg: DictConfig):
     # for sweep
     if cfg.sweep:
         if cfg.extract_visual_embeddings.name == "droplets_all":
-            if cfg.simulated_image == "small_mvt_6000_droplets.csv":
+            if cfg.simulated_image == "small_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "small_all")
-            elif cfg.simulated_image == "medium_mvt_6000_droplets.csv":
+            elif cfg.simulated_image == "medium_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "medium_all")
-            elif cfg.simulated_image == "large_mvt_6000_droplets.csv":
+            elif cfg.simulated_image == "large_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "large_all")
         elif cfg.extract_visual_embeddings.name == "droplets_only_cells":
-            if cfg.simulated_image == "small_mvt_6000_droplets.csv":
+            if cfg.simulated_image == "small_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "small_only_cells")
-            elif cfg.simulated_image == "medium_mvt_6000_droplets.csv":
+            elif cfg.simulated_image == "medium_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "medium_only_cells")
-            elif cfg.simulated_image == "large_mvt_6000_droplets.csv":
+            elif cfg.simulated_image == "large_mvt_20000_droplets.csv":
                 image_feature_path = Path(FEATURE_PATH / "large_only_cells")
 
     create_dir(image_preprocessed_path)

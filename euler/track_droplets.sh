@@ -9,6 +9,15 @@
 
 module load gcc/8.2.0 python_gpu/3.11.2
 
-export JAX_PLATFORMS=cuda,cpu
+export JAX_PLATFORMS=cuda
 
-$HOME/$1/bin/python3.11 $HOME/DrTrack/src/track_droplets.py
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/track_droplets.py \
+    data_path=/cluster/scratch/$USER/data \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    track=tau_999 \
+    raw_image="Small mvt 3.nd2" \
+    extract_visual_embeddings=droplets_all \
+    device=cuda \
+    track.relative_epsilon=5e-3 \
+    track.embedding_dist=euclid \
+    track.alpha=0.25 \

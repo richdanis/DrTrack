@@ -20,7 +20,7 @@ droplet_radius: 21
 
 # Scores to be computed
 accuracy: true
-accuracy_k: [100, 500, 1000, 2000, 3000, -1]
+accuracy_k: [100, 500, 1000, 2000, 5000, 10000, -1]
 
 brier: true
 auprc: true
