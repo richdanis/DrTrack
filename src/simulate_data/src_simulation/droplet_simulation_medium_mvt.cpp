@@ -606,8 +606,8 @@ int main() {
     droplet_simulator->number_of_recordings = 12;
 
     // Droplet parameters
-    droplet_simulator->num_droplets = 6000;
-    droplet_simulator->droplet_radius = 2.9;
+    droplet_simulator->num_droplets = 20000;
+    droplet_simulator->droplet_radius = 1.55;
     droplet_simulator->random_movement = false;
     droplet_simulator->intrinsic_movement = false;
     droplet_simulator->max_random_velocity = 0.05;

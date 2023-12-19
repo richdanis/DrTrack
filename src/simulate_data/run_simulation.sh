@@ -9,7 +9,7 @@ make
 # Edit the parameters in main of the droplet_simulation.cpp file as wished
 # Run the simulation. The data will be stored in data/simulation_data
 echo Simulation Starting
-#./droplet_simulation_small
+./droplet_simulation_small
 ./droplet_simulation_medium
 ./droplet_simulation_large
 echo Simulation Complete

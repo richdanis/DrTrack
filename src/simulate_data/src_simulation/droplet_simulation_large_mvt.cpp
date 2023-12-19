@@ -606,8 +606,8 @@ int main() {
     droplet_simulator->number_of_recordings = 12;
 
     // Droplet parameters
-    droplet_simulator->num_droplets = 6000;
-    droplet_simulator->droplet_radius = 2.8;
+    droplet_simulator->num_droplets = 20000;
+    droplet_simulator->droplet_radius = 1.5;
     droplet_simulator->random_movement = true;
     droplet_simulator->intrinsic_movement = true;
     droplet_simulator->max_random_velocity = 0.2;
@@ -642,8 +642,8 @@ int main() {
     // Giant droplet parameters
     droplet_simulator->larger_droplet = true;
     droplet_simulator->larger_droplet_radius = 80;
-    droplet_simulator->larger_droplet_speed_x = 0.08;
-    droplet_simulator->larger_droplet_speed_y = -0.15;
+    droplet_simulator->larger_droplet_speed_x = 0.16;
+    droplet_simulator->larger_droplet_speed_y = -0.30;
     droplet_simulator->larger_droplet_start_x = 1.2*droplet_simulator->screen_width / 5.;
     droplet_simulator->larger_droplet_start_y = 5.8*droplet_simulator->screen_height / 6.;
 
