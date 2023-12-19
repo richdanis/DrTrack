@@ -14,11 +14,44 @@ export JAX_PLATFORMS=cuda
 $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     data_path=/cluster/scratch/$USER/data/evaluation \
     checkpoint_dir=/cluster/scratch/$USER/checkpoints \
-    experiment_name=large_all \
+    experiment_name=small_all \
     extract_visual_embeddings=droplets_all \
-    simulated_image=large_mvt_1848_droplets.csv \
+    simulated_image=small_mvt_6000_droplets.csv \
     skip_preprocessing=true \
     skip_visual_embedding_extraction=true \
     skip_calibration_plot=true \
     evaluate=unbalanced_v1 \
-    evaluate.auroc=false
+    evaluate.auroc=false \
+    track=tau_9999 \
+    device=cuda \
+    wandb=true
+
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
+    data_path=/cluster/scratch/$USER/data/evaluation \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    experiment_name=medium_all \
+    extract_visual_embeddings=droplets_all \
+    simulated_image=medium_mvt_6000_droplets.csv \
+    skip_preprocessing=true \
+    skip_visual_embedding_extraction=true \
+    skip_calibration_plot=true \
+    evaluate=unbalanced_v1 \
+    evaluate.auroc=false \
+    track=tau_9999 \
+    device=cuda \
+    wandb=true
+
+$HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
+    data_path=/cluster/scratch/$USER/data/evaluation \
+    checkpoint_dir=/cluster/scratch/$USER/checkpoints \
+    experiment_name=large_all \
+    extract_visual_embeddings=droplets_all \
+    simulated_image=large_mvt_6000_droplets.csv \
+    skip_preprocessing=true \
+    skip_visual_embedding_extraction=true \
+    skip_calibration_plot=true \
+    evaluate=unbalanced_v1 \
+    evaluate.auroc=false \
+    track=tau_9999 \
+    device=cuda \
+    wandb=true

@@ -129,9 +129,9 @@ class OtEvaluation():
                 for key, value in scores_frame.items():
                     if key != "frames":
                         wandb.log({key: value}, step=step)
+                step += 1
     
             scores.append(scores_frame)
-            step += 1
 
         # Save scores
         scores_df = pd.DataFrame.from_records(scores)
@@ -149,6 +149,7 @@ class OtEvaluation():
                 print(f'\nAll Frames:\nauprc_total: {auprc}')
 
             if self.wandb:
+                step += 1
                 wandb.log({"auprc_total": auprc}, step=step)
         
         if self.args.auroc:
@@ -159,6 +160,7 @@ class OtEvaluation():
                 print(f'auroc_total: {auroc}')
 
             if self.wandb: 
+                step += 1
                 wandb.log({"auroc_total": auroc}, step=step)
 
         if self.args.brier:

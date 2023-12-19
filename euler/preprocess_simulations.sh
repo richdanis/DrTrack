@@ -17,7 +17,7 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
-    simulated_image=small_mvt_1848_droplets.csv \
+    simulated_image=small_mvt_6000_droplets.csv \
     evaluate=unbalanced_v1 \
     device=cpu
 
@@ -28,7 +28,7 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
-    simulated_image=medium_mvt_1848_droplets.csv \
+    simulated_image=medium_mvt_6000_droplets.csv \
     evaluate=unbalanced_v1 \
     device=cpu
 
@@ -39,6 +39,6 @@ $HOME/$1/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
     skip_tracking=true \
     skip_results_generation=true \
     extract_visual_embeddings=droplets_all \
-    simulated_image=large_mvt_1848_droplets.csv \
+    simulated_image=large_mvt_6000_droplets.csv \
     evaluate=unbalanced_v1 \
     device=cpu

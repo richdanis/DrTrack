@@ -6,7 +6,7 @@
 #SBATCH --output=/cluster/home/%u/DrTrack/logs/%x.out                                                                         
 #SBATCH --error=/cluster/home/%u/DrTrack/logs/%x.err
 
-export JAX_PLATFORMS=cuda,cpu
+export JAX_PLATFORMS=cuda
 
 module load gcc/8.2.0 python_gpu/3.11.2 eth_proxy
 
