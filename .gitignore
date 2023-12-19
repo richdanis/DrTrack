@@ -13,5 +13,9 @@ euler
 # python cache in all directories
 **/__pycache__/**
 
+conf
+evaluation
+outputs
+
 
 efficientnet_b1.pth
