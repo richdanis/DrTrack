@@ -19,7 +19,7 @@ def find_closest_neighbors_cosine(array1: np.array, array2: np.array, topk: int 
     """For vectors in array1 finds topk closest neighbors inside array2 using cosine distance."""
 
     distances = distance.cdist(array1, array2, 'cosine')
-    distances_sort = np.argsort(distances, axis=0)[:, 1: topk + 1]
+    distances_sort = np.argsort(distances, axis=1)[:, :topk]
     return distances_sort
 
 
@@ -43,7 +43,7 @@ def calculate_accuracy(array1: np.array, array2: np.array, topk: Union[List, int
     for k in topk:
         matched = 0
         for i, i_closest_neighbors in enumerate(closest_neighbors):
-            # print(i, i_closest_neighbors[:k])
+            # print(dist, i, i_closest_neighbors[:k])
             matched += (i in i_closest_neighbors[:k])
 
         accuracy.append(matched / num_embeddings)

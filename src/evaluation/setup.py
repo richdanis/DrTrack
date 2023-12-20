@@ -16,5 +16,6 @@ def get_args():
     parser.add_argument('--device', type=str, default='cpu', help='Device to use. Default is cpu.')
     parser.add_argument('--embed_dim', type=int, help='Dimension of the embedding layer.', required=True)
     parser.add_argument('--use_dapi', action='store_true', help='Whether to use DAPI channel.', default=False)
+    parser.add_argument('--sample_size', type=int, help='Whether to use DAPI channel.', default=0)
 
     return parser.parse_args()

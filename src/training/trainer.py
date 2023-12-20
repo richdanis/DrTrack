@@ -8,6 +8,8 @@ import time
 import datetime
 import os
 
+from metrics.auroc import calculate_auroc
+from metrics.accuracy import calculate_accuracy
 
 class Trainer():
 
@@ -101,6 +103,36 @@ class Trainer():
                 count += self.args.batch_size
                 if count > self.args.samples_per_epoch:
                     break
+
+    def full_val_epoch(self, loader, results):
+
+        self.model.eval()
+
+        embeddings_x = torch.empty((0, self.args.embed_dim))
+        embeddings_y = torch.empty((0, self.args.embed_dim))
+
+        for x, y in tqdm(loader):
+
+            with torch.no_grad():
+                x = x.to(self.device)
+                out_x = self.model(x).cpu()
+
+                y = y.to(self.device)
+                out_y = self.model(y).cpu()
+
+            embeddings_x = torch.cat((embeddings_x, out_x), dim=0)
+            embeddings_y = torch.cat((embeddings_y, out_y), dim=0)
+
+        embeddings_x = embeddings_x.numpy()
+        embeddings_y = embeddings_y.numpy()
+
+        for d in ['l2', 'cosine']:
+            acc = calculate_accuracy(embeddings_x, embeddings_y, topk=[1, 5], dist=d)
+            results[f'acc_top1_{d}'].append(acc[0])
+            results[f'acc_top5_{d}'].append(acc[1])
+            results[f'auroc_{d}'].append(calculate_auroc(embeddings_x, embeddings_y, dist=d))
+
+
 
     def val_epoch(self, loader, epoch, labels, neg_ind):
 

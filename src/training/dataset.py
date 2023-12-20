@@ -1,7 +1,30 @@
 import numpy as np
 import torch
+import pandas as pd
 import albumentations as A
 from torch.utils.data import Dataset
+import matplotlib.pyplot as plt
+from skimage.transform import resize
+
+
+class PairedDataset(Dataset):
+
+    def __init__(self, dataset_path, size, frame_num=0):
+
+        all_patches = pd.DataFrame(np.load(dataset_path, allow_pickle=True).item())
+        self.patches = all_patches[((all_patches['frame'] == frame_num) | (all_patches['frame'] == frame_num + 1)) & (all_patches['droplet_id'] < size)]
+        self.frame_num = frame_num
+        print(len(self.patches) // 2)
+
+    def __len__(self):
+        return len(self.patches) // 2
+
+    def __getitem__(self, idx):
+        # TODO: Debug and extract new patches
+        patch = self.patches[self.patches['droplet_id'] == idx]
+        patch1 = resize(patch[patch['frame'] == self.frame_num]['patch'].item(), (2, 40, 40))
+        patch2 = resize(patch[patch['frame'] == self.frame_num + 1]['patch'].item(), (2, 40, 40))
+        return torch.from_numpy(patch1).type(torch.FloatTensor), torch.from_numpy(patch2).type(torch.FloatTensor)
 
 
 class CellDataset(Dataset):
@@ -54,8 +77,8 @@ class LocalDataset(Dataset):
         # since we have less labels then patches, because patches
         # of last image have no label (no next image)
 
-        self.negatives = np.load(dataset_path + '/negatives.npy')
-        # format: (M, 128)
+        # self.negatives = np.load(dataset_path + '/negatives.npy')
+        # # format: (M, 128)
 
         # train or validation
         self.config = config

@@ -69,7 +69,7 @@ def remove_duplicated_fprs(tprs, sorted_fprs) -> Tuple[List, List]:
     return tprs[mask], sorted_fprs[mask]
 
 
-def calculate_auroc(array1: np.array, array2: np.array, negative_sample_mode: str = 'rev', dist: str = 'l2') -> float:
+def calculate_auroc(array1: np.array, array2: np.array, negative_sample_mode: str = 'random', dist: str = 'l2') -> float:
     if dist == 'l2':
         dist_fun = get_l2_distances
     elif dist == 'cosine':
