@@ -3,8 +3,7 @@ import numpy as np
 import wandb
 import os
 
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss
 
 class OtEvaluation():
     """
@@ -51,6 +50,9 @@ class OtEvaluation():
         y_true_all = []
         y_prob_all = []
 
+        # step for wandb plots
+        step = 0
+
         # Retrieve frame ids from results df
         id_cols = sorted([col for col in results_df.columns if col.startswith("id_")])
         for id_col in id_cols[:-1]:
@@ -88,6 +90,13 @@ class OtEvaluation():
                 if self.verbose:
                     print(f'auroc: {auroc}')
 
+            if self.args.brier:
+                brier_score = brier_score_loss(y_true, y_prob)
+                scores_frame[f"brier"] = brier_score
+
+                if self.verbose:
+                    print(f'brier: {brier_score}')
+
             if self.args.accuracy:
                 # TODO: check whether sklearn top_k_accuracy is nicer/better
                 # get top k accuracy
@@ -119,7 +128,8 @@ class OtEvaluation():
             if self.wandb:
                 for key, value in scores_frame.items():
                     if key != "frames":
-                        wandb.log({key: value})
+                        wandb.log({key: value}, step=step)
+                step += 1
     
             scores.append(scores_frame)
 
@@ -139,7 +149,8 @@ class OtEvaluation():
                 print(f'\nAll Frames:\nauprc_total: {auprc}')
 
             if self.wandb:
-                wandb.log({"auprc_total": auprc})
+                step += 1
+                wandb.log({"auprc_total": auprc}, step=step)
         
         if self.args.auroc:
             auroc = roc_auc_score(y_true_all, y_prob_all)
@@ -149,7 +160,19 @@ class OtEvaluation():
                 print(f'auroc_total: {auroc}')
 
             if self.wandb: 
-                wandb.log({"auroc_total": auroc})
+                step += 1
+                wandb.log({"auroc_total": auroc}, step=step)
+
+        if self.args.brier:
+            brier_score = brier_score_loss(y_true_all, y_prob_all)
+            scores_df[f"brier_total"] = brier_score
+
+            if self.verbose:
+                print(f'brier_total: {brier_score}')
+            
+            if self.wandb:
+                wandb.log({"brier_total": brier_score}, step=step)
+
 
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)

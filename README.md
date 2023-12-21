@@ -22,7 +22,7 @@ Data Science Lab 2023 at ETH Zurich. Challenge: Tracking Droplets in Microfluidi
 ```pip install -r requirements.txt```
 
 ## Download of Necessary Data
-- To run the track_droplets.py, make sure to have saved an .nd2 image in data/01_raw.
+- To run the track_droplets.py, make sure to have saved a .nd2 image in data/01_raw.
 Check out the config_track_droplets_.yaml in src/conf for further settings.
 
 - To run evaluate_tracking.py, make sure to have installed the paired patch data (link to download). 

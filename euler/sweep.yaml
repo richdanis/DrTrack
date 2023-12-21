@@ -11,38 +11,38 @@ command:
   - evaluate=unbalanced_v1
   - evaluate.auroc=false
   - sweep=true
+  - device=cuda
 program: src/evaluate_tracking.py
 method: grid
 parameters:
   simulated_image:
     values:
-      - small_mvt_1848_droplets.csv
-      - medium_mvt_1848_droplets.csv
-      - large_mvt_1848_droplets.csv
+      - small_mvt_6000_droplets.csv
+      - medium_mvt_6000_droplets.csv
+      - large_mvt_6000_droplets.csv
   track:
     values:
       - tau_9999
       - tau_999
       - tau_99
   track.alpha:
+  # use number of cells to false
     values:
       - 0.0
-      - 0.2
-      - 0.4
-      - 0.6
-      - 0.8
+      - 0.25
+      - 0.5
+      - 0.75
       - 1.0
   track.embedding_dist:
     values:
-      - cosine
+      # cosine
       - euclid
   track.relative_epsilon:
     values:
-      - 5e-2
+      - 5e-1 
       - 5e-3
-      - 5e-4
       - 5e-5
   extract_visual_embeddings:
     values:
       - droplets_all
-      - droplets_only_cells
+      #- droplets_only_cells

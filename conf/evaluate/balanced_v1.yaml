@@ -20,6 +20,7 @@ droplet_radius: 21
 accuracy: true
 accuracy_k: [100, 200, 500, 1000, -1]
 
+brier: true
 auprc: true
 auroc: true
 

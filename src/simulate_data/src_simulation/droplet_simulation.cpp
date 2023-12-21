@@ -602,14 +602,14 @@ int main() {
     */
     // Set parameters
     // Length of simulation
-    droplet_simulator->number_of_frames = 2000;
+    droplet_simulator->number_of_frames = 1000;
     droplet_simulator->number_of_recordings = 12;
 
     // Droplet parameters
-    droplet_simulator->num_droplets = 1848;
-    droplet_simulator->droplet_radius = 4.9;
-    droplet_simulator->random_movement = true;
-    droplet_simulator->intrinsic_movement = true;
+    droplet_simulator->num_droplets = 6000;
+    droplet_simulator->droplet_radius = 3.0;
+    droplet_simulator->random_movement = false;
+    droplet_simulator->intrinsic_movement = false;
     droplet_simulator->max_random_velocity = 0.05;
     droplet_simulator->max_intrinsic_velocity = 0.05;
 

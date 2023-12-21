@@ -111,29 +111,29 @@ class SimulationPlotter:
             self.ax.add_patch(circle)
         
         # Plot attraction points#
-        if self.attraction_points:
-            for i in range(0, len(self.attraction_points_df.index), 2):
-                x = self.attraction_points_df.iloc[i, self.current_time_point]
-                y = self.attraction_points_df.iloc[i+1, self.current_time_point]
-                circle = patches.Circle((x, y), 
-                                        radius=self.attraction_radius, 
-                                        edgecolor='green', 
-                                        facecolor='green',
-                                        alpha=0.1)
-                self.ax.add_patch(circle)
+        # if self.attraction_points:
+        #     for i in range(0, len(self.attraction_points_df.index), 2):
+        #         x = self.attraction_points_df.iloc[i, self.current_time_point]
+        #         y = self.attraction_points_df.iloc[i+1, self.current_time_point]
+        #         circle = patches.Circle((x, y), 
+        #                                 radius=self.attraction_radius, 
+        #                                 edgecolor='green', 
+        #                                 facecolor='green',
+        #                                 alpha=0.1)
+        #         self.ax.add_patch(circle)
                 
             
             
         # Plot repulsion points
-        if self.repulsion_points:
-            for i in range(0, len(self.repulsion_points_df.index), 2):
-                x = self.repulsion_points_df.iloc[i, self.current_time_point]
-                y = self.repulsion_points_df.iloc[i+1, self.current_time_point]
-                circle = patches.Circle((x, y), self.repulsion_radius, 
-                                        edgecolor='red', 
-                                        facecolor='red',
-                                        alpha=0.1)
-                self.ax.add_patch(circle)
+        # if self.repulsion_points:
+        #     for i in range(0, len(self.repulsion_points_df.index), 2):
+        #         x = self.repulsion_points_df.iloc[i, self.current_time_point]
+        #         y = self.repulsion_points_df.iloc[i+1, self.current_time_point]
+        #         circle = patches.Circle((x, y), self.repulsion_radius, 
+        #                                 edgecolor='red', 
+        #                                 facecolor='red',
+        #                                 alpha=0.1)
+        #         self.ax.add_patch(circle)
         
         self.ax.scatter(0,0,s=0.001) # Necessary for unknown reason 
         

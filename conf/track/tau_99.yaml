@@ -1,6 +1,8 @@
 # Cost params
 alpha: 0.7 #position
 beta: None
+gamma: 0.0
+use_nr_cells: False 
 embedding_dist: cosine # cosine or euclid
 
 # Solver params
