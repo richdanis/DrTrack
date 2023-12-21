@@ -1,0 +1,22 @@
+# Cost params
+alpha: 0.5 #position
+beta: None
+gamma: 0.0
+use_nr_cells: False 
+embedding_dist: euclid # cosine or euclid
+
+# Solver params
+max_iterations: 5000
+
+# Geometry params
+relative_epsilon: 0.005 # "default" or float
+
+# Print losses
+print_convergence: true
+
+# Problem params
+tau_a: 0.99
+tau_b: 0.99
+
+# Save embedding dfs
+save_embedding_df: false

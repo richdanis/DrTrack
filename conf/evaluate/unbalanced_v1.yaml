@@ -1,17 +1,18 @@
 # Option to cut out a part of the image - whole image is always (0,0) to (500,500)
 cutout_image: true
 cutout:
-  x_min: 25
-  x_max: 475
-  y_min: 25
-  y_max: 475
+  x_min: 100
+  x_max: 400
+  y_min: 100
+  y_max: 400
 
 # Possible to reduce the number of droplets to be processed
 stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
 
 # Set which frames should be processed - needs to be the same as the number of frames for the embeddings!
 # frames: [3, 4, 5, 6, 7, 8, 9, 10, 11] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
-frames: [6, 7, 8, 9] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
+# frames: [6, 7, 8, 9] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
+frames: [2, 3, 4, 5]
 
 # Probabilities for numbers of cells in droplet and droplet radius
 nr_cells_distribution: [1.0, 0.0, 0.0] # first entry is probability for 0 cells, second for 1 cell, etc.
