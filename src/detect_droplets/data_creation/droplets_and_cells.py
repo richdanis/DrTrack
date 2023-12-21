@@ -2,161 +2,18 @@ import cv2 as cv
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
-from . import manual_circle_hough, cell_detector, droplet_retriever
+from . import manual_circle_hough, cell_detector
 from pathlib import Path
-
-class Droplet():
-    def __init__(self, droplet_id, frame, center_y, center_x, radius, nr_cells, image_name,DROPLET_PATH) -> None:
-        self.id = int(droplet_id)
-        self.frame = int(frame)
-        self.center_y = int(center_y)
-        self.center_x = int(center_x)
-        self.radius = int(radius)
-        self.nr_cells = int(nr_cells)
-        self.cells = []
-        self.image_name = image_name
-        self.folder_path = DROPLET_PATH
-
-    def get_droplet_id(self):
-        return self.id
-    
-    def get_frame(self):
-        return self.frame
-    
-    def get_center(self):
-        return (self.center_y, self.center_x)
-    
-    def get_radius(self):
-        return self.radius
-    
-    def get_nr_cells(self):
-        return self.nr_cells
-    
-    def has_cell(self) -> bool:
-        return self.nr_cells > 0
-    
-    def set_patch(self):
-        patch = np.load(Path(self.folder_path / self.image_name / ("f" + str(self.frame) + "_d" + str(self.id).zfill(4) + '.npy')))
-        patch = np.float64(droplet_retriever.resize_patch(patch, 40) * (2.0 ** (-16)))
-        self.patch = patch
-
-    def get_patch(self):
-        return self.patch
-
-    def set_max_brightness(self):
-        self.max_brightness = np.max(self.patch)
-
-    def get_max_brightness(self):
-        return self.max_brightness
-    
-    def get_patch_minus_mean(self):
-        return self.patch - np.mean(self.patch, axis=0)
-    
-    def get_patch_size(self):
-        return self.patch.shape
-    
-    def add_cell(self,cell):
-        self.cells.append(cell)
-
-    def get_cells(self):
-        return self.cells
-    
-    def get_integrated_brightness_of_cells(self):
-        return np.sum([cell.get_integrated_brightness() for cell in self.cells])
-    
-    def set_hog(self):
-        winSize = (64, 64)
-        blockSize = (64, 64)
-        blockStride = (64, 64)
-        cellSize = (32, 32)
-        patch = np.uint8(droplet_retriever.resize_patch(self.patch, 64) // 256)
-        hog = cv.HOGDescriptor(_winSize=winSize, _blockSize=blockSize, _blockStride=blockStride, _cellSize=cellSize, _nbins=9)
-        self.hog_bf = hog.compute(patch[0, :, :])
-        self.hog_dapi = hog.compute(patch[1, :, :])
-
-    def get_hog_bf(self):
-        return self.hog_bf
-
-    def get_hog_dapi(self):
-        return self.hog_dapi
-
-    def set_embedding(self):
-        assert False, "Not implemented - correct path to embedding"
-        embedding = np.load(Path(self.folder_path / ("f" + str(self.frame) + "_d" + str(self.id).zfill(4))))
-        self.embedding = embedding
-
-    def get_embedding(self):
-        return self.embedding
-    
-    def get_pandas_series_without_cell_information(self):
-        return pd.Series({"droplet_id": self.droplet_id,
-                          "frame": self.frame,
-                          "center_y": self.center_y,
-                          "center_x": self.center_x,
-                          "radius": self.radius,
-                          "nr_cells": self.nr_cells})
-    
-    def safe_as_jason(self):
-        return {"droplet_id": self.droplet_id,
-                "frame": self.frame,
-                "center_y": self.center_y,
-                "center_x": self.center_x,
-                "radius": self.radius,
-                "nr_cells": self.nr_cells,
-                "cells": [cell.safe_as_jason() for cell in self.cells]}
-        
-
-class Cell():
-    def __init__(self, center_y, center_x, intensity_score, persistence_score) -> None:
-        self.center_y = center_y
-        self.center_x = center_x
-        self.intensity_score = intensity_score
-        self.persistence_score = persistence_score
-
-    def get_cell_center(self):
-        return (self.center_y, self.center_x)
-    
-    def get_intensity_score(self):
-        return self.intensity_score
-    
-    def get_persistence_score(self):
-        return self.persistence_score
-    
-    def get_integrated_brightness(self):
-        return self.intensity_score * self.persistence_score
-    
-    def relative_position_to_droplet(self, droplet):
-        return np.asarray([self.center_y - droplet.get_center()[0], self.center_x - droplet.get_center()[1]])
-    
-    def resize_patch(self, size):
-        pass
-
-    def get_pandas_series(self):
-        return pd.Series({"center_y": self.center_y,
-                          "center_x": self.center_x,
-                          "intensity_score": self.intensity_score,
-                          "persistence_score": self.persistence_score})
-    
-    def safe_as_jason(self):
-        return {"center_y": self.center_y,
-                "center_x": self.center_x,
-                "intensity_score": self.intensity_score,
-                "persistence_score": self.persistence_score}
-
-
-def get_droplet_output(bf_image, refine, radius_min = 12, radius_max = 25):
-    droplet_mask, droplet_circles = manual_circle_hough.manual_circle_hough(bf_image, refine, radius_min = radius_min, radius_max = radius_max)
 
 
 # The input image should be an ndarray with shape (f,c,h,w) where f = frames, c = channels, h = height and w = width of the image.
 # IMPORTANT: Datatype should be uint16 just as with the raw images and BF and DAPI must be channels Nr 0 and 1 respectively
-def generate_output_from_ndarray(cfg, 
-                                 input_image: np.ndarray, 
+def generate_output_from_ndarray(cfg,
+                                 input_image: np.ndarray,
                                  output_string_droplets: Path,
                                  refine: bool,
-                                 radius_min: int = 12, 
+                                 radius_min: int = 12,
                                  radius_max: int = 25):
-    
     nr_frames = input_image.shape[0]
     nr_channels = input_image.shape[1]
 
@@ -166,20 +23,22 @@ def generate_output_from_ndarray(cfg,
 
         dapi_channel = input_image[frame_nr, 1, :, :]
         bf_channel = input_image[frame_nr, 0, :, :]
-        visualization_channel = np.zeros(bf_channel.shape, dtype = np.float32)
+        visualization_channel = np.zeros(bf_channel.shape, dtype=np.float32)
 
-        circles_in_frame = manual_circle_hough.manual_circle_hough(bf_channel, refine, bf_is_inverted = True, radius_min = radius_min, radius_max = radius_max)
+        circles_in_frame = manual_circle_hough.manual_circle_hough(bf_channel, refine, bf_is_inverted=True,
+                                                                   radius_min=radius_min, radius_max=radius_max)
 
-        cells_mask, cells_intensities, cells_persistencies = cell_detector.cell_detector(cfg, dapi_channel, bf_channel, circles_in_frame)
+        cells_mask, cells_intensities, cells_persistencies = cell_detector.cell_detector(cfg, dapi_channel, bf_channel,
+                                                                                         circles_in_frame)
 
         intensities_vector = cells_intensities[cells_mask == 1.0]
         persistence_vector = cells_persistencies[cells_mask == 1.0]
 
         intens_thresh = np.quantile(intensities_vector, 0.2)
-        
+
         presis_thresh = np.quantile(persistence_vector, 0.2)
 
-        visualization_channel = cv.morphologyEx(cells_mask, cv.MORPH_DILATE, np.ones((3,3)))
+        visualization_channel = cv.morphologyEx(cells_mask, cv.MORPH_DILATE, np.ones((3, 3)))
 
         cell_id_counter = 0
 
@@ -193,18 +52,23 @@ def generate_output_from_ndarray(cfg,
             local_cells_pers = cells_persistencies[patch_x[0]: patch_x[1], patch_y[0]: patch_y[1]]
 
             local_mask = np.zeros(local_cells_mask.shape)
-            center_in_patch = center - np.asarray([max(int(center[0]) - radius - 2, 0), max(int(center[1]) - radius - 2, 0)])
-            cv.circle(local_mask, np.flip(center_in_patch), radius, 1.0 , -1)
+            center_in_patch = center - np.asarray(
+                [max(int(center[0]) - radius - 2, 0), max(int(center[1]) - radius - 2, 0)])
+            cv.circle(local_mask, np.flip(center_in_patch), radius, 1.0, -1)
             local_cells_mask = local_cells_mask * local_mask
             local_cells_intens = local_cells_intens * local_mask
             local_cells_pers = local_cells_pers * local_mask
 
-            nr_cells_estimated = np.sum(np.logical_and((local_cells_pers > presis_thresh), (local_cells_intens > intens_thresh)))
+            nr_cells_estimated = np.sum(
+                np.logical_and((local_cells_pers > presis_thresh), (local_cells_intens > intens_thresh)))
             cv.circle(visualization_channel, np.flip(center), radius, 1.0, 1)
-            droplets.append({"droplet_id": id, "frame": frame_nr, "center_y": circ[0], "center_x": circ[1], "radius": circ[2], "nr_cells": nr_cells_estimated})
+            droplets.append(
+                {"droplet_id": id, "frame": frame_nr, "center_y": circ[0], "center_x": circ[1], "radius": circ[2],
+                 "nr_cells": nr_cells_estimated})
             cell_coords = np.transpose(np.asarray(np.where(local_cells_mask != 0.0)))
             for coord in cell_coords:
-                global_center = coord + np.asarray([max(int(center[0]) - radius - 2, 0), max(int(center[1]) - radius - 2, 0)])
+                global_center = coord + np.asarray(
+                    [max(int(center[0]) - radius - 2, 0), max(int(center[1]) - radius - 2, 0)])
                 cells_dict.append({"cell_id": cell_id_counter,
                                    "droplet_id": id,
                                    "frame": frame_nr,
@@ -213,7 +77,6 @@ def generate_output_from_ndarray(cfg,
                                    "intensity_score": local_cells_intens[coord[0], coord[1]],
                                    "persistence_score": local_cells_pers[coord[0], coord[1]]})
                 cell_id_counter = cell_id_counter + 1
-      
-    droplet_df = pd.DataFrame(droplets)
-    droplet_df.to_csv(output_string_droplets, index = False)
 
+    droplet_df = pd.DataFrame(droplets)
+    droplet_df.to_csv(output_string_droplets, index=False)
