@@ -6,6 +6,7 @@ from sklearn.metrics import brier_score_loss
 from pathlib import Path
 import seaborn as sns
 from seaborn.categorical import boxplot
+import os
 
 #context can be: paper, notebook, talk, poster
 sns.set_theme(context="poster", palette="pastel", style="ticks", font_scale=0.8)
@@ -21,17 +22,27 @@ def save_calibration_plot(cfg, results_dir, title="Calibration Plot", frame_shif
         print("Creating Calibration Plot - ", result_type)
         print("=========================================\n")
 
-    # Get results df
     if result_type == "Unfiltered":
-        name = "results_.csv"
+        file_name_start = "results"
         fig_name = "calibration_plot.png"
+
     elif result_type == "Filtered":
-        name = "filtered_results_.csv"
-        fig_name = "calibration_plot_filtered.png"
+        file_name_start = "filtered_results"
+
     else:
         raise NotImplementedError("Result type not implemented. In calibration_plot.py")
-    
-    results_df = pd.read_csv(results_dir / name)
+
+    # Load simulated data
+    for file in os.listdir(results_dir):
+        if file.startswith(file_name_start):
+            results_df_name = file
+            # Get suffix of results_df_name
+            file_name_suffix = results_df_name.split("_")[-1].split(".")[0]
+
+            if result_type == "Filtered":
+                fig_name = f"calibration_plot_{file_name_suffix}.png"
+                
+            results_df = pd.read_csv(results_dir / results_df_name)
 
     # Prepare fig
     fig, ax = plt.subplots(figsize=(8, 6))
