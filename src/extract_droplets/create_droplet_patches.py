@@ -10,8 +10,8 @@ from omegaconf import DictConfig
 
 sys.path.append('./src/')
 
-
-def get_patch(image, center_x, center_y, radius, buffer=3, suppress_rest=True, suppression_slack=1,
+# IMPORTANT! Default params are compatible with the current embeddings. Changing them will harm the performance.
+def get_patch(image, center_x, center_y, radius, buffer=-2, suppress_rest=True, suppression_slack=-3,
               discard_boundaries=True):
     s = image.shape
     assert len(s) == 3, 'axis length of image is not 2 or 3 (create_droplet_patches.py)'
@@ -45,12 +45,11 @@ def get_patch(image, center_x, center_y, radius, buffer=3, suppress_rest=True, s
             mask = np.zeros(ans.shape[1:3], dtype=np.uint16)
             cv.circle(mask, np.asarray((window_dim, window_dim)), radius + suppression_slack, 1, -1)
             ans = ans * mask[None, :, :]
-
         return ans
 
-
-def create_droplet_patches(image: np.ndarray, droplet_feature_table: pd.DataFrame, buffer: int = 3,
-                           suppress_rest: bool = True, suppression_slack: int = 1,
+# IMPORTANT! Default params are compatible with the current embeddings. Changing them will harm the performance.
+def create_droplet_patches(image: np.ndarray, droplet_feature_table: pd.DataFrame, buffer: int = -2,
+                           suppress_rest: bool = True, suppression_slack: int = -3,
                            discard_boundaries: bool = False) -> Dict:
     """
     Create a dataframe with droplet patches.
