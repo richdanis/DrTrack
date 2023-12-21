@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import wandb
 import os
+from pathlib import Path
 
 from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss
 
@@ -30,6 +31,9 @@ class OtEvaluation():
         for file in os.listdir(self.results_path):
             if file.startswith(file_name_start):
                 results_df_name = file
+                # Get suffix of results_df_name
+                self.file_name_suffix = results_df_name.split("_")[-1].split(".")[0]
+
                 self.results_df = pd.read_csv(self.results_path / results_df_name)
 
         # OLD CODE
@@ -196,7 +200,7 @@ class OtEvaluation():
             scores_df.to_csv(self.results_path / "scores.csv", index=False)
 
         elif self.result_type == "Filtered":
-            scores_df.to_csv(self.results_path / "scores_filtered.csv", index=False)
+            scores_df.to_csv(self.results_path / Path("scores_filtered_" + self.file_name_suffix + ".csv"), index=False)
 
         else:
             raise ValueError("result_type must be either 'Unfiltered' or 'Filtered'")

@@ -12,6 +12,9 @@ evaluation_mode: True
 
 
 # FILTERING of RESULTS
+# file_name_suffix for filtered results version
+file_name_suffix: "_basic"
+
 # If True, filters for trajectories that are not merged with other trajectories. Only the trajectories with highest full_trajectory_probability are kept.
 filter_merging_trajectories: True 
 

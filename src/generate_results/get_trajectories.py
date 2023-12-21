@@ -421,7 +421,7 @@ def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path
         filtered_final_results, = filter_results(cfg, final_results_df)
 
     # Store filtered results
-    filtered_final_results.to_csv(image_results_path / f'filtered_results_{cut_name}.csv', index=False)
+    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results_{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):
