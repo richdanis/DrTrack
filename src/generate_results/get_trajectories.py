@@ -18,50 +18,31 @@ import os
 
 def transform_to_entry_based_probability_matrix(cfg, ot_matrix):
     """
-    This function scales the OT matrix to a range of [0,1].
+    Linearly scale OT matrix entries onto the range of [0,1].
+
+    Parameters:
+    - cfg: The configuration object.
+    - ot_matrix: The OT matrix to be scaled.
+
+    Returns:
+    - ot_matrix_scaled: The min-max scaled OT matrix.
     """
     # Scale onto 0-1 range
     ot_matrix_scaled = (ot_matrix - ot_matrix.min()) / (ot_matrix.max() - ot_matrix.min())
 
     return ot_matrix_scaled
 
-    ## VERSION 2 - more similar to rank based by using cutoff
-    # # Scale onto 0-1 range
-    # # Cut off the lowest 1% of the values
-    # ot_m = np.array(ot_matrix)
-   
-    # # Standardize and scale the entries
-    # ot_m = (ot_m - ot_m.min()) / (ot_m.max() - ot_m.min())
-
-    # # Flatten the matrix into 1D array
-    # flattened = np.array(ot_m).flatten()
-
-    # # Get max rank per vector along maximal dimension
-    # max_entry_per_vector = np.max(np.array(ot_m), axis=0)
-    # cut_off = np.min(max_entry_per_vector)
-
-    # # Get uncertainty resolution
-    # uncertainty_resolution = cfg.generate_results.uncertainty_resolution
-
-    # # Make sure to create contrast in probabilities where it matters
-    # flattened[flattened <= cut_off / uncertainty_resolution] = cut_off / uncertainty_resolution
-    
-    # # 0-1 normalize the ranks
-    # max_rank = np.max(flattened)
-    # min_rank = np.min(flattened)
-
-    # # Scale to 0-1 range
-    # prob_matrix = (np.array(ot_m) - min_rank) / (max_rank - min_rank)
-
-    # # Make sure that probabilities are uniformly distributed on [0,1]
-    # prob_matrix = ot_m
-    # prob_matrix[prob_matrix < 0] = 0
-
-    # return prob_matrix
 
 def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     """
-    This function transforms the OT matrix to a probability matrix based on the ranks of the entries in the OT matrix.
+    Transform the OT matrix to a probability matrix based on the ranks of the entries in the OT matrix.
+
+    Parameters:
+    - cfg: The configuration object containing the settings for generating results.
+    - ot_matrix: The OT matrix to be transformed.
+
+    Returns:
+    - prob_matrix: The transformed probability matrix.
     """
     # Flatten the matrix into 1D array
     flattened = np.array(ot_matrix).flatten()
@@ -71,9 +52,6 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
 
     # Reshape the ordering to match the original matrix shape
     ranks = ranks.reshape(ot_matrix.shape)
-
-    # Make sure to create contrast in probabilities where it matters
-    # max_dim = np.argmax(ot_matrix.shape)
     
     # Get max rank per vector along maximal dimension
     max_rank_per_vector = np.max(ranks, axis=0)
@@ -89,66 +67,22 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     min_rank = np.min(ranks)
     prob_matrix = (ranks - min_rank) / (max_rank - min_rank)
 
-    ## VERSION 2
-    # # Flatten the matrix into 1D array
-    # flattened = np.array(ot_matrix).flatten()
-
-    # # Get the ordering of the elements
-    # ranks = flattened.argsort().argsort()
-
-    # # Reshape the ordering to match the original matrix shape
-    # ranks = ranks.reshape(ot_matrix.shape)
-
-    # # Make sure to create contrast in probabilities where it matters
-    # max_dim = max(ot_matrix.shape[0], ot_matrix.shape[1])
-    # min_dim = min(ot_matrix.shape[0], ot_matrix.shape[1])
-
-    # # Get max rank of vectors of maximal dimension
-    # max_rank = np.max(ranks, axis=max_dim-1)
-    
-    # uncertainty_resolution = cfg.generate_results.uncertainty_resolution
-    # ranks[ranks <= max_dim * (min_dim - uncertainty_resolution)] = max_dim * (min_dim - uncertainty_resolution)
-    
-    # # 0-1 normalize the ranks
-    # max_rank = np.max(ranks)
-    # min_rank = np.min(ranks)
-    # prob_matrix = (ranks - min_rank) / (max_rank - min_rank)
-
-    ## VERSION 1
-    # # Flatten the matrix into 1D array
-    # flattened = ot_matrix.flatten()
-
-    # # Get the ordering of the elements
-    # ranks = flattened.argsort().argsort()
-
-    # # Reshape the ordering to match the original matrix shape
-    # ranks = ranks.reshape(ot_matrix.shape)
-
-    # # Make sure the the maximal probability is 1
-    # min_dim = min(ot_matrix.shape[0], ot_matrix.shape[1])
-    # ranks = ranks // min_dim
-
-    # # Add row and col based ordering to deal with ties
-    # row_ranks = ot_matrix.argsort().argsort()
-    # col_ranks = ot_matrix.argsort(axis=0).argsort(axis=0)
-    # ranks_row_col = row_ranks + col_ranks
-    # norm_ranks_row_col = ranks_row_col / (ot_matrix.shape[0] + ot_matrix.shape[1] - 2)
-
-    # # Transform to probability matrix
-    # total_ranks = ranks + norm_ranks_row_col
-
-    # # Apply temperature for more constrast in the probabilities
-    # temp = 2
-    # prob_matrix = total_ranks ** temp / (min_dim+1) ** temp
-
     return prob_matrix
 
 
 
-def get_epsilon_independent_id_mapping(cfg, ot_matrix, frame_id):
+def get_id_mapping(cfg, ot_matrix, frame_id):
     """
-    This function returns a mapping from the droplet ids in the current frame to the droplet ids in the next frame.
-    The mapping is epsilon independent and based on ranks.
+    Return a mapping from droplet ids in the current frame to the droplet ids in the next frame.
+    --------
+    Parameters:
+    - cfg: The configuration object.
+    - ot_matrix: The optimal transport matrix.
+    - frame_id: The id of the current frame.
+
+    Returns:
+    - this_frame_ids: The droplet ids in the current frame.
+    - next_frame_ids: The droplet ids in the next frame.
     """
     # Get directory to store probability matrices
     directory_name = "prob_matrix_" + cfg.experiment_name
@@ -183,7 +117,7 @@ def create_trajectory_with_prob(cfg, ot_matrices):
 
     for i, ot_matrix in enumerate(ot_matrices):
         # get the mapping from the current frame to the next frame
-        this_frame_ids, next_frame_ids = get_epsilon_independent_id_mapping(cfg, ot_matrix, i)
+        this_frame_ids, next_frame_ids = get_id_mapping(cfg, ot_matrix, i)
 
         # create a dataframe with the indices and the probabilities
         tmp = pd.DataFrame({f'frame': i,
@@ -361,6 +295,93 @@ def part_trajectory_prob(cfg, df):
     # Display the result DataFrame
     return result_df
 
+def filter_results(cfg, results_df):
+    """
+    Filter the results based on the following criteria:
+    - Confidence threshold on whole trajectory
+    - Duplicate assignments
+    """
+    # Get copy of results
+    trajectories = results_df.copy()
+
+    # Params from config
+    uncertainty_threshold = cfg.generate_results.uncertainty_threshold
+    enforce_same_number_of_cells = cfg.generate_results.enforce_same_nr_cells
+    max_distance = cfg.generate_results.max_distance
+    frame_margin = cfg.generate_results.frame_margin
+    filter_merging_trajectories = cfg.generate_results.filter_merging_trajectories
+
+    # Get range of frames
+    if cfg.generate_results.frame_range is None:
+        first_frame = 0
+        cols = trajectories.columns.tolist()
+        original_ids = [int(col.split("_")[1]) for col in cols if col.startswith("id")]
+        last_frame = max(original_ids)
+    
+    else:
+        first_frame = cfg.generate_results.frame_range[0]
+        last_frame = cfg.generate_results.frame_range[1]
+
+    # Test for full trajectory uncertainty passing the threshold
+    if uncertainty_threshold is not None:
+        mask = trajectories[f'full_trajectory_uncertainty'] >= uncertainty_threshold
+        trajectories = trajectories[mask]
+
+    # Test for the same number of cells
+    if enforce_same_number_of_cells:
+        mask = pd.Series(True, index=trajectories.index)
+        for i in range(first_frame + 1, last_frame + 1):
+            mask = mask & (trajectories[f'nr_cells{i}'] == trajectories[f'nr_cells{first_frame}'])
+
+        trajectories = trajectories[mask]
+
+    # Test for max distance between frames
+    if max_distance is not None:
+        mask = pd.Series(True, index=trajectories.index)
+        for i in range(first_frame, last_frame):
+            mask = mask & ((trajectories[f'x{i}'] - trajectories[f'x{i + 1}']).abs() < max_distance)
+            mask = mask & ((trajectories[f'y{i}'] - trajectories[f'y{i + 1}']).abs() < max_distance)
+
+        trajectories = trajectories[mask]
+
+    # Test for distance from the frame border
+    if frame_margin is not None:
+        min_x = 0
+        max_x = trajectories[f'x{first_frame}'].max()
+        min_y = 0
+        max_y = trajectories[f'y{first_frame}'].max()
+        mask = pd.Series(True, index=trajectories.index)
+        for i in range(first_frame, last_frame + 1):
+            mask = mask & (trajectories[f'x{i}'] - min_x > frame_margin)
+            mask = mask & (max_x - trajectories[f'x{i}'] > frame_margin)
+            mask = mask & (trajectories[f'y{i}'] - min_y > frame_margin)
+            mask = mask & (max_y - trajectories[f'y{i}'] > frame_margin)
+
+        
+        trajectories = trajectories[mask]
+
+    # Filter for merging trajectories and keep only the ones with the highest probability
+    if filter_merging_trajectories:
+        # Sort the trajectories by their uncertainty
+        trajectories = trajectories.sort_values(by="full_trajectory_uncertainty", ascending=False)
+
+        # Iterate through frame transitions and filter for merging trajectories
+        cols = trajectories.columns.tolist()
+        original_ids = [col for col in cols if col.startswith("id")]
+        trajectories_high_prob = trajectories.copy()
+
+        for col in original_ids:
+            trajectories_high_prob = trajectories_high_prob.drop_duplicates(col, keep="first")
+        
+        # Get the indices of the trajectories that are not kept
+        mask = trajectories.index.isin(trajectories_high_prob.index)
+        trajectories_low_prob = trajectories[~mask]
+
+        return trajectories_high_prob, trajectories_low_prob
+    
+    return trajectories, None
+
+
 def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path, cut_feature_droplets_df):
     # load the ot matrices
     ot_matrices = []
@@ -391,6 +412,16 @@ def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path
 
     # save the results
     final_results_df.to_csv(image_results_path / f'results_{cut_name}.csv', index=False)
+
+    # filter the results
+    if cfg.generate_results.filter_merging_trajectories:
+        filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
+        dropped_merging_trajectories_.to_csv(image_results_path / f'dropped_merging_trajectories_{cut_name}.csv', index=False)
+    else:
+        filtered_final_results, = filter_results(cfg, final_results_df)
+
+    # Store filtered results
+    filtered_final_results.to_csv(image_results_path / f'filtered_results_{cut_name}.csv', index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):

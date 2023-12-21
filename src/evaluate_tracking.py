@@ -145,11 +145,15 @@ def main(cfg: DictConfig):
             compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
 
         if not cfg.skip_scoring:
-            ot_evaluation = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path)
-            ot_evaluation.compute_and_store_scores()
+            ot_evaluation_unfiltered = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path, result_type="Unfiltered")
+            ot_evaluation_unfiltered.compute_and_store_scores()
+
+            ot_evaluation_filtered = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path, result_type="Filtered")
+            ot_evaluation_filtered.compute_and_store_scores()
 
         if not cfg.skip_calibration_plot:
-            save_calibration_plot(cfg, image_results_path)
+            save_calibration_plot(cfg, image_results_path, result_type="Unfiltered")
+            save_calibration_plot(cfg, image_results_path, result_type="Filtered")
 
     if cfg.wandb:
         wandb.log({"alpha": cfg.track.alpha,

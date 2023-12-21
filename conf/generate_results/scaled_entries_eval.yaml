@@ -5,7 +5,27 @@ uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks"
 uncertainty_resolution: 1 
 
 # How to aggregate the probabilities for the same droplet from different frames
-prob_agregation: "average" # "multiplication"
+prob_agregation: "multiplication" # "multiplication" or "average"
 
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: True
+
+
+# FILTERING of RESULTS
+# If True, filters for trajectories that are not merged with other trajectories. Only the trajectories with highest full_trajectory_probability are kept.
+filter_merging_trajectories: True 
+
+# If null, all frames will be processed. Otherwise, only frames in this range will be processed.
+frame_range: null     
+
+# Filter out droplets with uncertainty below this threshold. If null, no filtering will be done.
+uncertainty_threshold: 0.4   
+
+# If True, only droplets with the same number of cells in all frames will be kept.
+enforce_same_nr_cells: False   
+
+# We only keep droplets that moved less than this distance in any dimension (simulation sqaure is usually 500x500).
+max_distance: null      
+
+# If null, no filtering will be done. Otherwise, we only keep trajectories with droplets that are not next to the cut edge.
+frame_margin: null              
