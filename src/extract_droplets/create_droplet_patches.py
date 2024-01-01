@@ -1,18 +1,54 @@
+# Types and os
 import sys
 from pathlib import Path
 import os
 from typing import Dict
-
-import numpy as np
-import cv2 as cv
-import pandas as pd
 from omegaconf import DictConfig
 
+# Arays and data frames
+import numpy as np
+import pandas as pd
+
+# Computer Vision
+import cv2 as cv
+
+# Add src to path
 sys.path.append('./src/')
 
 # IMPORTANT! Default params are compatible with the current embeddings. Changing them will harm the performance.
-def get_patch(image, center_x, center_y, radius, buffer=-2, suppress_rest=True, suppression_slack=-3,
-              discard_boundaries=True):
+def get_patch(image, 
+              center_x: float, 
+              center_y: float, 
+              radius: int, 
+              buffer: int = -2, 
+              suppress_rest: bool = True, 
+              suppression_slack: int = -3,
+              discard_boundaries: bool = True) -> np.ndarray:
+    """
+    Get a patch of a droplet from an image.
+    ----------
+    Parameters:
+    image: np.ndarray:
+        3D image data, where c represents channels, h is image height, and w is image width.
+    center_x: float:
+        x coordinate of the center of the droplet.
+    center_y: float:
+        y coordinate of the center of the droplet.
+    radius: int:
+        Radius of the droplet.
+    buffer: int:
+        Extra pixels of slack for extracting droplet patches.
+    suppress_rest: bool:
+        Whether to suppress pixels outside of the radius of the detected droplets.
+    suppression_slack: int:
+        Distance in pixels outside of the detected radius that is still considered part of the droplet.
+    discard_boundaries: bool:
+        Whether to exclude patches that are partially outside of the image boundaries.
+    ----------
+    Returns:
+    ans: np.ndarray:
+        A 3D array with the droplet patch.
+    """
     s = image.shape
     assert len(s) == 3, 'axis length of image is not 2 or 3 (create_droplet_patches.py)'
 
@@ -48,8 +84,11 @@ def get_patch(image, center_x, center_y, radius, buffer=-2, suppress_rest=True, 
         return ans
 
 # IMPORTANT! Default params are compatible with the current embeddings. Changing them will harm the performance.
-def create_droplet_patches(image: np.ndarray, droplet_feature_table: pd.DataFrame, buffer: int = -2,
-                           suppress_rest: bool = True, suppression_slack: int = -3,
+def create_droplet_patches(image: np.ndarray, 
+                           droplet_feature_table: pd.DataFrame, 
+                           buffer: int = -2,
+                           suppress_rest: bool = True, 
+                           suppression_slack: int = -3,
                            discard_boundaries: bool = False) -> Dict:
     """
     Create a dataframe with droplet patches.
@@ -101,7 +140,7 @@ def create_and_save_droplet_patches(cfg: DictConfig, image_preprocessed_path: Pa
     """
     if cfg.verbose:
         print("\n===================================================================")
-        print("Cut droplet patches")
+        print("Cut Droplet Patches")
         print("===================================================================\n")
         print("Currently processing:")
 

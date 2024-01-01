@@ -1,12 +1,18 @@
 import os
+
+# Types
 from pathlib import Path
 from typing import Dict
-
-import torch
-from tqdm import tqdm
 from omegaconf import DictConfig
+
+# Handling neural networks
+import torch
 import numpy as np
 
+# Progress
+from tqdm import tqdm
+
+# Local imports
 from extract_visual_embeddings.dataset import DropletDataset
 from extract_visual_embeddings.models.efficientnet import EfficientNet
 
@@ -75,7 +81,7 @@ def create_and_save_droplet_embeddings(cfg: DictConfig, image_feature_path: Path
     """
     if cfg.verbose:
         print("\n===================================================================")
-        print("Create droplet embeddings")
+        print("Create Droplet Embeddings")
         print("===================================================================\n")
         print("Currently processing:")
 
@@ -96,7 +102,7 @@ def create_and_save_droplet_embeddings(cfg: DictConfig, image_feature_path: Path
             droplet_base_file_name = cut_patch_file_name.replace("patches_", "").replace(".npy", "")
             cut_droplet_path = Path(image_feature_path / f"droplets_{droplet_base_file_name}.csv")
 
-            dataset = DropletDataset(cut_patch_path, cut_droplet_path)
+            dataset = DropletDataset(cfg, cut_patch_path, cut_droplet_path)
 
             droplet_embeddings_df = create_droplet_embeddings(cfg, dataset, model)
 
