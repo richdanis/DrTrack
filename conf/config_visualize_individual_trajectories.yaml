@@ -2,7 +2,7 @@
 
 # Name of the results file to visualize
 # results: "filtered_results_y0_x0_basic.csv"
-results: "dropped_merging_trajectories_y0_x2325_basic.csv"
+results: "results_y0_x2325_basic.csv"
 image_name: "Small mvt 1.nd2"
 
 # Name of the experiment to visualize

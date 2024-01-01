@@ -468,7 +468,7 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
 
         return trajectories_high_prob, trajectories_low_prob
     
-    return trajectories, None
+    return trajectories
 
 
 def compute_and_store_results_cut(cfg, 
@@ -536,7 +536,7 @@ def compute_and_store_results_cut(cfg,
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
         dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
     else:
-        filtered_final_results, = filter_results(cfg, final_results_df)
+        filtered_final_results = filter_results(cfg, final_results_df)
 
     # Store filtered results
     filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)

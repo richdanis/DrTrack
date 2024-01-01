@@ -3,13 +3,14 @@
 file_name_suffix: "_basic"
 
 # If True, filters for trajectories that are not merged with other trajectories. Only the trajectories with highest full_trajectory_probability are kept.
-filter_merging_trajectories: True 
+filter_merging_trajectories: False 
 
-# If null, all frames will be processed. Otherwise, only frames in this range will be processed.
-frame_range: null     
+# If null, all frames will be processed. Otherwise, trajectories will only be excluded based on values for the specified frame range.
+# Often the first few frames are not reliable, so we can skip them.
+frame_range: [2,7]     
 
-# Filter out droplets with uncertainty below this threshold. If null, no filtering will be done.
-uncertainty_threshold: 0.98  
+# Filter out trajectories with an uncertainty below this threshold. If null, no filtering will be done.
+uncertainty_threshold: 0.8
 
 # If True, only droplets with the same number of cells in all frames will be kept.
 enforce_same_nr_cells: False   
