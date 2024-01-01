@@ -1,0 +1,9 @@
+# Choose the number of pixels for the smaller side of the image.
+# If pixel = -1, the whole cut image will be used. Set to 500 for debugging purposes.
+pixel: -1
+
+# Number of cuts for each image (only relevant if pixel = -1).
+# Here one cut refers to a segment of the image that is cut out.
+# The total number of cuts is cuts_x * cuts_y.
+cuts_x: 2
+cuts_y: 2
