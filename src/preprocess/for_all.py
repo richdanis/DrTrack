@@ -49,7 +49,7 @@ def preprocess_cut_and_store(cfg: DictConfig,
                                            PREPROCESSED_PATH, pixel=pixel)
 
 
-def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path, image_name: str):
+def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path):
     """
     Preprocess the .nd2 images separated into cuts and save as .npy arrays.
 
@@ -61,8 +61,6 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path, 
         Path to the raw .nd2 image file.
     preprocessed_path : Path
         Path to store the preprocessed .npy arrays.
-    image_name : str
-        Name of the image.
 
     Returns
     -------
@@ -105,7 +103,7 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path, 
     for i in range(cuts_y):
         for j in range(cuts_x):
             # Naming convention: image_name_y[upper_left]_x[upper_left]
-            image_name_curr = f'{image_name}_y{i * cut_size_y}_x{j * cut_size_x}'
+            image_name_curr = f'y{i * cut_size_y}_x{j * cut_size_x}'
             upper_left_corner = (i * cut_size_y, j * cut_size_x)
 
             # Progress

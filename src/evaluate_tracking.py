@@ -22,25 +22,7 @@ from evaluate.preprocess_simulated import SimulatedData
 from evaluate.get_scores import OtEvaluation
 from evaluate.calibration_plot import save_calibration_plot
 from evaluate.generate_paired_patches import structure_patches
-import os
-
-def create_dir(path: str):
-    """
-    Create a directory at the specified path if it doesn't already exist.
-
-    Parameters
-    ----------
-    path : str
-        The path of the directory to be created.
-
-    Returns
-    -------
-    None
-        This function does not return anything.
-
-    """
-    if not os.path.exists(path):
-        os.makedirs(path)
+from utils.file_structure import create_dir
 
 
 @hydra.main(config_path="../conf", config_name="config_evaluate_tracking", version_base=None)

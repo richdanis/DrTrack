@@ -1,10 +1,24 @@
 import cv2 as cv
 import numpy as np
+
+# Local imports
 from .nms import nms, canny_nms
-from tqdm.auto import tqdm
 
 
-def create_custom_kernel(rad):
+def create_custom_kernel(rad: int) -> np.ndarray:
+    """
+    Creates a custom kernel for morphological operations.
+    
+    Parameters
+    ----------
+    rad : int
+        The radius of the kernel.
+    
+    Returns
+    -------
+    np.ndarray
+        The kernel as a numpy ndarray.
+    """
     x, y = np.meshgrid(np.arange(-rad, rad + 1), np.arange(-rad, rad + 1))
     dist = np.sqrt(x**2 + y**2)
     
@@ -13,11 +27,32 @@ def create_custom_kernel(rad):
     return ans
 
 
-def masked_dilate(image, mask, kernel):
+def masked_dilate(image: np.array, 
+                  mask: np.array, 
+                  kernel: np.array) -> np.array:
+    """
+    Dilates an image while taking a mask into account.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        The input image as a numpy ndarray.
+    mask : np.ndarray
+        The mask as a numpy ndarray.
+    kernel : np.ndarray
+        The kernel as a numpy ndarray.
+
+    Returns
+    -------
+    np.ndarray
+        The dilated image as a numpy ndarray.
+    """
     return cv.morphologyEx(image, cv.MORPH_DILATE, kernel, iterations = 1) * mask
 
 
-def cell_finding(cfg, droplet_circles: list, raw_dapi: np.ndarray, raw_bf: np.ndarray) -> np.ndarray:
+def cell_finding(cfg, droplet_circles: list, 
+                 raw_dapi: np.ndarray, 
+                 raw_bf: np.ndarray) -> np.ndarray:
     """
     Finding the cells in the image -- IMPORTANT not the droplets
     ----------

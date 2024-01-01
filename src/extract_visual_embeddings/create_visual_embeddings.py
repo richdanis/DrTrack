@@ -69,7 +69,7 @@ def create_and_save_droplet_embeddings(cfg: DictConfig, image_feature_path: Path
     ----------
     Parameters:
     cfg: DictConfig
-       Global config.
+        Global config.
     image_feature_path: Path:
         Directory where .csv files with droplet features are stored.
     """

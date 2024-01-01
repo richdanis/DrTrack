@@ -1,23 +1,24 @@
-import os
-import time
+# Types
+from omegaconf import DictConfig
 from pathlib import Path
 
+# Runtime measurement
+import time
+
+# Configuration library
 import hydra
-from omegaconf import DictConfig
+
+# Jax for fast computation using GPUs
 import jax
 
+# Local imports
 from preprocess.for_all import preprocess_cuts_and_store_all
 from detect_droplets.detect_and_store import detect_and_store_all
 from extract_droplets.create_droplet_patches import create_and_save_droplet_patches
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
-
-
-def create_dir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
+from utils.file_structure import create_dir
 
 def setup_directories(cfg):
     # Create directories if they do not exist
@@ -31,9 +32,29 @@ def setup_directories(cfg):
 
 @hydra.main(config_path="../conf", config_name="config_track_droplets", version_base=None)
 def main(cfg: DictConfig):
+    """
+    Main function for tracking droplets. The pipeline consists of the following steps:
+    1. Preprocess the raw image and store as .npy arrays.
+    2. Detect droplets and store as .csv files.
+    3. Extract droplet patches and store as .npy arrays.
+    4. Extract visual embeddings and store as .npy arrays.
+    5. Compute optimal transport matrices and store as .npy arrays.
+    6. Compute trajectories and store as .csv files.
 
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration dictionary.
+
+    Returns
+    -------
+    None
+    """
+    ### SETUP ###
+    # Set device
     if cfg.device == 'cpu':
         jax.devices("cpu")[0]
+
     # Setup directories
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
     PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
@@ -47,7 +68,6 @@ def main(cfg: DictConfig):
 
     # Get name of image configuration to be processed
     experiment_name = cfg.experiment_name
-    image_name = cfg.raw_image[:-4].lower().replace(' ', '_')
 
     ### PREPROCESSING ###
     # Check conf/preprocess.yaml for settings
@@ -56,12 +76,14 @@ def main(cfg: DictConfig):
     if not cfg.skip_preprocessing:
         # Create paths if they do not exist
         create_dir(image_preprocessed_path)
-        preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path, experiment_name)
+        preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path)
 
     ### DROPLET DETECTION ###
-    # Check conf/extract_droplets.yaml for settings
+    # Check conf/extract_droplets for settings
+    # Path to store the detected droplets
     image_feature_path = Path(FEATURE_PATH / experiment_name)
 
+    # Detect droplets and store as .csv files
     if not cfg.skip_droplet_detection:
         # Create paths if they do not exist
         create_dir(image_feature_path)

@@ -60,7 +60,7 @@ class SimulatedData():
                  cfg: DictConfig, 
                  image_simulated: Path, 
                  image_processed_path: Path, 
-                 real_droplet_metadata_path: Path = None):
+                 real_droplet_metadata_path: Path = None) -> None:
         """
         Initialize the PreprocessSimulated class with parameters described in the class docstring.
         """
@@ -84,7 +84,7 @@ class SimulatedData():
 
     def get_frame_position_jnp(self, 
                                frame: int, 
-                               stride: int = 2):
+                               stride: int = 2) -> jnp.array:
         """
         Get the position of droplets in a specific frame as JAX NumPy array.
 
@@ -117,7 +117,7 @@ class SimulatedData():
     def get_frame_position_df(self, 
                               frame: int, 
                               real_data_frame: int, 
-                              stride: int = 2):
+                              stride: int = 2) -> pd.DataFrame:
         """
         Get the position of droplets in a specific frame as a DataFrame.
 
@@ -165,7 +165,9 @@ class SimulatedData():
 
         return df
 
-    def get_plain_filtered_position_df(self, frame, stride=2):
+    def get_plain_filtered_position_df(self, 
+                                       frame: int, 
+                                       stride: int = 2) -> pd.DataFrame:
         """
         Get the position of droplets in a specific frame as a filtered DataFrame.
 
@@ -195,7 +197,14 @@ class SimulatedData():
 
         return df
 
-    def create_and_store_position_dfs(self):
+    def create_and_store_position_dfs(self) -> None:
+        """
+        Create and store position DataFrames for all frames.
+        
+        Returns
+        -------
+        None
+        """
         # Progress
         if self.verbose:
             print("\n=========================================")

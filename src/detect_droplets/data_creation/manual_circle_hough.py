@@ -1,20 +1,78 @@
-from . import find_hough_circle, nms
+# Computer vision for circle detection
 import cv2 as cv
+
+# Handling arrays
 import numpy as np
+
+# Progress
 from tqdm import tqdm
 
-# Transforms float32 images to uint8 images. Assumes the range of the input image is correct
-def f32_to_uint8(img):
+# Local imports
+from . import find_hough_circle, nms
+
+def f32_to_uint8(img: np.ndarray) -> np.ndarray:
+    """
+    Transforms float32 images to uint8 images. Assumes the range of the input image is correct.
+
+    Parameters
+    ----------
+    img : np.ndarray
+        The input image as a numpy ndarray.
+    
+    Returns
+    -------
+    np.ndarray
+        The input image as a numpy ndarray with datatype uint8.
+    """
     return np.uint8(img * 255)
 
-# Transforms uint8 images to float32 images. Assumes the range of both images are correct
-def uint8_to_f32(img):
+def uint8_to_f32(img: np.ndarray):
+    """
+    Transforms uint8 images to float32 images. Assumes the range of the input image is correct.
+
+    Parameters
+    ----------
+    img : np.ndarray
+        The input image as a numpy ndarray.
+    
+    Returns
+    -------
+    np.ndarray
+        The input image as a numpy ndarray with datatype float32.
+    """
     return np.float32(img / 255.0)
 
-# input is uin16 greyscale base image
-def manual_circle_hough(img: np.ndarray, refine: bool, bf_is_inverted = False, noise_level_param = 0.3, radius_min = 12, radius_max = 25):
+def manual_circle_hough(img: np.ndarray, 
+                        refine: bool, 
+                        bf_is_inverted: bool = False, 
+                        noise_level_param: float = 0.3, 
+                        radius_min: int = 12, 
+                        radius_max: int = 25):
+    """
+    Detects circles in an image using the Hough transform.
     
-    # For the BF channel, bottom 80% of pixels is pretty much background 
+    Parameters
+    ----------
+    img : np.ndarray
+        The input image as a uint16 numpy ndarray (the greyscale base image).
+    refine : bool
+        A boolean flag indicating whether to refine the circles.
+    bf_is_inverted : bool, optional
+        A boolean flag indicating whether the brightfield channel is inverted. Default is False.
+    noise_level_param : float, optional
+        The noise level parameter. Default is 0.3.
+    radius_min : int, optional
+        The minimum radius for circle detection. Default is 12.
+    radius_max : int, optional
+        The maximum radius for circle detection. Default is 25.
+    
+    Returns
+    -------
+    np.ndarray
+        Detected circles in the image.
+    """
+    
+    # For the BF channel, bottom 80% of pixels is mostly background. Perform denoising.
     noise_level = noise_level_param
 
     img_denoised = (img - img.min()) / (img.max() - img.min())
@@ -23,7 +81,8 @@ def manual_circle_hough(img: np.ndarray, refine: bool, bf_is_inverted = False, n
     img_denoised = np.clip(img_denoised - np.quantile(img_denoised, noise_level), 0.0, 1.0)
     img_denoised = (img_denoised - img_denoised.min()) / (img_denoised.max() - img_denoised.min())
 
-    # Depending on option, do refinement or not
+    # Depending on option, do refinement or not.
+    # Refinement is done via the RANSAC algorithm.
     detected_circles = []
     if (not refine):
         img_denoised = cv.GaussianBlur(img_denoised, (3, 3), 0)

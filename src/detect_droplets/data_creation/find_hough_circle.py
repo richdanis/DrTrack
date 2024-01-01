@@ -1,9 +1,10 @@
 import cv2 as cv
 import numpy as np
 
-
-# Takes in a blank image with points on circle
-def circle_RANSAC3(points_img: np.ndarray, edge_img: int, rmin: int, rmax: int) -> set:
+def circle_RANSAC3(points_img: np.ndarray, 
+                   edge_img: int, 
+                   rmin: int, 
+                   rmax: int) -> set:
     """
     RANSAC Circle Fitting Function
     This function takes a binary image containing points on or near a circular shape and fits a circle using the RANSAC algorithm. 
