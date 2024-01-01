@@ -41,6 +41,9 @@ def main(cfg: DictConfig):
     5. Compute optimal transport matrices and store as .npy arrays.
     6. Compute trajectories and store as .csv files.
 
+    Note: Any step can be skipped by setting the corresponding flag in the configuration file.
+    As long as the previous steps have been executed at some point (the corresponding files are present), the pipeline will work.
+
     Parameters
     ----------
     cfg : DictConfig
@@ -110,21 +113,26 @@ def main(cfg: DictConfig):
 
 
     ### TRACKING ###
+    # Check conf/track for configurations.
     image_ot_path = Path(OT_PATH / experiment_name)
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_ot_path)
 
+        # Compute optimal transport matrices and store as .npy arrays
         ot = OptimalTransport(cfg)
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
 
 
     ### GENERATING RESULTS ###
+    # Check conf/generate_results for configurations.
     image_results_path = Path(RESULTS_PATH / experiment_name)
 
     if not cfg.skip_results_generation:
         # Create paths if they do not exist
         create_dir(image_results_path)
+
+        # Compute trajectories and store full and filtered version as .csv files
         compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
 
     # End timer

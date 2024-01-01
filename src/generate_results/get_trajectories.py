@@ -1,31 +1,26 @@
-# import time
-# import jax
-# import jax.numpy as jnp
-import numpy as np
-import pandas as pd
-# from tqdm import tqdm
-import torch 
-
-# import matplotlib.pyplot as plt
-# from IPython import display
-
-# from ott import utils
-# from ott.geometry import costs, pointcloud
-# from ott.problems.linear import linear_problem
-# from ott.solvers.linear import sinkhorn
+# Types and os
 from pathlib import Path
 import os
 
-def transform_to_entry_based_probability_matrix(cfg, ot_matrix):
+import numpy as np
+import pandas as pd
+import torch 
+
+def transform_to_entry_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np.ndarray:
     """
-    Linearly scale OT matrix entries onto the range of [0,1].
+    Linearly scale entries of OT matrix entries onto the range of [0,1].
 
     Parameters:
-    - cfg: The configuration object.
-    - ot_matrix: The OT matrix to be scaled.
+    ----------
+    cfg : Configuration
+        The configuration object.
+    ot_matrix : np.ndarray
+        The OT matrix to be scaled.
 
     Returns:
-    - ot_matrix_scaled: The min-max scaled OT matrix.
+    -------
+    ot_matrix_scaled : np.ndarray
+        The min-max scaled OT matrix.
     """
     # Scale onto 0-1 range
     ot_matrix_scaled = (ot_matrix - ot_matrix.min()) / (ot_matrix.max() - ot_matrix.min())
@@ -33,16 +28,21 @@ def transform_to_entry_based_probability_matrix(cfg, ot_matrix):
     return ot_matrix_scaled
 
 
-def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
+def transform_to_rank_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np.ndarray:
     """
     Transform the OT matrix to a probability matrix based on the ranks of the entries in the OT matrix.
 
     Parameters:
-    - cfg: The configuration object containing the settings for generating results.
-    - ot_matrix: The OT matrix to be transformed.
+    ----------
+    cfg : Configuration
+        The configuration object containing the settings for generating results.
+    ot_matrix : np.ndarray
+        The OT matrix to be transformed.
 
     Returns:
-    - prob_matrix: The transformed probability matrix.
+    -------
+    prob_matrix : np.ndarray
+        The transformed probability matrix.
     """
     # Flatten the matrix into 1D array
     flattened = np.array(ot_matrix).flatten()
@@ -57,11 +57,6 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     max_rank_per_vector = np.max(ranks, axis=0)
     min_max_rank_per_vector = np.min(max_rank_per_vector)
 
-    # Get uncertainty resolution
-    uncertainty_resolution = cfg.generate_results.uncertainty_resolution
-
-    ranks[ranks <= min_max_rank_per_vector // uncertainty_resolution] = min_max_rank_per_vector // uncertainty_resolution - 1
-    
     # 0-1 normalize the ranks
     max_rank = np.max(ranks)
     min_rank = np.min(ranks)
@@ -70,19 +65,25 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix):
     return prob_matrix
 
 
-
-def get_id_mapping(cfg, ot_matrix, frame_id):
+def get_id_mapping(cfg, ot_matrix: np.ndarray, frame_id: np.ndarray) -> (np.ndarray, np.ndarray):
     """
     Return a mapping from droplet ids in the current frame to the droplet ids in the next frame.
-    --------
+
     Parameters:
-    - cfg: The configuration object.
-    - ot_matrix: The optimal transport matrix.
-    - frame_id: The id of the current frame.
+    ----------
+    cfg : Configuration
+        The configuration object.
+    ot_matrix : np.ndarray
+        The optimal transport matrix.
+    frame_id : np.ndarray
+        The id of the current frame.
 
     Returns:
-    - this_frame_ids: The droplet ids in the current frame.
-    - next_frame_ids: The droplet ids in the next frame.
+    -------
+    this_frame_ids : np.ndarray
+        The droplet ids in the current frame.
+    next_frame_ids : np.ndarray
+        The droplet ids in the next frame.
     """
     # Get directory to store probability matrices
     directory_name = "prob_matrix_" + cfg.experiment_name
@@ -92,10 +93,8 @@ def get_id_mapping(cfg, ot_matrix, frame_id):
     # Get probability matrix based on ranks
     if cfg.generate_results.uncertainty_type == "scaled_ranks":
         prob_matrix = transform_to_rank_based_probability_matrix(cfg, ot_matrix)
-
     elif cfg.generate_results.uncertainty_type == "scaled_entries":
         prob_matrix = transform_to_entry_based_probability_matrix(cfg, ot_matrix)
-
     else:
         raise NotImplementedError("Unknown uncertainty type. In get_trajectories.py.")
     
@@ -108,10 +107,22 @@ def get_id_mapping(cfg, ot_matrix, frame_id):
 
     return this_frame_ids, next_frame_ids
 
-def create_trajectory_with_prob(cfg, ot_matrices):
+def create_trajectory_with_prob(cfg, ot_matrices: list):
     """
     This function creates a tracking table with the droplet ids of the current frame and the next frame.
     The transitions are based on transition scores extracted from the OT matrices.
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    ot_matrices : list
+        A list of OT matrices.
+
+    Returns:
+    -------
+    tracking_table : pd.DataFrame
+        A dataframe with the droplet ids of the current frame and the next frame.
     """
     tracking_table = []
 
@@ -131,10 +142,29 @@ def create_trajectory_with_prob(cfg, ot_matrices):
 
     return tracking_table 
 
-def filter_and_reindex_droplets(cfg, droplet_table: pd.DataFrame, frame_id: int, reindex=True) -> pd.DataFrame:
+def filter_and_reindex_droplets(cfg, 
+                                droplet_table: pd.DataFrame, 
+                                frame_id: int, 
+                                reindex: bool = True) -> pd.DataFrame:
     """
     This function filters and reindexes the droplets that are present in the current frame.
     Filtering only needs to be done in unbalanced evaluation mode.
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    droplet_table : pd.DataFrame
+        The droplet table.
+    frame_id : int
+        The id of the current frame.
+    reindex : bool
+        Whether to reindex the droplets.
+
+    Returns:
+    -------
+    droplets : pd.DataFrame
+        The filtered and reindexed droplets.
     """
     # Get the droplets that are present in the current frame
     droplets = droplet_table[droplet_table['frame'] == frame_id]
@@ -152,8 +182,9 @@ def filter_and_reindex_droplets(cfg, droplet_table: pd.DataFrame, frame_id: int,
 
     return droplets
 
-def process_and_merge_results(cfg, droplet_table: pd.DataFrame, 
-                        tracking_table: pd.DataFrame) -> pd.DataFrame:
+def process_and_merge_results(cfg, 
+                              droplet_table: pd.DataFrame, 
+                              tracking_table: pd.DataFrame) -> pd.DataFrame:
     """
     Create trajectories from the tracking table and the droplet table.
     The following will be stored per transition:
@@ -161,6 +192,20 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
     - x and y positions
     - probabilities
     - number of cells
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    droplet_table : pd.DataFrame
+        The droplet table.
+    tracking_table : pd.DataFrame
+        The tracking table.
+
+    Returns:
+    -------
+    result : pd.DataFrame
+        The dataframe with the trajectories.
     """
     # Get droplet IDs that we want to track. These are the droplets that are present in the first frame.
     droplets_raw = [df for _, df in droplet_table.groupby('frame', sort=True)]
@@ -261,9 +306,21 @@ def process_and_merge_results(cfg, droplet_table: pd.DataFrame,
     return result
 
 
-def part_trajectory_prob(cfg, df):
+def part_trajectory_prob(cfg, df: pd.DataFrame) -> pd.DataFrame:
     """
     Computes probabilities of partial trajectories.
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    df : pd.DataFrame
+        The dataframe with the trajectories.
+
+    Returns:
+    -------
+    result_df : pd.DataFrame
+        The dataframe with the partial trajectory probabilities.
     """
     probs = []
     for col in df.columns.sort_values():
@@ -271,9 +328,10 @@ def part_trajectory_prob(cfg, df):
             probs.append(col)
     df = df[probs]
 
-    # Calculate the product in sliding windows
+    # Aggregate in sliding windows
     num_columns = df.shape[1]
-
+    
+    # Choose type of aggregation
     if cfg.generate_results.prob_agregation == "multiplication":
         sliding_windows = [np.prod(df.iloc[:, i:j], axis=1) for i in range(num_columns) for j in range(i + 2, num_columns + 1)]
     
@@ -295,11 +353,27 @@ def part_trajectory_prob(cfg, df):
     # Display the result DataFrame
     return result_df
 
-def filter_results(cfg, results_df):
+def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     """
     Filter the results based on the following criteria:
     - Confidence threshold on whole trajectory
     - Duplicate assignments
+
+    Optionally also returns the trajectories that are dropped due to merging as a dataframe.
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    results_df : pd.DataFrame
+        The dataframe with the trajectories.
+
+    Returns:
+    -------
+    trajectories : pd.DataFrame
+        The filtered dataframe with the trajectories.
+    dropped_merging_trajectories : pd.DataFrame
+        The dataframe with the dropped merging trajectories.
     """
     # Get copy of results
     trajectories = results_df.copy()
@@ -356,7 +430,6 @@ def filter_results(cfg, results_df):
             mask = mask & (max_x - trajectories[f'x{i}'] > frame_margin)
             mask = mask & (trajectories[f'y{i}'] - min_y > frame_margin)
             mask = mask & (max_y - trajectories[f'y{i}'] > frame_margin)
-
         
         trajectories = trajectories[mask]
 
@@ -382,7 +455,27 @@ def filter_results(cfg, results_df):
     return trajectories, None
 
 
-def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path, cut_feature_droplets_df):
+def compute_and_store_results_cut(cfg, 
+                                  cut_name: str, 
+                                  cut_ot_path: Path, 
+                                  image_results_path: Path, 
+                                  cut_feature_droplets_df: pd.DataFrame) -> None:
+    """
+    Compute and store the results for a single cut.
+
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    cut_name : str
+        The name of the cut.
+    cut_ot_path : Path
+        The path to the ot matrices of the cut.
+    image_results_path : Path
+        The path to the results of the cut.
+    cut_feature_droplets_df : pd.DataFrame
+        The dataframe with the droplet features of the cut.
+    """
     # load the ot matrices
     ot_matrices = []
     for file_name in sorted(os.listdir(cut_ot_path), key=lambda x: int(x.split("-")[0])):
@@ -411,17 +504,17 @@ def compute_and_store_results_cut(cfg, cut_name, cut_ot_path, image_results_path
     final_results_df = final_results_df.round(3)
 
     # save the results
-    final_results_df.to_csv(image_results_path / f'results_{cut_name}.csv', index=False)
+    final_results_df.to_csv(image_results_path / f'results{cut_name}.csv', index=False)
 
     # filter the results
     if cfg.generate_results.filter_merging_trajectories:
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
-        dropped_merging_trajectories_.to_csv(image_results_path / f'dropped_merging_trajectories_{cut_name}.csv', index=False)
+        dropped_merging_trajectories_.to_csv(image_results_path / f'dropped_merging_trajectories{cut_name}.csv', index=False)
     else:
         filtered_final_results, = filter_results(cfg, final_results_df)
 
     # Store filtered results
-    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results_{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
+    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):
@@ -431,7 +524,7 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
         print("Generating Results For all Cuts")
         print("=========================================\n")
 
-        print(f'Currently generating results for cut:')
+        print(f'Currently processing:')
     
     # Create directories for storing probability interpretation of ot matrix
     # Create directory if it does not exist
@@ -448,15 +541,15 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
             continue
 
         # Get cut name
-        cut_name = dir_name.replace("ot_matrix_", "")
+        cut_name = dir_name.replace("ot_matrix", "")
 
         # Progress
         if cfg.verbose:
-            print(cut_name)
+            print(dir_name)
 
         # Get features of current cut
         cut_ot_path = Path(image_ot_path / dir_name)
-        cut_feature_droplets_file_path = Path(image_feature_path / f'droplets_{cut_name}.csv')
+        cut_feature_droplets_file_path = Path(image_feature_path / f'droplets{cut_name}.csv')
         cut_feature_droplets_df = pd.read_csv(cut_feature_droplets_file_path)
 
         # Compute and store ot matrices for current cut

@@ -1,3 +1,5 @@
+# Description: Main configuration file for the droplet tracking pipeline. Includes settings for all steps of the pipeline.
+
 # Name for this experiment - will be used to name the output files and directories
 experiment_name: "small_mvt_3"
 
@@ -13,33 +15,44 @@ feature_dir: "03_features"
 ot_dir: "04_ot"
 results_dir: "05_results"
 
-# Name of the raw image file to be processed - should be in data_path/raw_dir
+# Name of the raw image file to be processed - 
+# SHOULD ALREADY BE STORED IN THE data_path/raw_dir!
 raw_image: "Small mvt 1.nd2"
 
 # Setting for the preprocessing pipeline
+# Each argument here refers to a corresponding .yaml file in the src/conf directory. The argument 4cuts_small refers to src/conf/preprocess/4cuts_small.yaml, for instance.
+# Create new configurations by copying existing ones, modifying them and using them here.
 defaults:
   - _self_
 
   # Config for preprocessing. See src/conf/preprocess for more options. Determines in how many cuts the image is split.
   - preprocess: 4_cuts_small
+
+  # Config for the droplet detection. See src/conf/detect_droplets for more options. Determines the droplet detection method and its parameters.
   - detect_droplets: ransac3
+
+  # Config for the droplet patch extraction. See src/conf/extract_droplet_patches for more options. Determines the method used for creating visual embeddings and its parameters.
   - extract_visual_embeddings: droplets_all
+
+  # Config for the tracking. See src/conf/track for more options. Determines the optimal transport algorithm and its parameters.
   - track: medium_20000_best
-  - generate_results: scaled_entries
+
+  # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters. Also allows for custom filtering of results.
+  - generate_results: scaled_ranks
 
 # Skip steps if they have already been completed
-skip_preprocessing: true # less than a few minutes for 4k*4k
-skip_droplet_detection: true # about 5 minutes for 4k*4k
-skip_droplet_patch_extraction: true # not very long either
-skip_visual_embedding_extraction: true # 2 minutes
-skip_tracking: false # 40 minutes 4k*4k on my laptop (Mike, on CPU!)
-skip_results_generation: true
+skip_preprocessing: false 
+skip_droplet_detection: false
+skip_droplet_patch_extraction: false 
+skip_visual_embedding_extraction: false
+skip_tracking: false 
+skip_results_generation: false
 
-# Detail level of the progress indications
+# Detail level of the progress indications. 
 verbose: true
 tqdm_disable: false
 
-# Device Settings
+# Device Settings. If you have a GPU, you can use it by setting device: cuda. Especially useful for the embedding creation and tracking step.
 device: cpu
 
 
