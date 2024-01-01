@@ -136,15 +136,11 @@ def launch_interactive_explorer(cfg: DictConfig,
     else:
         frames = range(len(image))
     
-    # frames = []
-    # for i, frame in enumerate(image):
-    #     f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
-    #     # By default, only have the first and last frames be visible
-    #     if i != 0 or i != (len(image) - 1):
-    #         f.set_visible(False)
-
-    #     frames.append(f)
-
+    for i, frame in enumerate(image):
+        f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
+        # By default, only have the first and last frames be visible
+        if i != 0 or i != (len(image) - 1):
+            f.set_visible(False)
 
     # Define callback for clicking on a line (or other thing)
     def pickline(event):
