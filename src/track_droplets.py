@@ -50,6 +50,7 @@ def main(cfg: DictConfig):
     -------
     None
     """
+
     ### SETUP ###
     # Set device
     if cfg.device == 'cpu':
@@ -69,8 +70,9 @@ def main(cfg: DictConfig):
     # Get name of image configuration to be processed
     experiment_name = cfg.experiment_name
 
+
     ### PREPROCESSING ###
-    # Check conf/preprocess.yaml for settings
+    # Check conf/preprocess for configurations.
     image_preprocessed_path = Path(PREPROCESSED_PATH / experiment_name)
 
     if not cfg.skip_preprocessing:
@@ -78,8 +80,9 @@ def main(cfg: DictConfig):
         create_dir(image_preprocessed_path)
         preprocess_cuts_and_store_all(cfg, RAW_PATH, image_preprocessed_path)
 
+
     ### DROPLET DETECTION ###
-    # Check conf/extract_droplets for settings
+    # Check conf/detect_droplets for configurations.
     # Path to store the detected droplets
     image_feature_path = Path(FEATURE_PATH / experiment_name)
 
@@ -89,21 +92,22 @@ def main(cfg: DictConfig):
         create_dir(image_feature_path)
         detect_and_store_all(cfg, image_preprocessed_path, image_feature_path)
 
-    ### DROPLET PATCHES EXTRACTION ###
-    # Check conf/extract_droplets.yaml for settings
 
+    ### DROPLET PATCHES EXTRACTION ###
     if not cfg.skip_droplet_patch_extraction:
         # Create paths if they do not exist
         create_dir(image_feature_path)
         create_and_save_droplet_patches(cfg, image_preprocessed_path, image_feature_path)
 
+
     ### VISUAL EMBEDDING EXTRACTION ###
-    # Check conf/extract_features.yaml for settings
+    # Check conf/extract_features for configurations.
 
     if not cfg.skip_visual_embedding_extraction:
         # Create paths if they do not exist
         create_dir(image_feature_path)
         create_and_save_droplet_embeddings(cfg, image_feature_path)
+
 
     ### TRACKING ###
     image_ot_path = Path(OT_PATH / experiment_name)
@@ -113,6 +117,7 @@ def main(cfg: DictConfig):
 
         ot = OptimalTransport(cfg)
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
+
 
     ### GENERATING RESULTS ###
     image_results_path = Path(RESULTS_PATH / experiment_name)
@@ -126,7 +131,6 @@ def main(cfg: DictConfig):
     end_time = time.time()
     if cfg.verbose:
         print(f"\nTotal processing time: {round(end_time - start_time)/60} minutes")
-
 
 if __name__ == '__main__':
     main()
