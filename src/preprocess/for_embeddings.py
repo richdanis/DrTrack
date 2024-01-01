@@ -1,16 +1,23 @@
+# Types
 from pathlib import Path
 from typing import Tuple
+from omegaconf import DictConfig
+
+# Preprocessing libraries
 import numpy as np
 import cv2 as cv
-from tqdm.auto import tqdm
 from skimage.filters import rank
 from skimage.morphology import disk
 from skimage.util import img_as_ubyte
 
+# Progress
+from tqdm.auto import tqdm
+
+# Local imports
 from .raw_image_reader import get_image_cut_as_ndarray
 
 
-def preprocess_cut_for_embeddings(cfg,
+def preprocess_cut_for_embeddings(cfg: DictConfig,
                                   image_path: Path,
                                   upper_left_corner: Tuple[int, int],
                                   pixel_dimensions: Tuple[int, int],
@@ -19,21 +26,23 @@ def preprocess_cut_for_embeddings(cfg,
     Preprocess the BF channel of an image
     ----------
     Parameters:
-    cfg: Config
+    cfg: DictConfig
+        Global config.
     path_to_image: Path
-        relative path to the image (image as .nd2 file)
+        Relative path to the image (image as .nd2 file)
     upper_left_corner: Tuple[int, int]
-        upper left corner of the cut (y, x)
+        Upper left corner of the cut (y, x)
     pixel_dimensions: Tuple[int, int]
-        dimensions of the cut (y, x)
+        Dimensions of the cut (y, x)
     pixels: Optional[int]
-        num of pixels to cut out of the full image, if -1 the full image is taken
+        Num of pixels to cut out of the full image, if -1 the full image is taken
     ----------
     Returns:
     ndarray: 4d numpy array (uint16 so be careful)
         with the following axes: Frames, Channels ['BF', 'DAPI'], Y (rows) and X (cols),
         where the BF and DAPI channels have been processed with quantile and locally histogram equalized
     """
+    # Get image as ndarray
     image = get_image_cut_as_ndarray(cfg,
                                      ['BF', 'DAPI'],
                                      image_path,
@@ -80,14 +89,35 @@ def preprocess_cut_for_embeddings(cfg,
     return image
 
 
-def raw_cut_to_preprocessed_for_embeddings(cfg,
+def raw_cut_to_preprocessed_for_embeddings(cfg: DictConfig,
                                            raw_image_path: Path,
                                            upper_left_corner: Tuple[int, int],
                                            pixel_dimensions: Tuple[int, int],
                                            image_name: str,
                                            preprocessed_path: Path,
                                            pixel: int = -1) -> np.ndarray:
-    """Preprocesses the raw .nd2 image for embedding creation and saves it as .npy file."""
+    """
+    Preprocess an image for embedding creation and save as .npy array in the preprocessing data directory.
+    ----------
+    Parameters:
+    cfg: DictConfig
+        Global config.
+    raw_image_path: Path
+        Relative path to the image (image as .nd2 file)
+    upper_left_corner: Tuple[int, int]
+        Upper left corner of the cut (y, x)
+    pixel_dimensions: Tuple[int, int]
+        Dimensions of the cut (y, x)
+    image_name: str
+        Name of the image
+    preprocessed_path: Path
+        Path to save the preprocessed image
+    pixel: Optional[int]
+        Num of pixels to cut out of the full image, if -1 the full image is taken
+    ----------
+    Returns:
+    None
+    """
     preprocessed_image = preprocess_cut_for_embeddings(cfg, raw_image_path, upper_left_corner, pixel_dimensions,
                                                        pixel=pixel)
     path = Path(preprocessed_path / f"preprocessed_featextr_{image_name}.npy")

@@ -1,6 +1,8 @@
+# Types
 from typing import Optional, Tuple, List
 from pathlib import Path
 
+# Other imports
 import numpy as np
 import nd2
 
@@ -15,7 +17,7 @@ def get_image_cut_as_ndarray(cfg,
                              frames: Optional[List[int]] = None,
                              pixel: int = -1) -> np.ndarray:
     """
-    Get the image as a ndarray - PRIMARY FUNCTION
+    Get the image as a ndarray.
     ----------
     Parameters:
     channels: list[str]
@@ -41,7 +43,7 @@ def get_image_cut_as_ndarray(cfg,
     ndarray: 4d numpy array (uint16)
         with the following axes: Frames, Channels, Y (rows) and X (cols).
     """
-
+    # Open nd2 file and check sizes
     f = nd2.ND2File(path_to_image)
 
     nr_frames = f.sizes['T']
@@ -49,6 +51,7 @@ def get_image_cut_as_ndarray(cfg,
     nr_rows = f.sizes['Y']
     nr_cols = f.sizes['X']
 
+    # Get desired channels
     channel_idx_lookup = {}
     if all_channels:
         channels = []
@@ -65,6 +68,7 @@ def get_image_cut_as_ndarray(cfg,
     for ch_name in channels:
         channel_idx_precompute.append(channel_idx_lookup[ch_name])
 
+    # Define range of frames
     if all_frames:
         frames = range(nr_frames)
     else:
@@ -85,11 +89,13 @@ def get_image_cut_as_ndarray(cfg,
     if x_upper_left + 2*size_x > nr_cols:
         x_end = nr_cols
 
+    # Get the image cut, and only the channels and frames wanted
     if pixel == -1:
         output = (fullimage[frames, :, y_upper_left:y_end, x_upper_left:x_end])[:, channel_idx_precompute, :, :]
     else:
         output = (fullimage[frames, :, y_upper_left:min(y_upper_left+pixel,y_end), x_upper_left:min(x_upper_left+pixel,x_end)])[:, channel_idx_precompute, :, :]
     
+    # Close nd2 file
     f.close()
     
     return output

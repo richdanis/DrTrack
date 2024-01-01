@@ -1,14 +1,19 @@
+# Types
 from pathlib import Path
 from typing import Tuple
+
+# Preprocessing libraries
 import numpy as np
 import cv2 as cv
-from tqdm.auto import tqdm
 from skimage.filters import rank
 from skimage.morphology import disk
 from skimage.util import img_as_ubyte
 
+# Local imports
 from .raw_image_reader import get_image_cut_as_ndarray
 
+# Progress
+from tqdm.auto import tqdm
 
 def preprocess_cut_for_detection(cfg,
                                  image_path: Path,
@@ -78,7 +83,28 @@ def raw_cut_to_preprocessed_for_detection(cfg,
                                           image_name: str,
                                           preprocessed_path: Path,
                                           pixel: int = -1) -> np.ndarray:
-    """Preprocesses a cut of the raw .nd2 image for detection and saves it as .npy file."""
+    """
+    Preprocess an image for droplet detection and save as .npy array in the preprocessing data directory.
+    ----------
+    Parameters:
+    cfg: DictConfig
+        Global config.
+    raw_image_path: Path
+        Relative path to the image (image as .nd2 file)
+    upper_left_corner: Tuple[int, int]
+        Upper left corner of the cut (y, x)
+    pixel_dimensions: Tuple[int, int]
+        Dimensions of the cut (y, x)
+    image_name: str
+        Name of the image
+    preprocessed_path: Path
+        Path to save the preprocessed image
+    pixel: Optional[int]
+        Num of pixels to cut out of the full image, if -1 the full image is taken
+    ----------
+    Returns:
+    None
+    """
     preprocessed_image = preprocess_cut_for_detection(cfg, raw_image_path, upper_left_corner, pixel_dimensions,
                                                       pixel=pixel)
     file_path = Path(preprocessed_path / f"preprocessed_drpdtc_{image_name}.npy")
