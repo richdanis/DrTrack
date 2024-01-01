@@ -1,6 +1,21 @@
+# Description: Configuration file for extracting visual embeddings from droplets_all dataset
+
+# Name of the config file
 name: droplets_only_cells
+
+# Batch size for inference on the contrastive learning model
 inference_batch_size: 32
+
+# Patch size for the droplet patch at inference time - should be the same as the patch size used for training
+patch_size_x: 40
+patch_size_y: 40
+
+# Path to the checkpoint (model) to be used for inference
 checkpoint: 2023-12-04_10-34-14_dim_20.pth
+
+# Whether to embed only the droplets with cells or all droplets
 embed_without_cells: True
 simulation: None
+
+# Dimension of the resulting embedding
 embed_dim: 20
