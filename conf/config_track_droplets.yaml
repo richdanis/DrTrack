@@ -37,8 +37,11 @@ defaults:
   # Config for the tracking. See src/conf/track for more options. Determines the optimal transport algorithm and its parameters.
   - track: small_mvt_1
 
-  # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters. Also allows for custom filtering of results.
+  # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters.
   - generate_results: scaled_entries
+
+  # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
+  - filter_results: basic
 
 # Skip steps if they have already been completed
 skip_preprocessing: true 

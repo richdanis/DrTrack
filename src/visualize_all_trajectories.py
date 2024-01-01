@@ -33,7 +33,7 @@ def get_stride(results_str: str) -> tuple:
     return int(match.group(1)), int(match.group(2))
 
 
-@hydra.main(config_path="../conf", config_name="visualizer", version_base=None)
+@hydra.main(config_path="../conf", config_name="config_visualize_all_trajectories", version_base=None)
 def main(cfg: DictConfig):
     # Check that the image and results are in the correct format.
     assert cfg.raw_image[-4:] == '.nd2', 'Image mast be an .nd2 file, or add ".nd2" to the end of the name'

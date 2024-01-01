@@ -385,22 +385,22 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
     trajectories = results_df.copy()
 
     # Params from config
-    uncertainty_threshold = cfg.generate_results.uncertainty_threshold
-    enforce_same_number_of_cells = cfg.generate_results.enforce_same_nr_cells
-    max_distance = cfg.generate_results.max_distance
-    frame_margin = cfg.generate_results.frame_margin
-    filter_merging_trajectories = cfg.generate_results.filter_merging_trajectories
+    uncertainty_threshold = cfg.filter_results.uncertainty_threshold
+    enforce_same_number_of_cells = cfg.filter_results.enforce_same_nr_cells
+    max_distance = cfg.filter_results.max_distance
+    frame_margin = cfg.filter_results.frame_margin
+    filter_merging_trajectories = cfg.filter_results.filter_merging_trajectories
 
     # Get range of frames
-    if cfg.generate_results.frame_range is None:
+    if cfg.filter_results.frame_range is None:
         first_frame = 0
         cols = trajectories.columns.tolist()
         original_ids = [int(col.split("_")[1]) for col in cols if col.startswith("id")]
         last_frame = max(original_ids)
     
     else:
-        first_frame = cfg.generate_results.frame_range[0]
-        last_frame = cfg.generate_results.frame_range[1]
+        first_frame = cfg.filter_results.frame_range[0]
+        last_frame = cfg.filter_results.frame_range[1]
 
     # Test for full trajectory uncertainty passing the threshold
     if uncertainty_threshold is not None:
@@ -522,14 +522,14 @@ def compute_and_store_results_cut(cfg,
     final_results_df.to_csv(image_results_path / f'results{cut_name}.csv', index=False)
 
     # filter the results
-    if cfg.generate_results.filter_merging_trajectories:
+    if cfg.filter_results.filter_merging_trajectories:
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
-        dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
+        dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
     else:
         filtered_final_results, = filter_results(cfg, final_results_df)
 
     # Store filtered results
-    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
+    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):

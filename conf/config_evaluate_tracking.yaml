@@ -4,6 +4,9 @@ defaults:
   - extract_visual_embeddings: droplets_all # Config for the visual embedding extraction
   - track: medium_20000_best                # Config for the tracking - sinkhorn parameters, etc.
   - generate_results: scaled_entries_eval
+  
+  # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
+  - filter_results: basic
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories

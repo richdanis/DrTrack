@@ -399,7 +399,7 @@ class Visualizer:
                 self.axarr[0, col_idx].imshow(img_4, vmin=0)
                 if col_idx == 0:
                     self.axarr[0, col_idx].set_title(
-                        'Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                        'Aggregated: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
                     self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][
                                                                         f'p{self.traj.frames[col_idx - 1]}_{self.traj.frames[col_idx]}']))
@@ -429,7 +429,7 @@ class Visualizer:
                 self.axarr[0, col_idx].imshow(img_1, vmin=0)
                 if col_idx == 0:
                     self.axarr[0, col_idx].set_title(
-                        'Mean prob: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
+                        'Aggregated: ' + str(self.traj.trajectories.iloc[self.current_idx][f'trajectory_uncertainty']))
                 else:
                     self.axarr[0, col_idx].set_title('Prob: ' + str(self.traj.trajectories.iloc[self.current_idx][
                                                                         f'p{self.traj.frames[col_idx - 1]}_{self.traj.frames[col_idx]}']))
@@ -669,7 +669,7 @@ class Visualizer:
         text_box.set_val('')
 
 
-@hydra.main(config_path="../conf", config_name="droplet_traj_visualizer", version_base=None)
+@hydra.main(config_path="../conf", config_name="config_visualize_individual_trajectories", version_base=None)
 def main(cfg: DictConfig):
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)

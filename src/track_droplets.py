@@ -125,7 +125,8 @@ def main(cfg: DictConfig):
 
 
     ### GENERATING RESULTS ###
-    # Check conf/generate_results for configurations.
+    # Check conf/generate_results for trajectory creation configurations.
+    # Check conf/filter_results for trajectory filtering configurations.
     image_results_path = Path(RESULTS_PATH / experiment_name)
 
     if not cfg.skip_results_generation:
