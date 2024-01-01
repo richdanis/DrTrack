@@ -1,6 +1,7 @@
 
 # Types
 from pathlib import Path
+from omegaconf import DictConfig
 
 # Data handling
 import pandas as pd
@@ -58,7 +59,34 @@ trajectory_beginning = None
 # Set aspect ratio to 1
 plt.gca().set_aspect('equal')
 
-def select_trajectories(cfg, image_path, results_path, image_name, y_stride, x_stride):
+def launch_interactive_explorer(cfg: DictConfig, 
+                        image_path: Path, 
+                        results_path: Path, 
+                        image_name: str, 
+                        y_stride: int, 
+                        x_stride: int) -> None:
+    """
+    Start the interactive explorer.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        The configuration file.
+    image_path : str
+        The path to the image.
+    results_path : str
+        The path to the results.
+    image_name : str
+        The name of the image.
+    y_stride : int
+        The y stride.
+    x_stride : int
+        The x stride.
+
+    Returns
+    -------
+    None
+    """
     # Must declare to use the global variables
     global results_df_x
     global results_df_y

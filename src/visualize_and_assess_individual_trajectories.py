@@ -12,6 +12,48 @@ from omegaconf import DictConfig
 
 
 class Trajectories:
+    """
+    Class to handle the trajectories from the tracking algorithm.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        The configuration file.
+    RAW_PATH : Path
+        The path to the raw image.
+    RESULTS_PATH : Path
+        The path to the results file.
+
+    Attributes
+    ----------
+    final_output : pd.DataFrame
+        The final output of the tracking algorithm.
+    frames : list
+        The frames to be visualized.
+    channels : list
+        The channels to be visualized.
+    image : np.ndarray
+        The image to be visualized.
+    trajectories : pd.DataFrame
+        The trajectories to be visualized.
+    radius : int
+        The radius of the patch.
+    y_max : int
+        The maximum y value.
+    x_max : int
+        The maximum x value.
+
+    Methods
+    -------
+    get_stride(results_str: str) -> tuple
+        Get the correct position of the droplet by adding the stride.
+    adjust_positions(df: pd.DataFrame, y_stride: int, x_stride: int) -> pd.DataFrame
+        Get x, y positions of the droplets in the given frames.
+    get_patch(frame, center_y: int, center_x: int)
+        Get the patch of the droplet.
+    get_group_patch(row) -> np.ndarray
+        Get patches.
+    """
 
     def __init__(self, cfg, RAW_PATH, RESULTS_PATH):
 
@@ -76,8 +118,21 @@ class Trajectories:
         self.y_max = self.image.shape[2]
         self.x_max = self.image.shape[3]
 
-    # get the correct position of the droplet by adding the stride
-    def get_stride(self, results_str) -> tuple:
+
+    def get_stride(self, results_str: str) -> tuple:
+        """
+        Get the correct position of the droplet by adding the stride.
+
+        Parameters
+        ----------
+        results_str : str
+            The name of the results file.
+
+        Returns
+        -------
+        tuple
+            The y and x strides.
+        """
         # Define a pattern using regular expression
         pattern = r'y(\d+)_x(\d+)'
         # Use re.search to find the pattern in the string
@@ -85,17 +140,51 @@ class Trajectories:
         # Extract the x and y values from the matched groups
         return int(match.group(1)), int(match.group(2))
 
-    # get x, y positions of the droplets in the given frames
+
     def adjust_positions(self, df: pd.DataFrame,
                          y_stride: int,
                          x_stride: int) -> pd.DataFrame:
+        """
+        Get x, y positions of the droplets in the given frames.
 
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The dataframe with the positions.
+        y_stride : int
+            The y stride.
+        x_stride : int
+            The x stride.
+
+        Returns
+        -------
+        pd.DataFrame
+            The adjusted dataframe.
+        """ 
+        # Add the stride to the x and y positions
         df[df.columns[df.columns.str.startswith('x')]] = df[df.columns[df.columns.str.startswith('x')]] + x_stride
         df[df.columns[df.columns.str.startswith('y')]] = df[df.columns[df.columns.str.startswith('y')]] + y_stride
         return df
 
     # Get the patch of the droplet
     def get_patch(self, frame, center_y: int, center_x: int):
+        """
+        Get the patch of the droplet.
+
+        Parameters
+        ----------
+        frame : int
+            The frame.
+        center_y : int
+            The y coordinate.
+        center_x : int
+            The x coordinate.
+
+        Returns
+        -------
+        np.ndarray
+            The image patch for the given droplet.
+        """
         # We are in the case where we have channel, image_row and image_col as axes.
         window_y = np.asarray((min(max(0, center_y - self.radius), self.y_max - 1),
                                max(0, min(self.y_max, center_y + self.radius))),
@@ -113,8 +202,21 @@ class Trajectories:
             ans = tmp
         return ans
 
-    # Get patches
-    def get_group_patch(self, row) -> np.ndarray:
+
+    def get_group_patch(self, row: int) -> np.ndarray:
+        """
+        Get patches.
+        
+        Parameters
+        ----------
+        row : int
+            The row numer.
+        
+        Returns
+        -------
+        np.ndarray
+            The image patches for the given droplet.
+        """
         traj = self.trajectories.iloc[row]
         # Get the x and y coordinates along with the trajectory
         x_pos = traj[traj.index.str.startswith('x')].values
@@ -127,9 +229,76 @@ class Trajectories:
 
 
 class Visualizer:
+    """
+    Class to visualize the trajectories.
+    
+    Parameters
+    ----------
+    cfg : DictConfig
+        The configuration file.
+    RAW_PATH : Path
+        The path to the raw image.
+    RESULTS_PATH : Path
+        The path to the results file.
+
+    Attributes
+    ----------
+    traj : Trajectories
+        The trajectories.
+    number_of_rows : int
+        The number of rows.
+    results_path : Path
+        The path to the results file.
+    all_channels : bool
+        Whether to visualize all channels.
+    verbose : bool
+        Whether to print information.
+    save : bool
+        Whether to save the results.
+    file : str
+        The name of the results file.
+    fig : plt.figure
+        The figure.
+    axarr : np.ndarray
+        The axes.
+    current_idx : int
+        The current index.
+    rows_false : list
+        The rows marked as false.
+    rows_true : list
+        The rows marked as true.
+    rows_unsure : list
+        The rows marked as unsure.
+    label_text : plt.text
+        The label text.
+    row_info_text : plt.text
+        The row info text.
+    
+    Methods
+    -------
+    update_display()
+        Update display for a new row.
+    on_true_clicked(event)
+        Mark the current row for keeping, and add label 'True'.
+    on_unsure_clicked(event)
+        Mark the current row for keeping, and add label 'Unsure'.
+    on_false_clicked(event)
+        Mark the current row for deletion, and add label 'False'.
+    on_delete_clicked(event)
+        If the current row is marked for deletion, unmark it.
+    on_prev_clicked(event)
+        Go to the previous row.
+    on_next_clicked(event)
+        Go to the next row.
+    on_close(event)
+        Label the rows in rows_false with "False", the rows in rows_true with "True", and the rows in rows_unsure with "Unsure".
+    on_key(event)
+        Keyboard interaction.
+    on_submit(text_box, text)
+        Jump to specified row when user submits a value in the TextBox.
+    """
 
     def __init__(self, cfg, RAW_PATH, RESULTS_PATH):
-
         self.traj = Trajectories(cfg, RAW_PATH, RESULTS_PATH)
         self.number_of_rows = len(self.traj.final_output)
         self.results_path = RESULTS_PATH
@@ -213,8 +382,15 @@ class Visualizer:
         plt.connect('close_event', self.on_close)
         plt.show()
 
-    # Update display for a new row
+
     def update_display(self):
+        """
+        Update display for a new row.
+        
+        Returns
+        -------
+        None
+        """
         images = self.traj.get_group_patch(self.current_idx)
         if self.all_channels:
             for col_idx, (img_0, img_1, img_2, img_3, img_4) in enumerate(images):
@@ -283,6 +459,14 @@ class Visualizer:
             self.label_text.set_text('')
 
     def on_true_clicked(self, event):
+        """
+        Mark the current row for keeping, and add label 'True'.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+        """
         if self.verbose:
             print(f"Row {self.current_idx} is marked true.")
         # Mark the current row for keeping, and add label 'True'
@@ -294,7 +478,16 @@ class Visualizer:
             self.rows_unsure.remove(tmp)
         self.on_next_clicked(event)
 
+
     def on_unsure_clicked(self, event):
+        """
+        Mark the current row for keeping, and add label 'Unsure'.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+        """
         if self.verbose:
             print(f"Row {self.current_idx} is marked unsure.")
         # Mark the current row for keeping, and add label 'Unsure'
@@ -306,7 +499,16 @@ class Visualizer:
             self.rows_true.remove(tmp)
         self.on_next_clicked(event)
 
+
     def on_false_clicked(self, event):
+        """
+        Mark the current row for deletion, and add label 'False'.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+        """
         if self.verbose:
             print(f"Row {self.current_idx} is marked false.")
         # Mark the current row for deletion, and add label 'False'
@@ -318,7 +520,16 @@ class Visualizer:
             self.rows_unsure.remove(tmp)
         self.on_next_clicked(event)
 
+
     def on_delete_clicked(self, event):
+        """
+        If the current row is marked for deletion, unmark it.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+        """
         if self.verbose:
             print(f"Label of row {self.current_idx} has be removed.")
         # If the current row is marked for deletion, unmark it
@@ -330,7 +541,20 @@ class Visualizer:
             self.rows_unsure.remove(self.current_idx)
         self.on_next_clicked(event)
 
+
     def on_prev_clicked(self, event):
+        """
+        Go to the previous row.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+        
+        Returns
+        -------
+        None
+        """
         if self.current_idx == 0:
             self.current_idx = self.number_of_rows - 1
         else:
@@ -338,6 +562,18 @@ class Visualizer:
         self.update_display()
 
     def on_next_clicked(self, event):
+        """
+        Go to the next row.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+            
+        Returns
+        -------
+        None
+        """
         if self.current_idx == self.number_of_rows - 1:
             self.current_idx = 0
         else:
@@ -345,6 +581,18 @@ class Visualizer:
         self.update_display()
 
     def on_close(self, event):
+        """
+        Label the rows in rows_false with "False", the rows in rows_true with "True", and the rows in rows_unsure with "Unsure".
+
+        Parameters
+        ----------
+        event : event
+            The event.
+
+        Returns
+        -------
+        None
+        """
         # Label the rows in rows_false with "False", the rows in rows_true with "True", and the rows in rows_unsure with "Unsure"
         if 'Label' not in self.traj.final_output.columns:
             self.traj.final_output['Label'] = np.nan
@@ -363,7 +611,19 @@ class Visualizer:
             print('The refined tracked droplet data is not saved.')
 
     def on_key(self, event):
-        """Keyboard interaction."""
+        """
+        Execute action depending on which key was pressed.
+        
+        Parameters
+        ----------
+        event : event
+            The event.
+
+        Returns
+        -------
+        None
+        """
+
         if event.key == 'right':
             self.on_next_clicked(event)
         elif event.key == 'left':
@@ -378,7 +638,20 @@ class Visualizer:
             self.on_delete_clicked(event)
 
     def on_submit(self, text_box, text):
-        """Jump to specified row when user submits a value in the TextBox."""
+        """
+        Jump to specified row when user submits a value in the TextBox.
+
+        Parameters
+        ----------
+        text_box : TextBox
+            The TextBox widget.
+        text : str
+            The text submitted by the user.
+
+        Returns
+        -------
+        None
+        """
         # Check if text is not empty
         if text.strip():  # This removes any leading/trailing whitespace and checks if text is not just whitespace
             try:
@@ -401,8 +674,8 @@ def main(cfg: DictConfig):
     RAW_PATH = Path(cfg.data_path) / Path(cfg.raw_dir)
     RESULTS_PATH = Path(cfg.data_path) / Path(cfg.results_dir)
 
+    # Run the visualizer
     Visualizer(cfg, RAW_PATH, RESULTS_PATH)
-
 
 if __name__ == "__main__":
     main()
