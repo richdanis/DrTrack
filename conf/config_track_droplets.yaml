@@ -1,7 +1,7 @@
 # Description: Main configuration file for the droplet tracking pipeline. Includes settings for all steps of the pipeline.
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "small_mvt_3"
+experiment_name: "small_mvt_3_full"
 
 # Path Settings (relative to project root)
 project_path: "."
@@ -26,7 +26,7 @@ defaults:
   - _self_
 
   # Config for preprocessing. See src/conf/preprocess for more options. Determines in how many cuts the image is split.
-  - preprocess: 4_cuts_small
+  - preprocess: 4_cuts_full
 
   # Config for the droplet detection. See src/conf/detect_droplets for more options. Determines the droplet detection method and its parameters.
   - detect_droplets: ransac3
@@ -35,17 +35,17 @@ defaults:
   - extract_visual_embeddings: droplets_all
 
   # Config for the tracking. See src/conf/track for more options. Determines the optimal transport algorithm and its parameters.
-  - track: medium_20000_best
+  - track: small_mvt_1
 
   # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters. Also allows for custom filtering of results.
-  - generate_results: scaled_ranks
+  - generate_results: scaled_entries
 
 # Skip steps if they have already been completed
-skip_preprocessing: false 
-skip_droplet_detection: false
-skip_droplet_patch_extraction: false 
-skip_visual_embedding_extraction: false
-skip_tracking: false 
+skip_preprocessing: true 
+skip_droplet_detection: true
+skip_droplet_patch_extraction: true 
+skip_visual_embedding_extraction: true
+skip_tracking: true 
 skip_results_generation: false
 
 # Detail level of the progress indications. 
