@@ -1,12 +1,21 @@
-import cv2 as cv
-import sys
+
+# Types
+from pathlib import Path
+
+# Data handling
 import pandas as pd
 import numpy as np
 import math
-from tqdm.auto import tqdm
+
+# System
+import sys
 import os
-from pathlib import Path
 from datetime import datetime
+
+# Progress bar
+from tqdm.auto import tqdm
+
+# Plotting
 import matplotlib.pyplot as plt
 from matplotlib.path import Path as matplotlibPath
 from matplotlib.widgets import LassoSelector
@@ -46,8 +55,10 @@ all_lines = None
 # Global variables to keep track of where the trajectories begin (not trivial for when we have partial trajectories)
 trajectory_beginning = None
 
+# Set aspect ratio to 1
+plt.gca().set_aspect('equal')
 
-def select_trajectories(image_path, results_path, image_name, y_stride, x_stride):
+def select_trajectories(cfg, image_path, results_path, image_name, y_stride, x_stride):
     # Must declare to use the global variables
     global results_df_x
     global results_df_y
@@ -64,6 +75,14 @@ def select_trajectories(image_path, results_path, image_name, y_stride, x_stride
     results_df_x = results_df[[i for i in results_df.columns if str(i).startswith("x")]].astype(np.float32) + x_stride
     results_df_y = results_df[[i for i in results_df.columns if str(i).startswith("y")]].astype(np.float32) + y_stride
 
+    if cfg.frames is not None:
+        # Frames to extract
+        frames = cfg.frames
+
+        # Extract the relevant frames
+        results_df_x = results_df_x.iloc[:, frames]
+        results_df_y = results_df_y.iloc[:, frames]
+
     trajectory_beginning = np.zeros((results_df_x.shape[0], 2))
 
     for index, row in results_df_x.iterrows():
@@ -74,23 +93,26 @@ def select_trajectories(image_path, results_path, image_name, y_stride, x_stride
     # Store lines for later manipulation
     all_lines = plt.plot(results_df_x.T, results_df_y.T, color="C0", marker=".", linewidth=1, picker=True, pickradius=5)
 
-    # Give all lines information abotu which trajectory they are
+    # Give all lines information about which trajectory they are
     for idx, line in enumerate(all_lines):
         plt.setp(line, gid=str(idx))
 
     # Load the image and plot each frame
     image = get_image_cut_as_ndarray(None, ["BF"], image_path, 
                                     upper_left_corner=(0, 0),
-                                    pixel_dimensions=(-1,-1))
+                                    pixel_dimensions=(-1,-1),
+                                    frames=cfg.frames)
     
-    frames = []
-    for i, frame in enumerate(image):
-        f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
-        # By default, only have the first and last frames be visible
-        if i != 0 or i != (len(image) - 1):
-            f.set_visible(False)
+    # frames = []
+    # for i, frame in enumerate(image):
+    #     f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
+    #     # By default, only have the first and last frames be visible
+    #     if i != 0 or i != (len(image) - 1):
+    #         f.set_visible(False)
 
-        frames.append(f)
+    #     frames.append(f)
+
+    frames = cfg.frames
 
     # Define callback for clicking on a line (or other thing)
     def pickline(event):

@@ -1,12 +1,30 @@
+# Types
 from pathlib import Path
-import re
-import hydra
 from omegaconf import DictConfig
 
+# Configuration
+import hydra
+
+# String manipulation
+import re
+
+# Local imports
 from visualizer import interactive_explorer
 
-# get the correct position of the droplet by adding the stride
-def get_stride(results_str) -> tuple:
+def get_stride(results_str: str) -> tuple:
+    """
+    Get the correct position of the droplet by adding the stride.
+
+    Parameters
+    ----------
+    results_str : str
+        The name of the results file.
+
+    Returns
+    -------
+    tuple
+        The y and x strides.
+    """
     # Define a pattern using regular expression
     pattern = r'y(\d+)_x(\d+)'
     # Use re.search to find the pattern in the string
@@ -17,7 +35,7 @@ def get_stride(results_str) -> tuple:
 
 @hydra.main(config_path="../conf", config_name="visualizer", version_base=None)
 def main(cfg: DictConfig):
-
+    # Check that the image and results are in the correct format.
     assert cfg.raw_image[-4:] == '.nd2', 'Image mast be an .nd2 file, or add ".nd2" to the end of the name'
     assert cfg.results[-4:] == '.csv', 'Results mast be an .csv file, or add ".csv" to the end of the name'
 
@@ -27,7 +45,8 @@ def main(cfg: DictConfig):
 
     y_stride, x_stride = get_stride(cfg.results[:-4])
 
-    interactive_explorer.select_trajectories(raw_image_path, results_path, image_name, y_stride, x_stride)
+    # Run the interactive explorer
+    interactive_explorer.select_trajectories(cfg, raw_image_path, results_path, image_name, y_stride, x_stride)
 
 
 if __name__ == "__main__":
