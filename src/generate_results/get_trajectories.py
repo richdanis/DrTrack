@@ -55,7 +55,6 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np
     
     # Get max rank per vector along maximal dimension
     max_rank_per_vector = np.max(ranks, axis=0)
-    min_max_rank_per_vector = np.min(max_rank_per_vector)
 
     # 0-1 normalize the ranks
     max_rank = np.max(ranks)
@@ -65,7 +64,9 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np
     return prob_matrix
 
 
-def get_id_mapping(cfg, ot_matrix: np.ndarray, frame_id: np.ndarray) -> (np.ndarray, np.ndarray):
+def get_id_mapping(cfg, ot_matrix: np.ndarray, 
+                   frame_id: np.ndarray, 
+                   cut_name: str) -> (np.ndarray, np.ndarray):
     """
     Return a mapping from droplet ids in the current frame to the droplet ids in the next frame.
 
@@ -77,6 +78,8 @@ def get_id_mapping(cfg, ot_matrix: np.ndarray, frame_id: np.ndarray) -> (np.ndar
         The optimal transport matrix.
     frame_id : np.ndarray
         The id of the current frame.
+    cut_name : str
+        The name of the cut.
 
     Returns:
     -------
@@ -86,7 +89,7 @@ def get_id_mapping(cfg, ot_matrix: np.ndarray, frame_id: np.ndarray) -> (np.ndar
         The droplet ids in the next frame.
     """
     # Get directory to store probability matrices
-    directory_name = "prob_matrix_" + cfg.experiment_name
+    directory_name = "prob_matrix" + cut_name
     directory_path = Path(cfg.data_path) / Path(cfg.ot_dir) / Path(cfg.experiment_name) / Path(directory_name)
     name = f"{frame_id}-{frame_id+1}.npy"
 
@@ -107,7 +110,7 @@ def get_id_mapping(cfg, ot_matrix: np.ndarray, frame_id: np.ndarray) -> (np.ndar
 
     return this_frame_ids, next_frame_ids
 
-def create_trajectory_with_prob(cfg, ot_matrices: list):
+def create_trajectory_with_prob(cfg, ot_matrices: list, cut_name: str) -> pd.DataFrame:
     """
     This function creates a tracking table with the droplet ids of the current frame and the next frame.
     The transitions are based on transition scores extracted from the OT matrices.
@@ -128,7 +131,7 @@ def create_trajectory_with_prob(cfg, ot_matrices: list):
 
     for i, ot_matrix in enumerate(ot_matrices):
         # get the mapping from the current frame to the next frame
-        this_frame_ids, next_frame_ids = get_id_mapping(cfg, ot_matrix, i)
+        this_frame_ids, next_frame_ids = get_id_mapping(cfg, ot_matrix, i, cut_name)
 
         # create a dataframe with the indices and the probabilities
         tmp = pd.DataFrame({f'frame': i,
@@ -184,7 +187,8 @@ def filter_and_reindex_droplets(cfg,
 
 def process_and_merge_results(cfg, 
                               droplet_table: pd.DataFrame, 
-                              tracking_table: pd.DataFrame) -> pd.DataFrame:
+                              tracking_table: pd.DataFrame,
+                              cut_name: str) -> pd.DataFrame:
     """
     Create trajectories from the tracking table and the droplet table.
     The following will be stored per transition:
@@ -201,6 +205,8 @@ def process_and_merge_results(cfg,
         The droplet table.
     tracking_table : pd.DataFrame
         The tracking table.
+    cut_name : str
+        The name of the cut.
 
     Returns:
     -------
@@ -252,7 +258,7 @@ def process_and_merge_results(cfg,
         next_ids = track_df['droplet_id_next'].to_numpy()
 
         # Get current transition matrix
-        directory_name = "prob_matrix_" + cfg.experiment_name
+        directory_name = "prob_matrix" + cut_name
         directory_path = Path(cfg.data_path) / Path(cfg.ot_dir) / Path(cfg.experiment_name) / Path(directory_name)
         name = f"{i}-{i+1}.npy"
         prob_matrix = torch.load(directory_path / name)
@@ -482,9 +488,18 @@ def compute_and_store_results_cut(cfg,
         if file_name.endswith(".npy"):
             ot_matrices.append(torch.load(cut_ot_path / file_name))
     
-    trajectory_df = create_trajectory_with_prob(cfg, ot_matrices)
+    # create directory for probability matrices
+    # Get file names for current cut
+    cut_prob_path = str(cut_ot_path).replace("ot_matrix", "prob_matrix")
 
-    results_df = process_and_merge_results(cfg, cut_feature_droplets_df, trajectory_df)
+    if not os.path.exists(cut_prob_path):
+        os.makedirs(cut_prob_path)
+
+    # create the trajectory dataframe
+    trajectory_df = create_trajectory_with_prob(cfg, ot_matrices, cut_name)
+
+    # process the results
+    results_df = process_and_merge_results(cfg, cut_feature_droplets_df, trajectory_df, cut_name)
     part_probs = part_trajectory_prob(cfg, results_df)
 
     # concat the two dataframes
@@ -526,15 +541,6 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
 
         print(f'Currently processing:')
     
-    # Create directories for storing probability interpretation of ot matrix
-    # Create directory if it does not exist
-    directory_name = "prob_matrix_" + cfg.experiment_name
-    directory_path = Path(cfg.data_path) / Path(cfg.ot_dir) / Path(cfg.experiment_name) / Path(directory_name)
-
-    # Create directory if it does not exist
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
-
     # Iterate through all cuts
     for dir_name in os.listdir(image_ot_path):
         if not dir_name.startswith("ot_matrix_"):
