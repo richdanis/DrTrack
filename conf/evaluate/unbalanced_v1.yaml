@@ -1,4 +1,5 @@
-# Option to cut out a part of the image - whole image is always (0,0) to (500,500)
+# Option to cut out a part of the simulated image - whole image is always (0,0) to (500,500)
+# This is useful for introducing unbalancedness
 cutout_image: true
 cutout:
   x_min: 10
@@ -6,16 +7,18 @@ cutout:
   y_min: 10
   y_max: 490
 
-# Possible to reduce the number of droplets to be processed
-stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
+# Possible to reduce the number of droplets to be processed. Useful for debugging and experiments.
+stride: 10 # 1 means all droplets, 2 means every second droplet, etc.
 
-# Set which frames should be processed - needs to be the same as the number of frames for the embeddings!
-# frames: [3, 4, 5, 6, 7, 8, 9, 10, 11] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
+# Set which frames should be processed - there cannot be more frames than the number of frames from the paired embeddings!
+# Often frames 0 and 1 are not used for evaluation, because the simulation is still starting up. See plots of simulations.
 frames: [6, 7, 8, 9] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
-#frames: [2, 3, 4, 5]
 
-# Probabilities for numbers of cells in droplet and droplet radius
+# If no numbers of cells are provided with the paired embeddings, generate random numbers of cells for each droplet.
+# Probabilities for numbers of cells in droplet and droplet radius.
 nr_cells_distribution: [1.0, 0.0, 0.0] # first entry is probability for 0 cells, second for 1 cell, etc.
+
+# Define the droplet radius. Not very relevant.
 droplet_radius: 21
 
 # Scores to be computed
@@ -25,18 +28,3 @@ accuracy_k: [100, 500, 1000, 2000, 5000, 10000, -1]
 brier: true
 auprc: true
 auroc: false
-
-# rank_accuracy: false
-# rank_accuracy_k: [1, 20, 30, 50, 100]
-
-# auroc_matchable: false
-# auroc_matchable_threshold_stride: "default" # "default" or int
-
-# auroc_all: false
-# auroc_all_threshold_stride: "default"
-
-# auroc_rank_matchable: false
-# auroc_rank_matchable_num_ranks: 20
-
-# auroc_rank_all: false
-# auroc_rank_all_num_ranks: 20

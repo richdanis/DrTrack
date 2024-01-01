@@ -1,16 +1,20 @@
+# Imports for handling paths
 import os
 from pathlib import Path
-import numpy as np
 import shutil
-import jax
-import pandas as pd
-import wandb
-import time
-import datetime
 
+# Wandb for logging
+import wandb
+
+# Jax for fast computation using GPUs
+import jax
+jax.config.update('jax_platform_name', 'cpu')
+
+# Hydra for configuration
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
+# Imports from src code for evaluation
 from extract_visual_embeddings.create_visual_embeddings import create_and_save_droplet_embeddings
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
@@ -18,18 +22,47 @@ from evaluate.preprocess_simulated import SimulatedData
 from evaluate.get_scores import OtEvaluation
 from evaluate.calibration_plot import save_calibration_plot
 from evaluate.generate_paired_patches import structure_patches
+import os
 
+def create_dir(path: str):
+    """
+    Create a directory at the specified path if it doesn't already exist.
 
-def create_dir(path):
+    Parameters
+    ----------
+    path : str
+        The path of the directory to be created.
+
+    Returns
+    -------
+    None
+        This function does not return anything.
+
+    """
     if not os.path.exists(path):
         os.makedirs(path)
 
 
 @hydra.main(config_path="../conf", config_name="config_evaluate_tracking", version_base=None)
 def main(cfg: DictConfig):
+    """
+    Main function for evaluating tracking.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration dictionary.
+
+    Returns
+    -------
+    None
+    """
+    ### SETUP ###
+    # Set device
     if cfg.device == 'cpu':
         jax.devices("cpu")[0]
 
+    # Initialize wandb
     if cfg.wandb:
         os.environ["WANDB__SERVICE_WAIT"] = "300"
 
@@ -39,6 +72,7 @@ def main(cfg: DictConfig):
             config=OmegaConf.to_container(cfg),
             dir="logs"
         )
+
     # Setup directories
     SIMULATED_PATH = Path(cfg.data_path) / Path(cfg.simulated_dir)
     PREPROCESSED_PATH = Path(cfg.data_path) / Path(cfg.preprocessed_dir)
