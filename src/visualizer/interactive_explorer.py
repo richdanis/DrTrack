@@ -97,6 +97,9 @@ def launch_interactive_explorer(cfg: DictConfig,
     # Int32 is a special pandas datatype, which is a integer 32 bit datatype plus it can have value NAN
     results_df = pd.read_csv(results_path)
 
+    # Assert if dataframe empty
+    assert not results_df.empty, "The dataframe is empty."
+
     # There is no real need to drop the NA rows
     results_df['discard'] = True
 

@@ -62,6 +62,9 @@ class Trajectories:
         else:
             tmp = pd.read_csv(f"{RESULTS_PATH}/{cfg.experiment_name}/{cfg.results}")
 
+        # Assert if dataframe empty
+        assert not tmp.empty, "The dataframe is empty."
+        
         self.final_output = tmp
         counter = 0
         for col in tmp.columns:

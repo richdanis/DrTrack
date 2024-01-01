@@ -4,7 +4,11 @@
 uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks"
 
 # How to aggregate the probabilities for the same droplet from different frames
-prob_agregation: "multiplication" # "multiplication" or "average"
+prob_agregation: "average" # "multiplication" or "average"
 
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: True
+
+# Path to calibration model
+calibrate_probabilities: True
+calibration_model_name: "small_1848.pkl"

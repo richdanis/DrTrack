@@ -7,6 +7,7 @@ experiment_name: "small_mvt_3_full"
 project_path: "."
 data_path: "data"
 checkpoint_dir: "checkpoints"
+calibration_model_dir: "calibration_models"
 
 # Data directories (will be directories in data_path)
 raw_dir: "01_raw"

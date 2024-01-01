@@ -9,7 +9,7 @@ filter_merging_trajectories: True
 frame_range: null     
 
 # Filter out droplets with uncertainty below this threshold. If null, no filtering will be done.
-uncertainty_threshold: 0.4   
+uncertainty_threshold: 0.98  
 
 # If True, only droplets with the same number of cells in all frames will be kept.
 enforce_same_nr_cells: False   

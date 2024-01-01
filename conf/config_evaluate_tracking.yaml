@@ -2,7 +2,7 @@
 defaults:
   - _self_
   - extract_visual_embeddings: droplets_all # Config for the visual embedding extraction
-  - track: medium_20000_best                # Config for the tracking - sinkhorn parameters, etc.
+  - track: small_mvt_1                      # Config for the tracking - sinkhorn parameters, etc.
   - generate_results: scaled_entries_eval
   
   # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
@@ -10,11 +10,11 @@ defaults:
   - evaluate: unbalanced_v1
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "large_mvt_6000"
+experiment_name: "small_mvt_1848"
 # experiment_name: "medium_mvt_20000_frames_2345"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "large_mvt_6000_droplets.csv"
+simulated_image: "small_mvt_1848_droplets.csv"
 
 # Paths to paired_patches and their metadata files - should be in data_path/feature_dir
 paired_patches: "paired_patches_9_frames_13584_droplets.npy"
@@ -24,6 +24,7 @@ paired_patches_metadata: "paired_patches_9_frames_13584_droplets_metadata.csv"
 project_path: "."
 data_path: "evaluation"
 checkpoint_dir: "checkpoints"
+calibration_model_dir: "calibration_models"
 
 # Evaluation directories (will be directories in data_path)
 simulated_dir: "01_simulated"
@@ -45,12 +46,12 @@ gt_uncertainty_threshold: 0.95 # Only trajectories with greater mean uncertainty
 
 # Skip steps if they have already been completed
 skip_preprocessing: true
-skip_visual_embedding_extraction: false
+skip_visual_embedding_extraction: true
 skip_tracking: true
-skip_results_generation: true
-skip_trajectory_generation: true
-skip_scoring: true
-skip_calibration_plot: true
+skip_results_generation: false
+skip_trajectory_generation: false
+skip_scoring: false
+skip_calibration_plot: false
 
 # Detail level of the progress indications
 verbose: true

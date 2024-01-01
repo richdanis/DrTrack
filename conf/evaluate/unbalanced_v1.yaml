@@ -8,7 +8,7 @@ cutout:
   y_max: 490
 
 # Possible to reduce the number of droplets to be processed. Useful for debugging and experiments.
-stride: 10 # 1 means all droplets, 2 means every second droplet, etc.
+stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
 
 # Set which frames should be processed - there cannot be more frames than the number of frames from the paired embeddings!
 # Often frames 0 and 1 are not used for evaluation, because the simulation is still starting up. See plots of simulations.

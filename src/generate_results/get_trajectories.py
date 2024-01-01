@@ -5,6 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import torch 
+from joblib import load
 
 def transform_to_entry_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np.ndarray:
     """
@@ -270,6 +271,15 @@ def process_and_merge_results(cfg,
         # Get probabilities of chosen trajectory
         probs = np.array([prob_matrix[curr_droplet_ids[i], droplet_ids_next[i]] for i in range(len(curr_droplet_ids))])
         
+        # Calibrate probabilities if desired
+        if cfg.generate_results.calibrate_probabilities:
+            # Load calibration model
+            calibration_model_path = Path(cfg.calibration_model_dir)
+            calibration_model = load(Path(calibration_model_path / cfg.generate_results.calibration_model_name))
+
+            # Apply calibration model
+            probs = calibration_model.transform(probs)
+
         # Store for next iteration
         curr_droplet_ids = droplet_ids_next.copy()
 
@@ -530,6 +540,11 @@ def compute_and_store_results_cut(cfg,
 
     # Store filtered results
     filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+
+    # Also store all trajectories not in the filtered results
+    mask = final_results_df.index.isin(filtered_final_results.index)
+    dropped_trajectories = final_results_df[~mask]
+    dropped_trajectories.to_csv(image_results_path / Path(f'dropped_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):
