@@ -76,12 +76,9 @@ def select_trajectories(cfg, image_path, results_path, image_name, y_stride, x_s
     results_df_y = results_df[[i for i in results_df.columns if str(i).startswith("y")]].astype(np.float32) + y_stride
 
     if cfg.frames is not None:
-        # Frames to extract
-        frames = cfg.frames
-
         # Extract the relevant frames
-        results_df_x = results_df_x.iloc[:, frames]
-        results_df_y = results_df_y.iloc[:, frames]
+        results_df_x = results_df_x.iloc[:, cfg.frames]
+        results_df_y = results_df_y.iloc[:, cfg.frames]
 
     trajectory_beginning = np.zeros((results_df_x.shape[0], 2))
 
@@ -103,6 +100,11 @@ def select_trajectories(cfg, image_path, results_path, image_name, y_stride, x_s
                                     pixel_dimensions=(-1,-1),
                                     frames=cfg.frames)
     
+    if cfg.frames is not None:
+        frames = cfg.frames
+    else:
+        frames = range(len(image))
+    
     # frames = []
     # for i, frame in enumerate(image):
     #     f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
@@ -112,7 +114,6 @@ def select_trajectories(cfg, image_path, results_path, image_name, y_stride, x_s
 
     #     frames.append(f)
 
-    frames = cfg.frames
 
     # Define callback for clicking on a line (or other thing)
     def pickline(event):

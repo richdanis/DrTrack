@@ -524,7 +524,7 @@ def compute_and_store_results_cut(cfg,
     # filter the results
     if cfg.generate_results.filter_merging_trajectories:
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
-        dropped_merging_trajectories_.to_csv(image_results_path / f'dropped_merging_trajectories{cut_name}.csv', index=False)
+        dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.generate_results.file_name_suffix + '.csv'), index=False)
     else:
         filtered_final_results, = filter_results(cfg, final_results_df)
 
