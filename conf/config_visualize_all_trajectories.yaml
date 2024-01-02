@@ -15,5 +15,5 @@ data_path: "data"
 raw_dir: "01_raw"
 results_dir: "05_results"
 
-# Frames to consider
-frames: [1,2,3,4,5] # If null, all frames are considered
+# Frames range to consider
+frame_range: [1,5] # [first_frame, last_frame] - If null, all frames are considered. 

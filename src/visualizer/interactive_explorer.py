@@ -103,13 +103,23 @@ def launch_interactive_explorer(cfg: DictConfig,
     # There is no real need to drop the NA rows
     results_df['discard'] = True
 
-    results_df_x = results_df[[i for i in results_df.columns if str(i).startswith("x")]].astype(np.float32) + x_stride
-    results_df_y = results_df[[i for i in results_df.columns if str(i).startswith("y")]].astype(np.float32) + y_stride
+    x_pos_cols = [i for i in results_df.columns if str(i).startswith("x")]
+    y_pos_cols = [i for i in results_df.columns if str(i).startswith("y")]
 
-    if cfg.frames is not None:
+    # Extract probabilities
+    # prob_cols = [i for i in results_df.columns if i.startswith("p")]
+    # prob_cols = [i for i in prob_cols if len(i.split("_"))==2 and int(i.split("_")[1])-int(i.split("_")[0][1:]) == 1]
+
+    results_df_x = results_df[x_pos_cols].astype(np.float32) + x_stride
+    results_df_y = results_df[y_pos_cols].astype(np.float32) + y_stride
+    # results_df_p = results_df[prob_cols].astype(np.float32)
+
+    if cfg.frame_range is not None:
         # Extract the relevant frames
-        results_df_x = results_df_x.iloc[:, cfg.frames]
-        results_df_y = results_df_y.iloc[:, cfg.frames]
+        frames = range(cfg.frame_range[0], cfg.frame_range[1] + 1)
+        results_df_x = results_df_x.iloc[:, frames]
+        results_df_y = results_df_y.iloc[:, frames]
+        # results_df_p = results_df_p.iloc[:, range(cfg.frame_range[0], cfg.frame_range[1])]
 
     trajectory_beginning = np.zeros((results_df_x.shape[0], 2))
 
@@ -126,13 +136,18 @@ def launch_interactive_explorer(cfg: DictConfig,
         plt.setp(line, gid=str(idx))
 
     # Load the image and plot each frame
-    image = get_image_cut_as_ndarray(None, ["BF"], image_path, 
+    if cfg.frame_range is not None:
+        image = get_image_cut_as_ndarray(None, ["BF"], image_path, 
                                     upper_left_corner=(0, 0),
                                     pixel_dimensions=(-1,-1),
-                                    frames=cfg.frames)
+                                    frames=frames)
+    else:
+        image = get_image_cut_as_ndarray(None, ["BF"], image_path,
+                                    upper_left_corner=(0, 0),
+                                    pixel_dimensions=(-1,-1))
     
-    if cfg.frames is not None:
-        frames = cfg.frames
+    if cfg.frame_range is not None:
+        frames = range(cfg.frame_range[0], cfg.frame_range[1] + 1)
     else:
         frames = range(len(image))
     
