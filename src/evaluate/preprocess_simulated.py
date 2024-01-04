@@ -210,7 +210,7 @@ class SimulatedData():
             print("\n=========================================")
             print("Preprocessing Simulated Data")
             print("=========================================\n")
-            print(f'Currently processing: {self.experiment_name}')
+            print(f'Currently processing: \n{self.experiment_name}')
 
         df_list = []
         for i, frame in enumerate(self.args.frames):

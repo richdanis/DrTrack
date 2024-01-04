@@ -19,9 +19,10 @@ from extract_visual_embeddings.create_visual_embeddings import create_and_save_d
 from track.ot import OptimalTransport
 from generate_results.get_trajectories import compute_and_store_results_all
 from evaluate.preprocess_simulated import SimulatedData
-from evaluate.get_scores import OtEvaluation
+from evaluate.get_scores import TrackingEvaluation
 from evaluate.calibration_plot import save_calibration_plot
 from evaluate.generate_paired_patches import structure_patches
+from evaluate.calibrate import train_and_store_calibration_model, save_calibration_plot
 from utils.file_structure import create_dir
 
 
@@ -52,7 +53,8 @@ def main(cfg: DictConfig):
             project="DrTrack",
             entity="dslab-23",
             config=OmegaConf.to_container(cfg),
-            dir="logs"
+            dir="logs",
+            settings=wandb.Settings(start_method="thread") # For making sure wandb works with hydra
         )
 
     # Setup directories
@@ -84,6 +86,7 @@ def main(cfg: DictConfig):
             print("***")
 
     ### PREPROCESSING ###
+    # Check src/conf/evaluate for configurations.
     # Preprocess simulated data
     image_simulated = Path(SIMULATED_PATH / cfg.simulated_image)
     image_preprocessed_path = Path(PREPROCESSED_PATH / cfg.experiment_name)
@@ -118,7 +121,7 @@ def main(cfg: DictConfig):
         sim_data.create_and_store_position_dfs()
 
     ### VISUAL EMBEDDING EXTRACTION ###
-    # Check conf/extract_features.yaml for settings
+    # Check conf/extract_visual_embeddings for settings
 
     if not cfg.skip_visual_embedding_extraction:
         # Create paths if they do not exist
@@ -137,10 +140,13 @@ def main(cfg: DictConfig):
         create_and_save_droplet_embeddings(cfg, image_feature_path)
 
     ### TRACKING ###
-    # change experiment name to timestamp
+    # Check conf/track for configurations.
+        
     ## The following should only be used for parameter sweeps - otherwise, when running the script manually, the experiment name should be set in the config file
     if cfg.sweep:
         cfg.experiment_name = "sweep"
+
+    # Path to store optimal transport matrices
     image_ot_path = Path(OT_PATH / cfg.experiment_name)
 
     if not cfg.skip_tracking:
@@ -151,25 +157,32 @@ def main(cfg: DictConfig):
         ot.compute_and_store_ot_matrices_all(image_feature_path, image_ot_path)
 
     ### GENERATING RESULTS (Trajectories and Scores) ###
+    # Check conf/generate_results for trajectory creation configurations.
+    # Check conf/filter_results for trajectory filtering configurations.
+    # Check conf/evaluate for score evaluation configurations and model calibration settings.
     image_results_path = Path(RESULTS_PATH / cfg.experiment_name)
+   
+    # Create paths if they do not exist
+    create_dir(image_results_path)
 
-    if not cfg.skip_results_generation:
-        # Create paths if they do not exist
-        create_dir(image_results_path)
+    if not cfg.skip_trajectory_generation:
+        compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
 
-        if not cfg.skip_trajectory_generation:
-            compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path)
+    if not cfg.skip_scoring:
+        for result_type in cfg.evaluate.result_types:
+            ot_evaluation = TrackingEvaluation(cfg, image_results_path, result_type=result_type)
+            ot_evaluation.compute_and_store_scores()
 
-        if not cfg.skip_scoring:
-            ot_evaluation_unfiltered = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path, result_type="Unfiltered")
-            ot_evaluation_unfiltered.compute_and_store_scores()
+    if not cfg.skip_calibration:
+        # Train calibration model
+        results_name = "unfiltered_trajectories_.csv"
+        train_and_store_calibration_model(cfg, image_results_path, results_name)
 
-            ot_evaluation_filtered = OtEvaluation(cfg, image_simulated, image_ot_path, image_results_path, result_type="Filtered")
-            ot_evaluation_filtered.compute_and_store_scores()
-
-        if not cfg.skip_calibration_plot:
-            save_calibration_plot(cfg, image_results_path, result_type="Unfiltered")
-            save_calibration_plot(cfg, image_results_path, result_type="Filtered")
+        # Create calibration plot
+        if cfg.evaluate.create_calibration_plot:
+            for result_type in cfg.evaluate.result_types:
+                save_calibration_plot(cfg, image_results_path, result_type=result_type, title=cfg.evaluate.figure_title)
+        
 
     if cfg.wandb:
         wandb.log({"alpha": cfg.track.alpha,

@@ -1,5 +1,8 @@
+# Description: Configuration file for evaluation of unbalancedness experiment
+
+## PREPROCESSING ##
 # Option to cut out a part of the simulated image - whole image is always (0,0) to (500,500)
-# This is useful for introducing unbalancedness
+# This is useful for introducing unbalancedness. The cutout parameters determine the margin
 cutout_image: true
 cutout:
   x_min: 10
@@ -7,12 +10,39 @@ cutout:
   y_min: 10
   y_max: 490
 
-# Possible to reduce the number of droplets to be processed. Useful for debugging and experiments.
-stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
-
 # Set which frames should be processed - there cannot be more frames than the number of frames from the paired embeddings!
 # Often frames 0 and 1 are not used for evaluation, because the simulation is still starting up. See plots of simulations.
 frames: [6, 7, 8, 9] #need to be <= 8 frames for 1848 droplets sim, <= 9 for 6000 and 20000 droplets sim
+
+## EVALUATION ##
+# List of results to generate scores for
+result_types: ["unfiltered", "filtered", "dropped", "dropped_merging"] # Can be "results", "results_filtered", "dropped", "dropped_merging"
+
+# Scores to be computed (see description in paper)
+precision_at_k: true
+k_values: [100, 500, 1000, 2000, 5000, 10000, -1]
+brier: true
+auprc: true
+auroc: false # Will fail if all matches are true positives
+
+## CALIBRATION ##
+# Parameters for training the isotonic regression model (see sklearn documentation: https://scikit-learn.org/stable/modules/generated/sklearn.isotonic.IsotonicRegression.html#sklearn.isotonic.IsotonicRegression)
+y_min: 0.0
+y_max: 1.0
+increasing: "auto"
+out_of_bounds: "clip"
+
+# Parameters for saving the calibration model
+calibration_model_name: null # If null, use experiment name
+
+# Calibration Plot
+create_calibration_plot: true
+figure_title: "Calibration Plot"
+
+
+## Miscellenous settings
+# Possible to reduce the number of droplets to be processed. Useful for debugging and experiments.
+stride: 1 # 1 means all droplets, 2 means every second droplet, etc.
 
 # If no numbers of cells are provided with the paired embeddings, generate random numbers of cells for each droplet.
 # Probabilities for numbers of cells in droplet and droplet radius.
@@ -20,11 +50,3 @@ nr_cells_distribution: [1.0, 0.0, 0.0] # first entry is probability for 0 cells,
 
 # Define the droplet radius. Not very relevant.
 droplet_radius: 21
-
-# Scores to be computed
-accuracy: true
-accuracy_k: [100, 500, 1000, 2000, 5000, 10000, -1]
-
-brier: true
-auprc: true
-auroc: false

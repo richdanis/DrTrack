@@ -6,26 +6,58 @@ from pathlib import Path
 
 from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss
 
-class OtEvaluation():
+class TrackingEvaluation():
     """
-    Simple class for running some OT analyses
+    Simple class for evaluating optimal transport results.
+    ----------
+    Parameters:
+    cfg: DictConfig:
+        Global config.
+    results_path: str:
+        Path to directory where results are stored.
+    result_type: str:
+        Type of results to evaluate. Must be either 'Unfiltered' or 'Filtered' or 'Dropped' or 'Dropped_Merging'.
+
+    Attributes:
+    args: object:
+        Evaluation arguments.
+    results_path: str:
+        Path to directory where results are stored.
+    verbose: bool:
+        Flag indicating whether to print progress messages.
+    wandb: bool:
+        Flag indicating whether to log results to wandb.
+    result_type: str:
+        Type of results to evaluate. Must be either 'Unfiltered' or 'Filtered' or 'Dropped' or 'Dropped_Merging'.
+    results_df: pandas.DataFrame:
+        DataFrame containing the results.
+    file_name_suffix: str:
+        Suffix of the results file.
+
+    Methods:
+    compute_and_store_scores():
+        Compute and store scores.
     """
     # Class variable for storing ot solution
     # ot = None # for OLD CODE
 
-    def __init__(self, cfg, image_simulated, image_ot_path, results_path, result_type="Unfiltered"):
+    def __init__(self, cfg, results_path, result_type="Unfiltered"):
         self.args = cfg.evaluate
         self.results_path = results_path
         self.verbose = cfg.verbose
         self.wandb = cfg.wandb
         self.result_type = result_type
 
-        if result_type == "Unfiltered":
-            file_name_start = "results"
-        elif result_type == "Filtered":
-            file_name_start = "filtered_results"
+        if result_type == "unfiltered":
+            file_name_start = "unfiltered_trajectories"
+        elif result_type == "filtered":
+            file_name_start = "filtered_trajectories"
+        elif result_type == "dropped":
+            file_name_start = "dropped_trajectories"
+        elif result_type == "dropped_merging":
+            file_name_start = "dropped_merging"
         else:
-            raise NotImplementedError("Result type not implemented. In calibration_plot.py")
+            raise NotImplementedError("Result type not implemented. Must be either 'Unfiltered' or 'Filtered' or 'Dropped' or 'Dropped_Merging'")
 
         # Load simulated data
         for file in os.listdir(self.results_path):
@@ -35,7 +67,8 @@ class OtEvaluation():
                 self.file_name_suffix = results_df_name.split("_")[-1].split(".")[0]
 
                 self.results_df = pd.read_csv(self.results_path / results_df_name)
-
+                
+                self.num_trajectories = len(self.results_df)
         # OLD CODE
         # self.image_ot_path = image_ot_path
         # self.simulated_data = SimulatedData(cfg, image_simulated, None)
@@ -55,8 +88,13 @@ class OtEvaluation():
         # Extract information about true positives vs false postives and plot calibration curve
         results_df = self.results_df
 
-        # List of k values to compute accuracy
-        k_values = self.args.accuracy_k
+        # Check if results are empty
+        if results_df.shape[0] == 0:
+            print(f"Results for {self.result_type} are empty. Skipping computation of scores.")
+            return
+
+        # List of k values to compute precision
+        k_values = self.args.precision_at_k
 
         # For total auroc, auprc
         y_true_all = []
@@ -109,11 +147,12 @@ class OtEvaluation():
                 if self.verbose:
                     print(f'brier: {brier_score}')
 
-            if self.args.accuracy:
-                # TODO: check whether sklearn top_k_accuracy is nicer/better
-                # get top k accuracy
-                k_values = self.args.accuracy_k
-                top_k_accuracy = []
+            if self.args.precision_at_k:
+                # get precision@k
+                k_values = self.args.k_values
+                k_values = [k for k in k_values if k <= self.num_trajectories]
+                
+                precision_at_k = []
                 sorted_probs_indices = y_prob.argsort()
                 
                 for k in k_values:
@@ -127,14 +166,14 @@ class OtEvaluation():
                     # deal with ties
                     k_eff = len(top_k_indices)
 
-                    # get top k accuracy
-                    top_k_accuracy.append((y_true[top_k_indices].sum() / k_eff))
+                    # get precision@k
+                    precision_at_k.append((y_true[top_k_indices].sum() / k_eff))
 
-                    # store top k accuracy
-                    scores_frame[f"{k}_accuracy"] = top_k_accuracy[-1]
+                    # store precision@k
+                    scores_frame[f"p@_{k}"] = precision_at_k[-1]
 
                     if self.verbose:
-                        print(f'{k}_accuracy: {top_k_accuracy[-1]}')
+                        print(f'p@_{k}: {precision_at_k[-1]}')
 
             # store scores for current frame
             if self.wandb:
@@ -196,12 +235,18 @@ class OtEvaluation():
         scores_df.loc['avg'] = avg_row
         scores_df.loc['max'] = max_row
 
-        if self.result_type == "Unfiltered":
-            scores_df.to_csv(self.results_path / "scores.csv", index=False)
+        if self.result_type == "unfiltered":
+            scores_df.to_csv(self.results_path / "unfiltered_scores__.csv", index=False)
 
-        elif self.result_type == "Filtered":
-            scores_df.to_csv(self.results_path / Path("scores_filtered_" + self.file_name_suffix + ".csv"), index=False)
+        elif self.result_type == "filtered":
+            scores_df.to_csv(self.results_path / Path("filtered_scores__" + self.file_name_suffix + ".csv"), index=False)
+
+        elif self.result_type == "dropped":
+            scores_df.to_csv(self.results_path / Path("dropped_scores__" + self.file_name_suffix + ".csv"), index=False)
+
+        elif self.result_type == "dropped_merging":
+            scores_df.to_csv(self.results_path / Path("dropped_merging_scores__" + self.file_name_suffix + ".csv"), index=False)
 
         else:
-            raise ValueError("result_type must be either 'Unfiltered' or 'Filtered'")
+            raise ValueError("result_type must be either 'Unfiltered' or 'Filtered' or 'Dropped' or 'Dropped_Merging'")
 

@@ -1,17 +1,7 @@
-# Setting for the preprocessing pipeline
-defaults:
-  - _self_
-  - extract_visual_embeddings: droplets_all # Config for the visual embedding extraction
-  - track: small_mvt_1                      # Config for the tracking - sinkhorn parameters, etc.
-  - generate_results: scaled_entries_eval
-  
-  # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
-  - filter_results: basic
-  - evaluate: unbalanced_v1
+# Description: Main configuration file for the evaluation pipeline. Includes settings for all steps of the pipeline.
 
 # Name for this experiment - will be used to name the output files and directories
 experiment_name: "small_mvt_1848"
-# experiment_name: "medium_mvt_20000_frames_2345"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
 simulated_image: "small_mvt_1848_droplets.csv"
@@ -26,16 +16,55 @@ data_path: "evaluation"
 checkpoint_dir: "checkpoints"
 calibration_model_dir: "calibration_models"
 
-# Evaluation directories (will be directories in data_path)
+# Evaluation data directories (will be directories in data_path)
 simulated_dir: "01_simulated"
 preprocessed_dir: "02_preprocessed"
 feature_dir: "03_features"
 ot_dir: "04_ot"
 results_dir: "05_results"
 
-# GT specification for patches extraction
+defaults:
+  - _self_
+
+  # Config for evaluating the tracking. See src/conf/evaluate for more options. Determines what data and how it should be evaluated.
+  - evaluate: unbalanced_v1
+  
+  # Config for the droplet patch extraction. See src/conf/extract_droplet_patches for more options. Determines the method used for creating visual embeddings and its parameters.
+  - extract_visual_embeddings: droplets_all
+
+  # Config for the tracking. See src/conf/track for more options. Determines the optimal transport algorithm and its parameters.
+  - track: small_mvt_1
+
+  # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters.
+  - generate_results: scaled_entries
+
+  # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
+  - filter_results: basic
+
+
+# Skip steps if they have already been completed
+skip_preprocessing: true
+skip_visual_embedding_extraction: true
+skip_tracking: true
+skip_trajectory_generation: false
+skip_scoring: false
+skip_calibration: false
+
+# Detail level of the progress indications
+verbose: true
+tqdm_disable: false
+
+# Device Settings
+device: cuda
+
+# wandb logging
+wandb: false
+sweep: false
+
+# TODO: Explain when and how to use this.
+# GT specification for patches extraction - This is needed if new paired patches need to be generated for evaluation. This is the case if the experimental setup changes significantly.
 extract_patches: false # If this is false, paired_patches file name will be used instead of generating
-gt_data_path: "/home/weronika/Documents/masters/sem3/data_science_lab/data"
+gt_data_path: "data/01_raw/XXX"
 gt_experiment_name: "small_mvt_3_smaller"
 gt_feature_dir: "03_features"
 gt_results_dir: "05_results"
@@ -43,25 +72,3 @@ gt_frames: 9
 gt_max_distance: 5 # We only keep droplets that moved less than this distance
 gt_margin: 20 # We only keep trajectories with droplets that are not next to the cut edge
 gt_uncertainty_threshold: 0.95 # Only trajectories with greater mean uncertainty are kept
-
-# Skip steps if they have already been completed
-skip_preprocessing: true
-skip_visual_embedding_extraction: true
-skip_tracking: true
-skip_results_generation: false
-skip_trajectory_generation: false
-skip_scoring: false
-skip_calibration_plot: false
-
-# Detail level of the progress indications
-verbose: true
-tqdm_disable: false
-
-# Device Settings
-device: cpu
-
-# wandb
-wandb: false
-
-# sweep
-sweep: false

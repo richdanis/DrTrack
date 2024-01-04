@@ -3,7 +3,7 @@
 file_name_suffix: "_basic"
 
 # If True, filters for trajectories that are not merged with other trajectories. Only the trajectories with highest full_trajectory_probability are kept.
-filter_merging_trajectories: False 
+filter_merging_trajectories: True 
 
 # If null, all frames will be processed. Otherwise, trajectories will only be excluded based on values for the specified frame range.
 # Often the first few frames are not reliable, so we can skip them.

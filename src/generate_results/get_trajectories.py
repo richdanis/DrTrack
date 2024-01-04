@@ -529,7 +529,7 @@ def compute_and_store_results_cut(cfg,
     final_results_df = final_results_df.round(3)
 
     # save the results
-    final_results_df.to_csv(image_results_path / f'results{cut_name}.csv', index=False)
+    final_results_df.to_csv(image_results_path / f'unfiltered_trajectories{cut_name}.csv', index=False)
 
     # filter the results
     if cfg.filter_results.filter_merging_trajectories:
@@ -539,7 +539,7 @@ def compute_and_store_results_cut(cfg,
         filtered_final_results = filter_results(cfg, final_results_df)
 
     # Store filtered results
-    filtered_final_results.to_csv(image_results_path / Path(f'filtered_results{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+    filtered_final_results.to_csv(image_results_path / Path(f'filtered_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
     # Also store all trajectories not in the filtered results
     mask = final_results_df.index.isin(filtered_final_results.index)
@@ -560,7 +560,7 @@ def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_
     for dir_name in os.listdir(image_ot_path):
         if not dir_name.startswith("ot_matrix_"):
             continue
-
+        
         # Get cut name
         cut_name = dir_name.replace("ot_matrix", "")
 
