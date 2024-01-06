@@ -43,8 +43,8 @@ defaults:
 
 
 # Skip steps if they have already been completed
-skip_preprocessing: false
-skip_visual_embedding_extraction: false
+skip_preprocessing: true
+skip_visual_embedding_extraction: true
 skip_tracking: false
 skip_trajectory_generation: false
 skip_scoring: false

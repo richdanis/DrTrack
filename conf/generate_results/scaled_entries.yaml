@@ -10,5 +10,5 @@ prob_agregation: "average" # "multiplication" or "average"
 evaluation_mode: False
           
 # Path to calibration model
-calibrate_probabilities: False
-calibration_model_name: "small_1848.pkl"
+calibrate_probabilities: True
+calibration_model_name: "large_mvt_6000.pkl"

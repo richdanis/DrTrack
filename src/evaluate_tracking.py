@@ -41,6 +41,10 @@ def main(cfg: DictConfig):
     None
     """
     ### SETUP ###
+    # State experiment that is running
+    if cfg.verbose:
+        print("Evaluation running: ", cfg.experiment_name)
+    
     # Set device
     if cfg.device == 'cpu':
         jax.devices("cpu")[0]
