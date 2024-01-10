@@ -4,6 +4,7 @@
 # results: "filtered_results_y0_x0_basic.csv"
 results: "results_y0_x2325_basic.csv"
 image_name: "Small mvt 1.nd2"
+evaluation_results: true 
 
 # Name of the experiment to visualize
 experiment_name: "small_mvt_3_full"

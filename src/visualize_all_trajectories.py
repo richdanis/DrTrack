@@ -45,7 +45,11 @@ def main(cfg: DictConfig):
     results_path = Path(f"{cfg.data_path}/{cfg.results_dir}/{cfg.experiment_name}/{cfg.results}")
 
     # Get the stride
-    y_stride, x_stride = get_stride(cfg.results[:-4])
+    if cfg.evaluation_results:
+        y_stride = 0
+        x_stride = 0
+    else:
+        y_stride, x_stride = get_stride(cfg.results[:-4])
 
     # Run the interactive explorer
     interactive_explorer.launch_interactive_explorer(cfg, raw_image_path, results_path, image_name, y_stride, x_stride)
