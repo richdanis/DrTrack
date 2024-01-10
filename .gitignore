@@ -1,30 +1,18 @@
 # ignore data
-data/**
-evaluation/**
+/data/*
+/evaluation/*
 *.nd2
 
 # ignore logs
 logs
 
 # Include data necessary for testing
-!evaluation/01_simulated
-!evaluation/01_simulated/*
-
-# Include results directory (for transfer between euler and local)
-!data/05_results
-!data/05_results/*
-!evaluation/05_results
-!evaluation/05_results/*
-
-# !evaluation/03_features
-# !evaluation/03_features/paired_patches_9_frames_1848_droplets_40x40.zip
+!/evaluation/01_simulated/
+!/evaluation/05_results/
+!/data/05_results/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# Ignore temporary files
-ground_truth_generation
-dslab
 
 # Git stuff
 **/__pycache__/
