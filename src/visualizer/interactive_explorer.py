@@ -151,11 +151,16 @@ def launch_interactive_explorer(cfg: DictConfig,
     else:
         frames = range(len(image))
     
+
+    frames_imgs = []
     for i, frame in enumerate(image):
         f = plt.imshow(frame[0], cmap="gray", alpha=0.3)
         # By default, only have the first and last frames be visible
         if i != 0 or i != (len(image) - 1):
             f.set_visible(False)
+        frames_imgs.append(f)
+
+        
 
     # Define callback for clicking on a line (or other thing)
     def pickline(event):
@@ -315,8 +320,8 @@ def launch_interactive_explorer(cfg: DictConfig,
             else:
                 print("Cut mode disabled")
 
-        if event.key in [str(i) for i in range(len(frames))]:
-            frames[int(event.key)].set_visible(not frames[int(event.key)].get_visible())
+        if event.key in [str(i) for i in range(len(frames_imgs))]:
+            frames_imgs[int(event.key)].set_visible(not frames_imgs[int(event.key)].get_visible())
 
             # Redraw the figure
             plt.gcf().canvas.draw_idle()
@@ -410,7 +415,7 @@ def launch_interactive_explorer(cfg: DictConfig,
     print(f"In swap mode, >left mouse< click on two edges and then press >{CONFIRMATION_KEY}< to confirm the edge swap")
     print(f"Press >{CUTTING_KEY}< to toggle cut mode which can cut a trajectory in two")
     print(f"In cut mode, >left mouse< click on an edge and then press >{CONFIRMATION_KEY}< to confirm the edge cut")
-    for i in range(len(frames)):
+    for i in range(len(frames_imgs)):
         print(f"Press >{i}< to toggle the visibility of frame #{i}")
     plt.gcf().canvas.manager.set_window_title('Visualizer ' + image_name)
     plt.show()
