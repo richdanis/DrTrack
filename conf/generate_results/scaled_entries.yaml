@@ -6,9 +6,12 @@ uncertainty_type: "scaled_entries" # "scaled_entries" or "scaled_ranks"
 # How to aggregate the probabilities for the same droplet from different frames
 prob_agregation: "average" # "multiplication" or "average"
 
+# Range of frames to consider
+frame_range: null # [first_frame, last_frame] - If null, all frames are considered.
+
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: False
           
 # Path to calibration model
 calibrate_probabilities: True
-calibration_model_name: "large_mvt_6000.pkl"
+calibration_model_name: "medium_mvt_6000.pkl"

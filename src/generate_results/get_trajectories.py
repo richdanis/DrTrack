@@ -134,6 +134,11 @@ def create_trajectory_with_prob(cfg, ot_matrices: list, cut_name: str) -> pd.Dat
         # get the mapping from the current frame to the next frame
         this_frame_ids, next_frame_ids = get_id_mapping(cfg, ot_matrix, i, cut_name)
 
+        # Make sure that frame range is considered
+        if cfg.generate_results.frame_range is not None:
+            first_frame=cfg.generate_results.frame_range[0]
+            i += first_frame
+
         # create a dataframe with the indices and the probabilities
         tmp = pd.DataFrame({f'frame': i,
                             f'droplet_id_this': this_frame_ids,
@@ -216,41 +221,52 @@ def process_and_merge_results(cfg,
     """
     # Get droplet IDs that we want to track. These are the droplets that are present in the first frame.
     droplets_raw = [df for _, df in droplet_table.groupby('frame', sort=True)]
-    original_ids = droplets_raw[0]['droplet_id'].to_numpy()
 
     # To make trajectories comparable, we reindex the droplets in each frame
     droplets = [filter_and_reindex_droplets(cfg,df,frame) for frame,df in enumerate(droplets_raw)]
     original_droplets = [filter_and_reindex_droplets(cfg,df,frame, reindex=False) for frame,df in enumerate(droplets_raw)]
+     
+    # Add original ids and make sure frame range is considered
+    if cfg.generate_results.frame_range is not None:
+        first_frame=cfg.generate_results.frame_range[0]
+        last_frame=cfg.generate_results.frame_range[1]
+    else:
+        first_frame = 0
 
     # Get number of droplets
-    num_droplets = len(droplets[0]['droplet_id'])
+    num_droplets = len(droplets[first_frame]['droplet_id'])
     droplets_first_frame = np.arange(num_droplets)
+    original_ids = droplets_raw[first_frame]['droplet_id'].to_numpy()
 
     # Create result dataframe to fill
     result = pd.DataFrame({'reindexed_droplet_id': droplets_first_frame}, dtype=int)
-     
-    # Add original ids
-    result['id_0'] = original_ids
+    col_name = f'id_{first_frame}'
+    result[col_name] = original_ids
 
     # Get the first positions of the droplets
-    result = result.merge(droplets[0], left_on='reindexed_droplet_id', right_on='droplet_id', how='left').drop(columns=['frame','radius'])
+    result = result.merge(droplets[first_frame], left_on='reindexed_droplet_id', right_on='droplet_id', how='left').drop(columns=['frame','radius'])
 
     # Rename columns and drop droplet_ids
-    result = result.rename(columns={'center_x': 'x0', 
-                                    'center_y': 'y0', 
-                                    'nr_cells': 'nr_cells0'}).drop(columns=['reindexed_droplet_id','droplet_id'])
+    result = result.rename(columns={'center_x': f'x{first_frame}', 
+                                    'center_y': f'y{first_frame}', 
+                                    'nr_cells': f'nr_cells{first_frame}'}).drop(columns=['reindexed_droplet_id','droplet_id'])
     
     # Add starting probabilities of 1
     full_prob = np.ones((droplets_first_frame.shape[0],), dtype=np.float64)
     
     # Define types
-    result = result.astype({'x0': float, 'y0': float,'nr_cells0': 'Int32'})
+    result = result.astype({f'x{first_frame}': float, f'y{first_frame}': float, f'nr_cells{first_frame}': 'Int32'})
 
     # Id column for merging
     curr_droplet_ids = droplets_first_frame.copy()
 
     # Iterate through frames
     for i, track_df in tracking_table.groupby('frame', sort=True):
+        # Skip frames out of range
+        if cfg.generate_results.frame_range is not None:
+            if i < first_frame or i >= last_frame:
+                continue
+
         # Get the next positions of the droplets
         next_droplets = droplets[i+1]
         next_droplets_original = original_droplets[i+1]
@@ -358,10 +374,15 @@ def part_trajectory_prob(cfg, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError("Unknown probability aggregation method.")
     
     # Create a new DataFrame with the results
+    if cfg.generate_results.frame_range is not None:
+        first_frame = cfg.generate_results.frame_range[0]
+    else:
+        first_frame = 0
+
     result_df = pd.DataFrame({
         f'p{i}-{j}': product
         for (i, j), product in zip(
-            [(i, j) for i in range(num_columns) for j in range(i + 2, num_columns + 1)],
+            [(i+first_frame, j+first_frame) for i in range(num_columns) for j in range(i + 2, num_columns + 1)],
             sliding_windows
         )
     })
@@ -457,6 +478,10 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
         # Iterate through frame transitions and filter for merging trajectories
         cols = trajectories.columns.tolist()
         original_ids = [col for col in cols if col.startswith("id")]
+
+        # Filter for frames before and after the frame range
+        original_ids = [col for col in original_ids if int(col.split("_")[1]) >= first_frame and int(col.split("_")[1]) <= last_frame]
+
         trajectories_high_prob = trajectories.copy()
 
         for col in original_ids:
@@ -492,10 +517,19 @@ def compute_and_store_results_cut(cfg,
     cut_feature_droplets_df : pd.DataFrame
         The dataframe with the droplet features of the cut.
     """
+    # Frames to get results for
+    if cfg.generate_results.frame_range is not None:
+        first_frame = cfg.generate_results.frame_range[0]
+        last_frame = cfg.generate_results.frame_range[1]
+
     # load the ot matrices
     ot_matrices = []
     for file_name in sorted(os.listdir(cut_ot_path), key=lambda x: int(x.split("-")[0])):
         if file_name.endswith(".npy"):
+            frame_id = int(file_name.split("-")[0])
+            if cfg.generate_results.frame_range is not None:
+                if frame_id < first_frame or frame_id >= last_frame:
+                    continue
             ot_matrices.append(torch.load(cut_ot_path / file_name))
     
     # create directory for probability matrices

@@ -65,14 +65,16 @@ class Trajectories:
         # Assert if dataframe empty
         assert not tmp.empty, "The dataframe is empty."
         
-        self.final_output = tmp
-        counter = 0
-        for col in tmp.columns:
-            if col.startswith('id'):
-                counter += 1
+        # Replace every number in any column name with the same number minus 3
+        self.first_frame = min([int(i[1:]) for i in tmp.columns[tmp.columns.str.startswith('x')]])
+        tmp.columns = tmp.columns.str.replace(r'(\d+)', lambda x: str(int(x.group(1)) - self.first_frame))
 
+        self.final_output = tmp
+        counter = len([i for i in self.final_output.columns if i.startswith('id')])
+        
         end_frame = counter if cfg.end_frame == -1 else cfg.end_frame
         self.frames = list(range(cfg.start_frame, end_frame))
+        self.frames_shifted = list(range(cfg.start_frame + self.first_frame, end_frame + self.first_frame))
 
         self.channels = ['DAPI', 'BF'] if not cfg.all_channels else ['DAPI', 'FITC', 'TRITC', 'Cy5', 'BF']
         IMAGE_PATH = Path(RAW_PATH / cfg.image_name)
@@ -80,7 +82,8 @@ class Trajectories:
         self.image = get_image_cut_as_ndarray(None, channels=self.channels, path_to_image=IMAGE_PATH,
                                               upper_left_corner=(0, 0),
                                               pixel_dimensions=(-1, -1),
-                                              frames=self.frames,
+                                              all_frames=False,
+                                              frames=self.frames_shifted,
                                               pixel=cfg.pixel)
 
         # cut all columns that are not needed since frames are specified

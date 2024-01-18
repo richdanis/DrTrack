@@ -1,10 +1,10 @@
 # Description: Main configuration file for the evaluation pipeline. Includes settings for all steps of the pipeline.
 
 # Name for this experiment - will be used to name the output files and directories
-experiment_name: "large_mvt_6000"
+experiment_name: "medium_mvt_6000"
 
 # Name of the simulated image file to be processed - should be in data_path/simulated_dir
-simulated_image: "large_mvt_6000_droplets.csv"
+simulated_image: "medium_mvt_6000_droplets.csv"
 
 # Paths to paired_patches and their metadata files - should be in data_path/feature_dir
 paired_patches: "paired_patches_9_frames_13584_droplets.npy"
@@ -36,7 +36,7 @@ defaults:
   - track: medium_20000_best
 
   # Config for generating results from ot matrices. See src/conf/generate_results for more options. Determines the method used for uncertainty estimation and its parameters.
-  - generate_results: scaled_entries
+  - generate_results: scaled_entries_eval
 
   # Config for filtering the results. See src/conf/filter_results for more options. Determines the method used for filtering and its parameters.
   - filter_results: basic
@@ -45,7 +45,7 @@ defaults:
 # Skip steps if they have already been completed
 skip_preprocessing: true
 skip_visual_embedding_extraction: true
-skip_tracking: false
+skip_tracking: true
 skip_trajectory_generation: false
 skip_scoring: false
 skip_calibration: false

@@ -8,7 +8,7 @@ use_nr_cells: True # True means use nr_cells in the loss function
 embedding_dist: euclid # cosine or euclid
 
 # Solver params (the sinkhorn algorithm will then execute max_iterations/10 many outer loop iterations)
-max_iterations: 5000
+max_iterations: 10000
 
 # Geometry params
 relative_epsilon: 0.005 # "default" or float

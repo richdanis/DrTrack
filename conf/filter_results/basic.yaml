@@ -7,10 +7,10 @@ filter_merging_trajectories: True
 
 # If null, all frames will be processed. Otherwise, trajectories will only be excluded based on values for the specified frame range.
 # Often the first few frames are not reliable, so we can skip them.
-frame_range: [1,7]     
+frame_range: null #[1,7] null    
 
 # Filter out trajectories with an uncertainty below this threshold. If null, no filtering will be done.
-uncertainty_threshold: 0.8
+uncertainty_threshold: 0.40
 
 # If True, only droplets with the same number of cells in all frames will be kept.
 enforce_same_nr_cells: False   

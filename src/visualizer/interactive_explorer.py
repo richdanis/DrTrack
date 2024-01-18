@@ -103,8 +103,15 @@ def launch_interactive_explorer(cfg: DictConfig,
     # There is no real need to drop the NA rows
     results_df['discard'] = True
 
-    x_pos_cols = [i for i in results_df.columns if str(i).startswith("x")]
-    y_pos_cols = [i for i in results_df.columns if str(i).startswith("y")]
+    if cfg.frame_range is not None:
+        # Extract the relevant frames
+        first_frame = cfg.frame_range[0]
+        last_frame = cfg.frame_range[1]
+        x_pos_cols = [i for i in results_df.columns if str(i).startswith("x") and int(i[1:]) >= first_frame and int(i[1:]) <= last_frame]
+        y_pos_cols = [i for i in results_df.columns if str(i).startswith("y") and int(i[1:]) >= first_frame and int(i[1:]) <= last_frame]
+    else:
+        x_pos_cols = [i for i in results_df.columns if str(i).startswith("x")]
+        y_pos_cols = [i for i in results_df.columns if str(i).startswith("y")]
 
     # Extract probabilities
     # prob_cols = [i for i in results_df.columns if i.startswith("p")]
@@ -114,9 +121,10 @@ def launch_interactive_explorer(cfg: DictConfig,
     results_df_y = results_df[y_pos_cols].astype(np.float32) + y_stride
     # results_df_p = results_df[prob_cols].astype(np.float32)
 
+
     if cfg.frame_range is not None:
         # Extract the relevant frames
-        frames = range(cfg.frame_range[0], cfg.frame_range[1] + 1)
+        frames = range(last_frame-first_frame+1)
         results_df_x = results_df_x.iloc[:, frames]
         results_df_y = results_df_y.iloc[:, frames]
         # results_df_p = results_df_p.iloc[:, range(cfg.frame_range[0], cfg.frame_range[1])]

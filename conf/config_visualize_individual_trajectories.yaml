@@ -1,18 +1,21 @@
 # Description: Configuration file for visualizing individual trajectories.
 
 # Name of the results file to visualize
-# results: "filtered_results_y0_x0_basic.csv"
-results: "results_y0_x2325_basic.csv"
+# results: "filtered_trajectories_y0_x0_basic.csv"
+results: "dropped_trajectories_y0_x0_basic.csv"
+# results: "unfiltered_trajectories_y0_x0.csv"
+
 image_name: "Small mvt 1.nd2"
-evaluation_results: true 
+evaluation_results: false 
 
 # Name of the experiment to visualize
-experiment_name: "small_mvt_3_full"
+experiment_name: "small_mvt_1_4cuts"
+#experiment_name: "small_mvt_demo"
 
 # All channels to visualize (False means only DAPI and BF)
-all_channels: False
+all_channels: false #true
 
-# Frames to visualize (end_frame = -1 means all frames)
+# Frames to visualize (TODO: implement, at the moment only the given parameters are possible)
 start_frame: 0
 end_frame: -1
 
