@@ -9,6 +9,10 @@ prob_agregation: "average" # "multiplication" or "average"
 # Range of frames to consider
 frame_range: null # [first_frame, last_frame] - If null, all frames are considered.
 
+# Whether to normalize the distances by the maximal possible distance for computing mvt metrics
+normalize_mvt: True
+droplet_radius: 21
+
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: True
 

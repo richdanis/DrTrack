@@ -495,6 +495,83 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
     
     return trajectories
 
+def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, droplet_radius: float = 0) -> pd.DataFrame:
+    """
+    Compute mvt metrics for the predicted trajectories.
+    
+    Parameters:
+    ----------
+    cfg : Configuration
+        The configuration object.
+    result_df : pd.DataFrame
+        The dataframe with the trajectories.
+    normalize : bool
+        Whether to normalize the distances by the maximal possible distance.
+    
+    Returns:
+    -------
+    mvts : pd.DataFrame
+        The dataframe with the mvt metric.
+    """
+    # Extract the columns containing positional information
+    cols_to_drop = [col for col in result_df.columns if not col.startswith('x') and not col.startswith('y')]
+    result_df = result_df.drop(columns=cols_to_drop)
+    start_frame = np.min([int(col[1:]) for col in result_df.columns])
+
+    # Get number of frames
+    n_frames = result_df.columns.size // 2
+
+    # Compute the distance between each frame
+    mvts = pd.DataFrame()
+    mvts.index = ["mean", "std", "median", "min", "max", "mean_q95", "std_q95"]
+
+    # Compute the distance travelled by each droplet between each frame
+    for i in range(start_frame, start_frame+n_frames-1):
+        # Compute distances
+        x_diff = result_df['x'+str(i+1)] - result_df['x'+str(i)]
+        y_diff = result_df['y'+str(i+1)] - result_df['y'+str(i)]
+        distances = (x_diff**2 + y_diff**2)**0.5
+
+        # Normalize distances by the maximal possible distance
+        if normalize is not None:
+            if normalize == "max_distance":
+                max_dist = (result_df['x'+str(i+1)].max() - result_df['x'+str(i)].min())**2 + (result_df['y'+str(i+1)].max() - result_df['y'+str(i)].min())**2
+                distances = distances / max_dist * 1000 # This way the value indicates a percentage of the maximal possible distance
+            elif normalize == "droplet_radius":
+                # TODO: Extract droplet radius from droplet detection step
+                distances = distances / droplet_radius
+            else:
+                raise ValueError(f"Unknown normalization method: {normalize}")
+
+        # Compute mean, std, min, max
+        mean = distances.mean()
+        std = distances.std()
+        median = distances.median()
+        min = distances.min()
+        max = distances.max()
+        
+        # drop the 5% of the largest values
+        q95 = distances.quantile(0.95)
+        distances = distances[distances < q95]
+        mean_q95 = distances.mean()
+        std_q95 = distances.std()
+
+        # Store results
+        mvts[f'{i}_{i+1}'] = [mean, std, median, min, max, mean_q95, std_q95]
+
+    # Obtain metrics aggregated over all frames
+    mvts['all_mean'] = mvts.mean(axis=1)
+    mvts['all_std'] = mvts.std(axis=1)
+
+    # Put the last two columns in front
+    cols = mvts.columns.tolist()
+    cols = cols[-2:] + cols[:-2]
+    mvts = mvts[cols]
+
+    # Round numerical values
+    mvts = mvts.round(3)
+        
+    return mvts
 
 def compute_and_store_results_cut(cfg, 
                                   cut_name: str, 
@@ -562,23 +639,41 @@ def compute_and_store_results_cut(cfg,
     # Round numerical values
     final_results_df = final_results_df.round(3)
 
+    # Compute mvt metric
+    final_results_df_mvt = compute_mvt_metric(cfg, final_results_df, normalize=cfg.generate_results.normalize_mvt, droplet_radius=cfg.generate_results.droplet_radius)
+
     # save the results
     final_results_df.to_csv(image_results_path / f'unfiltered_trajectories{cut_name}.csv', index=False)
+    final_results_df_mvt.to_csv(image_results_path / f'mvt_unfiltered_trajectories{cut_name}.csv', index=True)
 
     # filter the results
     if cfg.filter_results.filter_merging_trajectories:
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
         dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+
+        # Compute mvt metric for dropped merging trajectories
+        #dropped_merging_trajectories_mvt = compute_mvt_metric(cfg, dropped_merging_trajectories_, normalize=True)
+        #dropped_merging_trajectories_mvt.to_csv(image_results_path / Path(f'mvt_dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+
     else:
         filtered_final_results = filter_results(cfg, final_results_df)
 
+    # Compute mvt metric for filtered trajectories
+    #filtered_final_results_mvt = compute_mvt_metric(cfg, filtered_final_results, normalize=True)
+
     # Store filtered results
     filtered_final_results.to_csv(image_results_path / Path(f'filtered_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+    #filtered_final_results_mvt.to_csv(image_results_path / Path(f'mvt_filtered_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
     # Also store all trajectories not in the filtered results
     mask = final_results_df.index.isin(filtered_final_results.index)
     dropped_trajectories = final_results_df[~mask]
+
+    # Compute mvt metric for dropped trajectories
+    #dropped_trajectories_mvt = compute_mvt_metric(cfg, dropped_trajectories, normalize=True)
+
     dropped_trajectories.to_csv(image_results_path / Path(f'dropped_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
+    #dropped_trajectories_mvt.to_csv(image_results_path / Path(f'mvt_dropped_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):
