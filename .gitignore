@@ -7,9 +7,9 @@
 logs
 
 # Include data necessary for testing
-!/evaluation/01_simulated/
-!/evaluation/05_results/
-!/data/05_results/
+!/evaluation/01_simulated/*.csv
+# !/evaluation/05_results/
+# !/data/05_results/
 
 # Jupyter Notebook
 .ipynb_checkpoints
