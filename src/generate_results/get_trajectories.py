@@ -4,6 +4,8 @@ import os
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import median_abs_deviation
 import torch 
 from joblib import load
 
@@ -495,7 +497,7 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
     
     return trajectories
 
-def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, droplet_radius: float = 0) -> pd.DataFrame:
+def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, droplet_radius: float = 0, return_dist: bool = False) -> pd.DataFrame:
     """
     Compute mvt metrics for the predicted trajectories.
     
@@ -523,7 +525,10 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
 
     # Compute the distance between each frame
     mvts = pd.DataFrame()
-    mvts.index = ["mean", "std", "median", "min", "max", "mean_q95", "std_q95"]
+    if normalize == "droplet_radius":
+        mvts.index = ["mean", "std", "median", "mad", "min", "max", "q20", "q80", "p_moved_1r", "p_moved_5r"]
+    else:
+        mvts.index = ["mean", "std", "median", "mad", "min", "max", "q20", "q80"]
 
     # Compute the distance travelled by each droplet between each frame
     for i in range(start_frame, start_frame+n_frames-1):
@@ -540,6 +545,8 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
             elif normalize == "droplet_radius":
                 # TODO: Extract droplet radius from droplet detection step
                 distances = distances / droplet_radius
+                p_moved_1r = (distances > 1).sum() / distances.size
+                p_moved_5r = (distances > 5).sum() / distances.size
             else:
                 raise ValueError(f"Unknown normalization method: {normalize}")
 
@@ -547,17 +554,19 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
         mean = distances.mean()
         std = distances.std()
         median = distances.median()
+        mad = median_abs_deviation(distances)
         min = distances.min()
         max = distances.max()
         
         # drop the 5% of the largest values
-        q95 = distances.quantile(0.95)
-        distances = distances[distances < q95]
-        mean_q95 = distances.mean()
-        std_q95 = distances.std()
+        p20 = distances.quantile(0.20)
+        p80 = distances.quantile(0.80)
 
         # Store results
-        mvts[f'{i}_{i+1}'] = [mean, std, median, min, max, mean_q95, std_q95]
+        if normalize == "droplet_radius":
+            mvts[f'{i}_{i+1}'] = [mean, std, median, mad, min, max, p20, p80, p_moved_1r, p_moved_5r]
+        else:
+            mvts[f'{i}_{i+1}'] = [mean, std, median, mad, min, max, p20, p80]
 
     # Obtain metrics aggregated over all frames
     mvts['all_mean'] = mvts.mean(axis=1)
@@ -570,8 +579,11 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
 
     # Round numerical values
     mvts = mvts.round(3)
-        
-    return mvts
+    
+    if return_dist:
+        return mvts, distances
+    else:
+        return mvts
 
 def compute_and_store_results_cut(cfg, 
                                   cut_name: str, 
