@@ -237,13 +237,25 @@ def process_and_merge_results(cfg,
 
     # Get number of droplets
     num_droplets = len(droplets[first_frame]['droplet_id'])
+
+    if cfg.generate_results.evaluation_mode:
+        # Find number of droplets in first frame (different from droplet.csv in evaluation mode)
+        for i, track_df in tracking_table.groupby('frame', sort=True):
+            num_droplets = len(track_df)
+            break
+
     droplets_first_frame = np.arange(num_droplets)
     original_ids = droplets_raw[first_frame]['droplet_id'].to_numpy()
 
     # Create result dataframe to fill
     result = pd.DataFrame({'reindexed_droplet_id': droplets_first_frame}, dtype=int)
     col_name = f'id_{first_frame}'
-    result[col_name] = original_ids
+
+    if cfg.generate_results.evaluation_mode:
+        result[col_name] = original_ids[:num_droplets]
+    else:
+        result[col_name] = original_ids
+
 
     # Get the first positions of the droplets
     result = result.merge(droplets[first_frame], left_on='reindexed_droplet_id', right_on='droplet_id', how='left').drop(columns=['frame','radius'])
@@ -636,6 +648,7 @@ def compute_and_store_results_cut(cfg,
     part_probs = part_trajectory_prob(cfg, results_df)
 
     # concat the two dataframes
+    #final_results_df = results_df # Just for movie, because there are too many subtrajectories:
     final_results_df = pd.concat([results_df, part_probs], axis=1)
 
     # reorder the columns
