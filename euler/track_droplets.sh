@@ -2,7 +2,7 @@
 
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=5G
+#SBATCH --mem-per-cpu=40G
 #SBATCH --job-name=track_droplets
 ##SBATCH --output=/cluster/home/%u/DrTrack/logs/%x.out                                                        
 ##SBATCH --error=/cluster/home/%u/DrTrack/logs/%x.err
@@ -19,15 +19,16 @@ cd ..
 #checkpoint_dir=/cluster/scratch/$USER/checkpoints \
 
 $HOME/dr_track/bin/python3.11 src/track_droplets.py \
-    experiment_name="large_mvt_4" \
+    experiment_name="MedMov_LargeDrop_Barcoded" \
     skip_preprocessing=true \
     skip_droplet_detection=true \
     skip_droplet_patch_extraction=true \
-    skip_visual_embedding_extraction=false \
-    skip_tracking=false \
+    skip_visual_embedding_extraction=true \
+    skip_tracking=true \
     skip_results_generation=false \
-    track=medium_20000_best \
-    raw_image="Large mvt 4.nd2" \
+    preprocess=1_cut_full \
+    track=small_mvt_1 \
+    raw_image="20240110IL_DropletTracking_PBMCBeadline_Chamber01-20_MedMov_LargeDrop.nd2" \
     extract_visual_embeddings=droplets_all \
     generate_results.calibrate_probabilities=true \
     generate_results.calibration_model_name="large_mvt_6000.pkl" \
