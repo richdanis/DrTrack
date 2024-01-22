@@ -14,7 +14,7 @@ max_iterations: 10000
 relative_epsilon: 0.005 # "default" or float
 
 # Print losses
-print_convergence: false
+print_convergence: true
 print_scaling: false
 
 # Problem params - these indicate how much mass is allowed to be lost and gained in the transport (unbalancedness)

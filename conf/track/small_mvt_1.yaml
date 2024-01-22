@@ -1,17 +1,17 @@
 # Description: Parameters for the optimal transport for tracking
 
 # Cost parameters
-alpha: 0.65 # position
-beta: 0.35 # None means 1-alpha
+alpha: 0.75 # position
+beta: 0.25 # None means 1-alpha
 gamma: 0 # None means alpha * 0.5
 use_nr_cells: True # True means use nr_cells in the loss function
 embedding_dist: euclid # cosine or euclid
 
 # Solver params (the sinkhorn algorithm will then execute max_iterations/10 many outer loop iterations)
-max_iterations: 50000
+max_iterations: 20000
 
 # Geometry params
-relative_epsilon: 0.0001 # "default" or float
+relative_epsilon: 0.005 # "default" or float
 
 # Print losses
 print_convergence: true
