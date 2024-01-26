@@ -1,8 +1,8 @@
 # Description: Configuration file for the visualizer - see README.md for more details
 
 # Name of the results file to visualize
-results: "unfiltered_trajectories_y0_x0.csv"
-# results: "filtered_trajectories_y0_x0_basic.csv"
+#results: "unfiltered_trajectories_y0_x0.csv"
+results: "filtered_trajectories_y0_x0_basic.csv"
 # results: "dropped_trajectories_y0_x0_basic.csv"
 
 #raw_image: "Small mvt 1.nd2"
@@ -11,7 +11,8 @@ raw_image: "Small mvt 3.nd2"
 # Name of the experiment to visualize
 #experiment_name: "medium_mvt_6000"
 #experiment_name: "small_mvt_demo"
-experiment_name: "small_mvt_1_4cuts"
+# experiment_name: "small_mvt_1_4cuts"
+experiment_name: "MedMov_LargeDrop_Barcoded"
 
 evaluation_results: false # Whether we are plotting evaluation results or not
 
@@ -25,4 +26,4 @@ results_dir: "05_results"
 
 # Frames range to consider
 #frame_range: null
-frame_range: [3,5] # [first_frame, last_frame] - If null, all frames are considered. 
+frame_range: [40,41] # [first_frame, last_frame] - If null, all frames are considered. 

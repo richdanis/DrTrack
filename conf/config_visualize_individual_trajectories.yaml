@@ -9,8 +9,9 @@ image_name: "Small mvt 1.nd2"
 evaluation_results: false 
 
 # Name of the experiment to visualize
-experiment_name: "small_mvt_1_4cuts"
+# experiment_name: "small_mvt_1_4cuts"
 #experiment_name: "small_mvt_demo"
+experiment_name: "MedMov_LargeDrop_Barcoded"
 
 # All channels to visualize (False means only DAPI and BF)
 all_channels: false #true
