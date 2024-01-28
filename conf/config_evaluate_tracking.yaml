@@ -43,9 +43,9 @@ defaults:
 
 
 # Skip steps if they have already been completed
-skip_preprocessing: true
-skip_visual_embedding_extraction: true
-skip_tracking: true
+skip_preprocessing: false
+skip_visual_embedding_extraction: false
+skip_tracking: false
 skip_trajectory_generation: false
 skip_scoring: false
 skip_calibration: false
@@ -58,14 +58,14 @@ tqdm_disable: false
 device: cpu # cpu or cuda
 
 # wandb logging
-wandb: false
+wandb: true
 sweep: false
 
 # TODO: Explain when and how to use this.
 # GT specification for patches extraction - This is needed if new paired patches need to be generated for evaluation. This is the case if the experimental setup changes significantly.
 extract_patches: false # If this is false, paired_patches file name will be used instead of generating
-gt_data_path: "data/01_raw/XXX"
-gt_experiment_name: "small_mvt_3_smaller"
+gt_data_path: "data" #/01_raw/Small mvt 3.nd2"
+gt_experiment_name: "small_mvt_demo"
 gt_feature_dir: "03_features"
 gt_results_dir: "05_results"
 gt_frames: 9

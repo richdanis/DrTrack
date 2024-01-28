@@ -67,7 +67,7 @@ class Trajectories:
         
         # Replace every number in any column name with the same number minus 3
         self.first_frame = min([int(i[1:]) for i in tmp.columns[tmp.columns.str.startswith('x')]])
-        tmp.columns = tmp.columns.str.replace(r'(\d+)', lambda x: str(int(x.group(1)) - self.first_frame))
+        tmp.columns = tmp.columns.str.replace(r'(\d+)', lambda x: str(int(x.group(1)) - self.first_frame), regex=True)
 
         self.final_output = tmp
         counter = len([i for i in self.final_output.columns if i.startswith('id')])

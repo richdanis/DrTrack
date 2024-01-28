@@ -5,13 +5,13 @@
 results: "dropped_trajectories_y0_x0_basic.csv"
 # results: "unfiltered_trajectories_y0_x0.csv"
 
-image_name: "Small mvt 1.nd2"
+image_name: "Small mvt 3.nd2"
 evaluation_results: false 
 
 # Name of the experiment to visualize
 # experiment_name: "small_mvt_1_4cuts"
-#experiment_name: "small_mvt_demo"
-experiment_name: "MedMov_LargeDrop_Barcoded"
+experiment_name: "small_mvt_demo"
+#experiment_name: "MedMov_LargeDrop_Barcoded"
 
 # All channels to visualize (False means only DAPI and BF)
 all_channels: false #true

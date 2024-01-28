@@ -10,9 +10,9 @@ raw_image: "Small mvt 3.nd2"
 
 # Name of the experiment to visualize
 #experiment_name: "medium_mvt_6000"
-#experiment_name: "small_mvt_demo"
+experiment_name: "small_mvt_demo"
 # experiment_name: "small_mvt_1_4cuts"
-experiment_name: "MedMov_LargeDrop_Barcoded"
+# experiment_name: "MedMov_LargeDrop_Barcoded"
 
 evaluation_results: false # Whether we are plotting evaluation results or not
 
@@ -26,4 +26,4 @@ results_dir: "05_results"
 
 # Frames range to consider
 #frame_range: null
-frame_range: [40,41] # [first_frame, last_frame] - If null, all frames are considered. 
+frame_range: null # [first_frame, last_frame] - If null, all frames are considered. 
