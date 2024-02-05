@@ -23,7 +23,6 @@ pip install ott-jax
 pip install nd2
 pip install opencv-python
 pip install -U scikit-image
-pip install -U scikit-image
 pip install pandas
 pip3 install torch torchvision torchaudio
 pip install -U scikit-learn==1.2.2
