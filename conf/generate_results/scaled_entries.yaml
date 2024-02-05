@@ -9,13 +9,13 @@ prob_agregation: "average" # "multiplication" or "average"
 # Range of frames to consider
 frame_range: null # [first_frame, last_frame] - If null, all frames are considered.
 
-# Whether to normalize the distances by the maximal possible distance for computing mvt metrics
+# Whether to normalize the distances by the maximal possible distance for computing mvt metrics. 
 normalize_mvt: "droplet_radius"
-droplet_radius: 21
+droplet_radius: null # If null, the droplet radius is estimated from the droplets csv file.
 
 # To let general pipeline code know that this is an evaluation run
 evaluation_mode: False
           
 # Path to calibration model
 calibrate_probabilities: True
-calibration_model_name: "medium_mvt_6000.pkl"
+calibration_model_name: "medium_mvt_20000.pkl"

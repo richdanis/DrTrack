@@ -5,8 +5,8 @@
 results: "filtered_trajectories_y0_x0_basic.csv"
 # results: "dropped_trajectories_y0_x0_basic.csv"
 
-#raw_image: "Small mvt 1.nd2"
-raw_image: "Small mvt 3.nd2"
+raw_image: "Small mvt 1.nd2"
+#raw_image: "Small mvt 3.nd2"
 
 # Name of the experiment to visualize
 #experiment_name: "medium_mvt_6000"
@@ -26,4 +26,4 @@ results_dir: "05_results"
 
 # Frames range to consider
 #frame_range: null
-frame_range: null # [first_frame, last_frame] - If null, all frames are considered. 
+frame_range: [0,3] # [first_frame, last_frame] - If null, all frames are considered. 

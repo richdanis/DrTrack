@@ -10,13 +10,13 @@ filter_merging_trajectories: True
 frame_range: null #[1,7] null    
 
 # Filter out trajectories with an uncertainty below this threshold. If null, no filtering will be done.
-uncertainty_threshold: 0.40
+uncertainty_threshold: null
 
 # If True, only droplets with the same number of cells in all frames will be kept.
 enforce_same_nr_cells: False   
 
 # We only keep droplets that moved less than this distance in any dimension (simulation sqaure is usually 500x500).
-max_distance: null      
+max_distance: 200      
 
 # If null, no filtering will be done. Otherwise, we only keep trajectories with droplets that are not next to the cut edge.
 frame_margin: null    
