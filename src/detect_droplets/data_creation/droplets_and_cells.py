@@ -123,4 +123,8 @@ def detect_droplets_and_cells_and_store(cfg,
 
     # Store droplet and cell information in csv files
     droplet_df = pd.DataFrame(droplets)
+
+    # Drop droplets with radius less than minimal radius indicated in config file
+    droplet_df = droplet_df[droplet_df['radius'] >= cfg.detect_droplets.radius_min]
+
     droplet_df.to_csv(output_string_droplets, index=False)
