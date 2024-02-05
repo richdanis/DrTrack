@@ -234,6 +234,7 @@ def process_and_merge_results(cfg,
         last_frame=cfg.generate_results.frame_range[1]
     else:
         first_frame = 0
+        last_frame = len(droplets)-1
 
     # Get number of droplets
     num_droplets = len(droplets[first_frame]['droplet_id'])
@@ -277,9 +278,8 @@ def process_and_merge_results(cfg,
     # Iterate through frames
     for i, track_df in tracking_table.groupby('frame', sort=True):
         # Skip frames out of range
-        if cfg.generate_results.frame_range is not None:
-            if i < first_frame or i >= last_frame:
-                continue
+        if i < first_frame or i >= last_frame:
+            continue
 
         # Get the next positions of the droplets
         next_droplets = droplets[i+1]
@@ -665,7 +665,12 @@ def compute_and_store_results_cut(cfg,
     final_results_df = final_results_df.round(3)
 
     # Compute mvt metric
-    final_results_df_mvt = compute_mvt_metric(cfg, final_results_df, normalize=cfg.generate_results.normalize_mvt, droplet_radius=cfg.generate_results.droplet_radius)
+    # Get droplet radius
+    if cfg.generate_results.droplet_radius is not None:
+        droplet_radius = cfg.generate_results.droplet_radius
+    else:
+        droplet_radius = cut_feature_droplets_df['radius'].mean()
+    final_results_df_mvt = compute_mvt_metric(cfg, final_results_df, normalize=cfg.generate_results.normalize_mvt, droplet_radius=droplet_radius)
 
     # save the results
     final_results_df.to_csv(image_results_path / f'unfiltered_trajectories{cut_name}.csv', index=False)
