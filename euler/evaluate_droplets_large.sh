@@ -10,8 +10,6 @@
 #SBATCH --output=logs/%x.out                                                        
 #SBATCH --error=logs/%x.err
 
-#module load gcc/8.2.0 python_gpu/3.11.2
-
 cd ..
 #data_path=/cluster/scratch/$USER/evaluation \
 #$HOME/dr_track/bin/python3.11 $HOME/DrTrack/src/evaluate_tracking.py \
