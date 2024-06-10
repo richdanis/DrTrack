@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.stats import median_abs_deviation
 import torch 
 from joblib import load
@@ -113,6 +112,7 @@ def get_id_mapping(cfg, ot_matrix: np.ndarray,
 
     return this_frame_ids, next_frame_ids
 
+
 def create_trajectory_with_prob(cfg, ot_matrices: list, cut_name: str) -> pd.DataFrame:
     """
     This function creates a tracking table with the droplet ids of the current frame and the next frame.
@@ -153,6 +153,7 @@ def create_trajectory_with_prob(cfg, ot_matrices: list, cut_name: str) -> pd.Dat
 
     return tracking_table 
 
+
 def filter_and_reindex_droplets(cfg, 
                                 droplet_table: pd.DataFrame, 
                                 frame_id: int, 
@@ -192,6 +193,7 @@ def filter_and_reindex_droplets(cfg,
         droplets["droplet_id"] = np.arange(len(droplets))
 
     return droplets
+
 
 def process_and_merge_results(cfg, 
                               droplet_table: pd.DataFrame, 
@@ -404,6 +406,7 @@ def part_trajectory_prob(cfg, df: pd.DataFrame) -> pd.DataFrame:
     # Display the result DataFrame
     return result_df
 
+
 def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     """
     Filter the results based on the following criteria:
@@ -509,6 +512,7 @@ def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame
     
     return trajectories
 
+
 def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, droplet_radius: float = 0, return_dist: bool = False) -> pd.DataFrame:
     """
     Compute mvt metrics for the predicted trajectories.
@@ -542,7 +546,7 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
     else:
         mvts.index = ["mean", "std", "median", "mad", "min", "max", "q20", "q80"]
 
-    # Compute the distance travelled by each droplet between each frame
+    # Compute the distance traveled by each droplet between each frame
     for i in range(start_frame, start_frame+n_frames-1):
         # Compute distances
         x_diff = result_df['x'+str(i+1)] - result_df['x'+str(i)]
@@ -597,6 +601,7 @@ def compute_mvt_metric(cfg, result_df: pd.DataFrame, normalize: bool = True, dro
     else:
         return mvts
 
+
 def compute_and_store_results_cut(cfg, 
                                   cut_name: str, 
                                   cut_ot_path: Path, 
@@ -648,7 +653,6 @@ def compute_and_store_results_cut(cfg,
     part_probs = part_trajectory_prob(cfg, results_df)
 
     # concat the two dataframes
-    #final_results_df = results_df # Just for movie, because there are too many subtrajectories:
     final_results_df = pd.concat([results_df, part_probs], axis=1)
 
     # reorder the columns
@@ -681,10 +685,6 @@ def compute_and_store_results_cut(cfg,
         filtered_final_results, dropped_merging_trajectories_ = filter_results(cfg, final_results_df)
         dropped_merging_trajectories_.to_csv(image_results_path / Path(f'dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
-        # Compute mvt metric for dropped merging trajectories
-        #dropped_merging_trajectories_mvt = compute_mvt_metric(cfg, dropped_merging_trajectories_, normalize=True)
-        #dropped_merging_trajectories_mvt.to_csv(image_results_path / Path(f'mvt_dropped_merging_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
-
     else:
         filtered_final_results = filter_results(cfg, final_results_df)
 
@@ -693,7 +693,6 @@ def compute_and_store_results_cut(cfg,
 
     # Store filtered results
     filtered_final_results.to_csv(image_results_path / Path(f'filtered_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
-    #filtered_final_results_mvt.to_csv(image_results_path / Path(f'mvt_filtered_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
     # Also store all trajectories not in the filtered results
     mask = final_results_df.index.isin(filtered_final_results.index)
@@ -703,7 +702,6 @@ def compute_and_store_results_cut(cfg,
     #dropped_trajectories_mvt = compute_mvt_metric(cfg, dropped_trajectories, normalize=True)
 
     dropped_trajectories.to_csv(image_results_path / Path(f'dropped_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
-    #dropped_trajectories_mvt.to_csv(image_results_path / Path(f'mvt_dropped_trajectories{cut_name}' + cfg.filter_results.file_name_suffix + '.csv'), index=False)
 
 
 def compute_and_store_results_all(cfg, image_ot_path, image_results_path, image_feature_path):

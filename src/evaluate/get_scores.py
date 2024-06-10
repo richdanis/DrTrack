@@ -85,7 +85,7 @@ class TrackingEvaluation():
         # Dictionary for storing scores
         scores = []
 
-        # Extract information about true positives vs false postives and plot calibration curve
+        # Extract information about true-positives vs false-positives and plot calibration curve
         results_df = self.results_df
 
         # Check if results are empty
@@ -224,7 +224,6 @@ class TrackingEvaluation():
             if self.wandb:
                 wandb.log({"brier_total": brier_score}, step=step)
 
-
         # Compute average of each column
         avg_row = scores_df.mean(numeric_only=True)
         avg_row = ["Mean"] + [i for i in avg_row] 
@@ -249,4 +248,3 @@ class TrackingEvaluation():
 
         else:
             raise ValueError("result_type must be either 'Unfiltered' or 'Filtered' or 'Dropped' or 'Dropped_Merging'")
-
