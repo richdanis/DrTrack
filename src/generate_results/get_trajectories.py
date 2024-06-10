@@ -1,5 +1,6 @@
 # Types and os
 from pathlib import Path
+from typing import Tuple
 import os
 
 import numpy as np
@@ -407,7 +408,7 @@ def part_trajectory_prob(cfg, df: pd.DataFrame) -> pd.DataFrame:
     return result_df
 
 
-def filter_results(cfg, results_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
+def filter_results(cfg, results_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Filter the results based on the following criteria:
     - Confidence threshold on whole trajectory

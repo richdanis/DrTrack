@@ -5,28 +5,6 @@ import numpy as np
 from .nms import nms, canny_nms
 
 
-def create_custom_kernel(rad: int) -> np.ndarray:
-    """
-    Creates a custom kernel for morphological operations.
-    
-    Parameters
-    ----------
-    rad : int
-        The radius of the kernel.
-    
-    Returns
-    -------
-    np.ndarray
-        The kernel as a numpy ndarray.
-    """
-    x, y = np.meshgrid(np.arange(-rad, rad + 1), np.arange(-rad, rad + 1))
-    dist = np.sqrt(x**2 + y**2)
-    
-    ans = np.exp(-dist / (rad / 2))
-    ans /= np.sum(ans)
-    return ans
-
-
 def masked_dilate(image: np.array, 
                   mask: np.array, 
                   kernel: np.array) -> np.array:
