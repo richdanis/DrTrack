@@ -40,7 +40,7 @@ def circle_RANSAC3(points_img: np.ndarray,
     filtered_points_img = points_img * cc_mask
 
     nnz = np.sum(filtered_points_img == 1.0)
-    if nnz == 0:
+    if nnz < 3:
         return None
 
     coords = np.transpose(np.asarray(np.where(filtered_points_img == 1.0)))
@@ -50,9 +50,9 @@ def circle_RANSAC3(points_img: np.ndarray,
     random_idxs[1, :] = np.random.randint(0, nnz - 1, size = nr_of_samples, dtype = int)
     random_idxs[2, :] = np.random.randint(0, nnz - 2, size = nr_of_samples, dtype = int)
 
-    random_idxs[1, :] =  random_idxs[1, :] + 1 * (random_idxs[1, :] >= random_idxs[0, :])
-    random_idxs[2, :] =  random_idxs[2, :] + 1 * (random_idxs[2, :] >= np.min(random_idxs[0: 2, :], axis = 0)) 
-    random_idxs[2, :] =  random_idxs[2, :] + 1 * (random_idxs[2, :] >= np.max(random_idxs[0: 2, :], axis = 0))
+    random_idxs[1, :] = random_idxs[1, :] + 1 * (random_idxs[1, :] >= random_idxs[0, :])
+    random_idxs[2, :] = random_idxs[2, :] + 1 * (random_idxs[2, :] >= np.min(random_idxs[0: 2, :], axis = 0)) 
+    random_idxs[2, :] = random_idxs[2, :] + 1 * (random_idxs[2, :] >= np.max(random_idxs[0: 2, :], axis = 0))
 
     coords1 = coords[random_idxs[0, :]]
     coords2 = coords[random_idxs[1, :]]
@@ -71,7 +71,7 @@ def circle_RANSAC3(points_img: np.ndarray,
 
     sample_viability = (np.abs(np.sum(line_directions1 * line_directions2, axis = 1)) <= 0.8)
     if np.sum(sample_viability) == 0:
-      return None
+        return None
 
     coords1 = coords1[sample_viability, :]
     coords2 = coords2[sample_viability, :]
@@ -94,10 +94,9 @@ def circle_RANSAC3(points_img: np.ndarray,
 
     distance_within_rad = np.logical_and(distances_to_centers <= radii[:, None] + 1.0, distances_to_centers >= radii[:, None] - 1.0)
     score = np.sum(distance_within_rad, axis = 1)
-    # print(score)
+
     winner = np.argmax(score)
     center_to_return = centers[winner, :]
     radius_to_return = round(radii[winner])
 
     return (round(center_to_return[0]), round(center_to_return[1]), radius_to_return)
-
