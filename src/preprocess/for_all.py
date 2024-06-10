@@ -1,5 +1,5 @@
 # Types
-from typing import Optional
+from typing import Optional, Tuple
 from pathlib import Path
 from omegaconf import DictConfig
 
@@ -7,17 +7,16 @@ from omegaconf import DictConfig
 import nd2
 
 # Local imports
-from .for_embeddings import raw_cut_to_preprocessed_for_embeddings  # , raw_to_preprocessed_for_embeddings
-from .for_detection import raw_cut_to_preprocessed_for_detection  # , raw_to_preprocessed_for_detection
-
+from .for_embeddings import raw_cut_to_preprocessed_for_embeddings
+from .for_detection import raw_cut_to_preprocessed_for_detection
 
 
 def preprocess_cut_and_store(cfg: DictConfig, 
                              raw_image_path: Path, 
-                             upper_left_corner: tuple, 
-                             pixel_dimensions: tuple,
+                             upper_left_corner: Tuple[int, int],
+                             pixel_dimensions: Tuple[int, int],
                              image_name: str, 
-                             PREPROCESSED_PATH: str, 
+                             PREPROCESSED_PATH: Path, 
                              pixel: Optional[int] = -1):
     """
     Preprocess the a single cut for embedding creation and droplet detection and save as .npy arrays.
@@ -34,7 +33,7 @@ def preprocess_cut_and_store(cfg: DictConfig,
         Tuple representing the dimensions of the region of interest in pixels.
     image_name : str
         Name of the image.
-    PREPROCESSED_PATH : str
+    PREPROCESSED_PATH : Path
         Path to save the preprocessed .npy arrays.
     pixel : int, optional
         The pixel value to use for preprocessing. Default is -1.
@@ -49,7 +48,7 @@ def preprocess_cut_and_store(cfg: DictConfig,
                                            PREPROCESSED_PATH, pixel=pixel)
 
 
-def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path):
+def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, PREPROCESSED_PATH: Path):
     """
     Preprocess the .nd2 images separated into cuts and save as .npy arrays.
 
@@ -59,7 +58,7 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path):
         Configuration object containing preprocessing parameters.
     RAW_PATH : Path
         Path to the raw .nd2 image file.
-    preprocessed_path : Path
+    PREPROCESSED_PATH : Path
         Path to store the preprocessed .npy arrays.
 
     Returns
@@ -112,7 +111,7 @@ def preprocess_cuts_and_store_all(cfg, RAW_PATH: Path, preprocessed_path: Path):
                 print(image_name_curr)
 
             preprocess_cut_and_store(cfg, raw_image_path, upper_left_corner, cut_pixel_dimensions, image_name_curr,
-                                     preprocessed_path, pixel=cfg.preprocess.pixel)
+                                     PREPROCESSED_PATH, pixel=cfg.preprocess.pixel)
 
             # Save image names in list
             cut_image_names.append(image_name_curr)
