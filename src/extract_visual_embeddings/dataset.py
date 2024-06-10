@@ -45,7 +45,7 @@ class DropletDataset(Dataset):
         patches = np.load(patches_path, allow_pickle=True).item()
         self.patches_df = pd.DataFrame(patches)
 
-        #To reduce the size of the dataset for evalutation purposes
+        # To reduce the size of the dataset for evaluation purposes
         #self.patches_df = self.patches_df[self.patches_df["droplet_id"] <= 22000]
 
         droplets_df = pd.read_csv(droplet_path)
