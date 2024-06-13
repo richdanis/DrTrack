@@ -115,6 +115,7 @@ def main(cfg: DictConfig):
     ### TRACKING ###
     # Check conf/track for configurations.
     image_ot_path = Path(OT_PATH / experiment_name)
+
     if not cfg.skip_tracking:
         # Create paths if they do not exist
         create_dir(image_ot_path)

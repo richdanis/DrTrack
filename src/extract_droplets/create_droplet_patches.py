@@ -5,7 +5,7 @@ import os
 from typing import Dict
 from omegaconf import DictConfig
 
-# Arays and data frames
+# Arrays and data frames
 import numpy as np
 import pandas as pd
 

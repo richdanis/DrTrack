@@ -129,39 +129,3 @@ def canny_nms(img: np.ndarray) -> np.ndarray:
 
     ans = np.max(compound_dominants * orientations, axis = 2)
     return ans
-
-
-def grad_nms(img: np.ndarray) -> np.ndarray:
-    """
-    Gradient-Based Non-Maximum Suppression (Grad NMS) Function
-    This function performs non-maximum suppression based on gradients using the Scharr gradient operators. 
-    It detects single points that stick out compared to their local neighborhood based on the gradient magnitude and orientation.
-    ----------
-    Parameters:
-    img: np.ndarray 
-        The input 2D image on which gradient-based non-maximum suppression will be performed.
-    ----------
-    Returns:
-    gradient_minima: 4d numpy array
-        An output image of the same shape as the input, where the value at each pixel represents whether it is a local gradient-based maximum (1) or not (0) based on the Grad NMS algorithm. 
-        The function retains only the local maxima in the gradient magnitude while suppressing other nearby values.
-    """
-    grad_x = cv.Scharr(img, -1, 1, 0)
-    grad_y = cv.Scharr(img, -1, 0, 1)
-
-    grad_xx = cv.Scharr(grad_x, -1, 1, 0)
-    grad_yy = cv.Scharr(grad_y, -1, 0, 1)
-    grad_xy_sq = cv.Scharr(grad_y, -1, 1, 0) * cv.Scharr(grad_x, -1, 0, 1)
-
-    dets = grad_xx * grad_yy - grad_xy_sq
-    ev1 = (grad_xx + grad_yy) * 0.5 + np.sqrt(((grad_xx + grad_yy) * 0.5)**2 - dets)
-    ev2 = (grad_xx + grad_yy) * 0.5 - np.sqrt(((grad_xx + grad_yy) * 0.5)**2 - dets)
-
-    grad_norm = np.linalg.norm(np.asarray([grad_x, grad_y]), axis = 0)
-
-    gradient_minima = nms(-grad_norm)
-
-    nd_ness = np.logical_and(ev1 < 0, ev2 < 0) * 1.0
-    gradient_minima = gradient_minima * nd_ness
-
-    return gradient_minima

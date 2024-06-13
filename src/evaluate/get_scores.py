@@ -91,7 +91,7 @@ class TrackingEvaluation:
         # Dictionary for storing scores
         scores = []
 
-        # Extract information about true positives vs false postives and plot calibration curve
+        # Extract information about true-positives vs false-positives and plot calibration curve
         results_df = self.results_df
 
         # Check if results are empty
