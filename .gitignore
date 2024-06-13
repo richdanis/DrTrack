@@ -29,3 +29,6 @@ efficientnet_b1.pth
 # Simulation files
 src/simulate_data/src_simulation/build
 src/simulate_data/data
+
+# Temporary folder
+/tmp/*
