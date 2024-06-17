@@ -69,7 +69,7 @@ def transform_to_rank_based_probability_matrix(cfg, ot_matrix: np.ndarray) -> np
 
 def get_id_mapping(cfg, ot_matrix: np.ndarray, 
                    frame_id: np.ndarray, 
-                   cut_name: str) -> (np.ndarray, np.ndarray):
+                   cut_name: str) -> Tuple[np.ndarray, np.ndarray]:
     """
     Return a mapping from droplet ids in the current frame to the droplet ids in the next frame.
 
