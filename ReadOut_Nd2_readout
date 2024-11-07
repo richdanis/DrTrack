@@ -1,0 +1,190 @@
+import numpy as np
+import pandas as pd
+from pathlib import Path
+from skimage.draw import disk
+import nd2
+from tqdm.auto import tqdm
+from skimage.filters import rank
+from skimage import morphology
+from skimage.util import img_as_ubyte
+
+def get_clip_as_ndarray(channels: list,
+                        path_to_image: str,
+                        allFrames: bool = True, 
+                        allChannels: bool = False, 
+                        frames = None,
+                        pixel: int = -1) -> np.ndarray:
+    """
+    Get the clip as a ndarray - PRIMARY FUNCTION
+    ----------
+    Parameters:″
+    frames: list[int]
+        frames wanted from the clip
+    channels: list[str]
+        channels wanted from: [DAPI, FITC, TRITC, Cy5, BF] 
+            'BF' is the identifier for the bright-field images,
+            'DAPI' is the identifier for the DAPI channel
+    path_to_image: str
+        relative path to the clip (clip as .nd2 file)
+    allFrames: bool (default = True)
+        if true returns all frames - otherwise as indicated in frames 
+    allChannels: bool (default = False)
+        if true returns all channels - otherwise as indicated in channels 
+    ----------
+    Returns:
+    ndarray: 4d numpy array (uint16)
+        with the following axes: Frames, Channels, Y (rows) and X (cols).
+    """
+
+    f = nd2.ND2File(path_to_image)
+
+    nr_frames = f.sizes['T']
+    nr_channels = f.sizes['C']
+    nr_rows = f.sizes['Y']
+    nr_cols = f.sizes['X']
+
+    print(f'Nr frames: {nr_frames}')
+    print(f'Nr channels: {nr_channels}')
+    print(f'Image dimensions: {nr_rows}x{nr_cols}')
+
+    channel_idx_lookup = {}
+    if allChannels:
+        channels = []
+
+    for c in f.metadata.channels:
+        channel_name = c.channel.name
+        print(channel_name)
+        if allChannels:
+            channels.append(channel_name)
+        channel_idx = c.channel.index
+        if channel_name in channels:
+            channel_idx_lookup[channel_name] = channel_idx
+
+    channel_idx_precompute = []
+    for ch_name in channels:
+        channel_idx_precompute.append(channel_idx_lookup[ch_name])
+
+    if allFrames:
+        frames = range(nr_frames)
+    else:
+        frames = frames
+    
+    fullimage = f.asarray()
+
+    if pixel == -1:
+        output = (fullimage[frames, :, :, :])[:, channel_idx_precompute, :, :]
+    else:
+        output = (fullimage[frames, :, :pixel, :pixel])[:, channel_idx_precompute, :, :]
+    
+    f.close()
+    return output
+
+
+def load_coordinates(excel_path):
+    df = pd.read_csv(excel_path)
+    return df
+
+
+def calculate_intensities(image, coordinates, radius=10):
+    """
+    Calculate intensities within a circular region around coordinates in each image frame and channel.
+
+    Parameters:
+    image: ndarray
+        4D numpy array representing loaded ND2 image.
+        Axes: Frames, Channels, Y (rows), X (cols).
+    coordinates: DataFrame
+        Pandas DataFrame containing coordinates.
+    radius: int, optional
+        Radius of the circular region around each coordinate (default is 10).
+
+    Returns:
+    DataFrame:
+        Pandas DataFrame containing calculated intensities.
+    """
+    results = []
+
+    for index, row in coordinates.iterrows():
+        intensities = {'ID': index + 1, 'x': row['x0'], 'y': row['y0']}  # Generate unique ID based on the index
+        for time_point in range(image.shape[0]):
+            x_col = f'x{time_point}'
+            y_col = f'y{time_point}'
+            if x_col in row and y_col in row:
+                x, y = int(row[x_col]), int(row[y_col])
+                for channel in range(image.shape[1]):
+                    # Ensure coordinates are within bounds of the image
+                    y = np.clip(y, 0, image.shape[2] - 1)
+                    x = np.clip(x, 0, image.shape[3] - 1)
+
+                    # Create circular region (disk) around coordinates
+                    rr, cc = disk((y, x), radius, shape=image[time_point, channel].shape)
+
+                    # Calculate intensities within the circular region
+                    intensity_values = image[time_point, channel, rr, cc]
+
+                    if intensity_values.size > 0:
+                        mean_intensity = np.mean(intensity_values)
+                        max_intensity = np.max(intensity_values)
+                        median_intensity = np.median(intensity_values)
+                        std_intensity = np.std(intensity_values)
+
+                        intensities[f'Intensity_Mean_timePoint{time_point}_Channel{channel}'] = mean_intensity
+                        intensities[f'Intensity_Max_timePoint{time_point}_Channel{channel}'] = max_intensity
+                        intensities[f'Intensity_Median_timePoint{time_point}_Channel{channel}'] = median_intensity
+                        intensities[f'Intensity_Std_timePoint{time_point}_Channel{channel}'] = std_intensity
+
+        results.append(intensities)
+        
+    df = pd.DataFrame(results)    
+    intensity_types = ['Mean', 'Max', 'Median', 'Std']
+    sorted_columns = ['ID', 'x', 'y']
+    for intensity_type in intensity_types:
+        for channel in range(image.shape[1]):
+            for time_point in range(image.shape[0]):
+                sorted_columns.append(f'Intensity_{intensity_type}_timePoint{time_point}_Channel{channel}')
+
+
+    df = df[sorted_columns]
+    return df
+
+
+def save_results_to_excel(results, output_path):
+    """
+    Save results DataFrame to Excel file.
+
+    Parameters:
+    results: DataFrame
+        Pandas DataFrame containing results to be saved.
+    output_path: Path
+        Path to save the Excel file.
+    """
+    results.to_excel(output_path, index=False)
+
+
+def main(image_path, excel_path, output_path):
+    # Load ND2 file as a 4D numpy array
+    image = get_clip_as_ndarray(channels=['DAPI', 'FITC', 'TRITC', 'Cy5', 'BF'],
+                                path_to_image=str(image_path))
+
+    # Check if images were loaded correctly
+    if image is not None:
+        print(f"Successfully loaded ND2 file. Shape of loaded images: {image.shape}")
+    else:
+        print("Failed to load ND2 file.")
+
+    # Load coordinates from CSV
+    coordinates = load_coordinates(excel_path)
+
+    # Calculate intensities
+    results = calculate_intensities(image, coordinates)
+
+    # Save results to Excel
+    save_results_to_excel(results, output_path)
+
+
+# Example usage
+image_path = Path('D:/Tracking/Exp3_09_no_small.nd2')
+excel_path = Path('D:/Tracking/05_results_Luca_with_metrics/05_results_Luca/Exp3_09_no_small/filtered_trajectories_y0_x0_basic.csv')
+output_path = Path('D:/Tracking/intensities_output5.xlsx')
+
+main(image_path, excel_path, output_path)
