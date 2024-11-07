@@ -1,0 +1,105 @@
+def calculate_intensities(image, coordinates, radius=10):
+    """
+    Calculate intensities within a circular region around coordinates in each image frame and channel.
+
+    Parameters:
+    image: ndarray
+        4D numpy array representing loaded ND2 image.
+        Axes: Frames, Channels, Y (rows), X (cols).
+    coordinates: DataFrame
+        Pandas DataFrame containing coordinates.
+    radius: int, optional
+        Radius of the circular region around each coordinate (default is 10).
+
+    Returns:
+    DataFrame:
+        Pandas DataFrame containing calculated intensities.
+    """
+    results = []
+
+    for index, row in coordinates.iterrows():
+        intensities = row.to_dict()  # Include all original row data
+        intensities['ID'] = index + 1  # Set ID for each row as index + 1
+
+        for time_point in range(image.shape[0]):
+            x_col = f'x{time_point}'
+            y_col = f'y{time_point}'
+            if x_col in row and y_col in row:
+                x, y = int(row[x_col]), int(row[y_col])
+                for channel in range(image.shape[1]):
+                    # Ensure coordinates are within bounds of the image
+                    y = np.clip(y, 0, image.shape[2] - 1)
+                    x = np.clip(x, 0, image.shape[3] - 1)
+
+                    # Create circular region (disk) around coordinates
+                    rr, cc = disk((y, x), radius, shape=image[time_point, channel].shape)
+
+                    # Calculate intensities within the circular region
+                    intensity_values = image[time_point, channel, rr, cc]
+
+                    if intensity_values.size > 0:
+                        mean_intensity = np.mean(intensity_values)
+                        max_intensity = np.max(intensity_values)
+                        median_intensity = np.median(intensity_values)
+                        std_intensity = np.std(intensity_values)
+
+                        intensities[f'Intensity_Mean_timePoint{time_point}_Channel{channel}'] = mean_intensity
+                        intensities[f'Intensity_Max_timePoint{time_point}_Channel{channel}'] = max_intensity
+                        intensities[f'Intensity_Median_timePoint{time_point}_Channel{channel}'] = median_intensity
+                        intensities[f'Intensity_Std_timePoint{time_point}_Channel{channel}'] = std_intensity
+
+        results.append(intensities)
+
+    df = pd.DataFrame(results)
+    
+    # Reorder columns, if needed, to keep original columns and then intensities
+    intensity_types = ['Mean', 'Max', 'Median', 'Std']
+    sorted_columns = ['ID'] + list(coordinates.columns)  # Include 'ID' first, then original columns
+    for intensity_type in intensity_types:
+        for channel in range(image.shape[1]):
+            for time_point in range(image.shape[0]):
+                sorted_columns.append(f'Intensity_{intensity_type}_timePoint{time_point}_Channel{channel}')
+
+    df = df[sorted_columns]
+    return df
+
+def save_results_to_excel(results, output_path):
+    """
+    Save results DataFrame to Excel file.
+
+    Parameters:
+    results: DataFrame
+        Pandas DataFrame containing results to be saved.
+    output_path: Path
+        Path to save the Excel file.
+    """
+    results.to_excel(output_path, index=False)
+
+
+def main(image_path, excel_path, output_path):
+    # Load ND2 file as a 4D numpy array
+    image = get_clip_as_ndarray(channels=['DAPI', 'FITC', 'TRITC', 'Cy5', 'BF'],
+                                path_to_image=str(image_path))
+
+    # Check if images were loaded correctly
+    if image is not None:
+        print(f"Successfully loaded ND2 file. Shape of loaded images: {image.shape}")
+    else:
+        print("Failed to load ND2 file.")
+
+    # Load coordinates from CSV
+    coordinates = load_coordinates(excel_path)
+
+    # Calculate intensities
+    results = calculate_intensities(image, coordinates)
+
+    # Save results to Excel
+    save_results_to_excel(results, output_path)
+
+
+# Example usage
+image_path = Path('D:/Tracking/Exp3_09_no_small.nd2')
+excel_path = Path('D:/Tracking/05_results_Luca_with_metrics/05_results_Luca/Exp3_09_no_small/filtered_trajectories_y0_x0_basic.csv')
+output_path = Path('D:/Tracking/intensities_output_Exp9_new.xlsx')
+
+main(image_path, excel_path, output_path)
