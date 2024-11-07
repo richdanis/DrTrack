@@ -1,0 +1,123 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the Excel file from your specified directory
+file_path = r"D:\Tracking\TrackingCorrelation_Uncertainity_Barcode_python\Correlation.xlsx"
+df = pd.read_excel(file_path)
+
+# Assuming the two variables are in columns 1 and 2
+x = df.iloc[:, 0]  # First variable (column 1)
+y = df.iloc[:, 1]  # Second variable (column 2)
+
+# Create a contour plot with marginal distributions
+sns.jointplot(x=x, y=y, kind='kde')
+
+plt.show()
+
+
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import statsmodels.api as sm
+
+# Load the Excel file
+file_path = r"D:\Tracking\TrackingCorrelation_Uncertainity_Barcode_python\Correlation.xlsx"
+df = pd.read_excel(file_path)
+
+# Extract the first two columns
+x = df.iloc[:, 0]  # First variable (Uncertainty Score)
+y = df.iloc[:, 1] *100 # Second variable (Wrong Barcode)
+
+# Set up the plot with shaded contours
+sns.set(style="whitegrid")
+g = sns.jointplot(x=x, y=y, kind='kde', fill=True, cmap='Blues')
+
+# Add a regression line
+sns.regplot(x=x, y=y, scatter=False, ax=g.ax_joint, color='red')
+
+# Customize axis labels and sizes
+g.ax_joint.set_xlabel('Uncertainty Score - Tracking Pipeline', fontsize=16)
+g.ax_joint.set_ylabel('Wrong Barcode [%]', fontsize=16)
+
+
+g.ax_joint.set_ylim(-10, y.max())  # Adjust y-axis limits
+g.ax_joint.set_yticks(np.arange(0, y.max(), 10))  # 
+# Increase the size of the ticks and numbers
+g.ax_joint.tick_params(labelsize=14)
+
+# Set custom tick marks on x-axis between 0.2 and 0.4
+g.ax_joint.set_xticks(np.arange(0.2, 1, 0.1))
+
+# Perform linear regression and calculate R-squared
+X = sm.add_constant(x)  # Add a constant (intercept)
+model = sm.OLS(y, X).fit()
+r_squared = model.rsquared
+regression_summary = model.summary()
+
+# Print R-squared and metrics from the linear regression
+print(f"R-squared: {r_squared}")
+print(regression_summary)
+
+# Annotate the plot with R-squared
+g.ax_joint.text(0.05, 0.95, f'$R^2$ = {r_squared:.2f}', transform=g.ax_joint.transAxes, fontsize=12, verticalalignment='top')
+
+output_path = r"D:\Tracking\TrackingCorrelation_Uncertainity_Barcode_python\contour_plot.png"
+plt.savefig(output_path, dpi=300, bbox_inches='tight')  # Save as PNG with 300 DPI
+
+plt.show()
+
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import statsmodels.api as sm
+
+# Load the Excel file
+file_path = r"D:\Tracking\TrackingCorrelation_Uncertainity_Barcode_python\Correlation2.xlsx"
+df = pd.read_excel(file_path)
+
+# Extract the first two columns
+x = df.iloc[:, 0]  # First variable (Uncertainty Score)
+y = df.iloc[:, 1] *100 # Second variable (Wrong Barcode)
+
+# Set up the plot with shaded contours
+sns.set(style="whitegrid")
+g = sns.jointplot(x=x, y=y, kind='kde', fill=True, cmap='Blues')
+
+# Add a regression line
+sns.regplot(x=x, y=y, scatter=False, ax=g.ax_joint, color='red')
+
+# Customize axis labels and sizes
+g.ax_joint.set_xlabel('Uncertainty Score - Tracking Pipeline', fontsize=16)
+g.ax_joint.set_ylabel('Wrong Barcode [%]', fontsize=16)
+
+
+g.ax_joint.set_ylim(-10, y.max())  # Adjust y-axis limits
+g.ax_joint.set_yticks(np.arange(0, y.max(), 10))  # 
+# Increase the size of the ticks and numbers
+g.ax_joint.tick_params(labelsize=14)
+
+# Set custom tick marks on x-axis between 0.2 and 0.4
+g.ax_joint.set_xticks(np.arange(0.2, 1, 0.1))
+
+# Perform linear regression and calculate R-squared
+X = sm.add_constant(x)  # Add a constant (intercept)
+model = sm.OLS(y, X).fit()
+r_squared = model.rsquared
+regression_summary = model.summary()
+
+# Print R-squared and metrics from the linear regression
+print(f"R-squared: {r_squared}")
+print(regression_summary)
+
+# Annotate the plot with R-squared
+g.ax_joint.text(0.05, 0.95, f'$R^2$ = {r_squared:.2f}', transform=g.ax_joint.transAxes, fontsize=12, verticalalignment='top')
+
+output_path = r"D:\Tracking\TrackingCorrelation_Uncertainity_Barcode_python\contour_plot2.png"
+plt.savefig(output_path, dpi=300, bbox_inches='tight')  # Save as PNG with 300 DPI
+
+plt.show()
